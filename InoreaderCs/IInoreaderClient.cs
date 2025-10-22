@@ -16,10 +16,10 @@ public interface IInoreaderClient: IDisposable {
     /// </summary>
     HttpClient HttpClient { get; }
 
-    /// <summary>
-    /// An OAuth user access token or an app user access token. Can be set after the client is instantiated to handle refreshed access tokens changing.
-    /// </summary>
-    IUserAuthToken AuthToken { get; set; }
+    // /// <summary>
+    // /// An OAuth user access token or an app user access token, set in the <see cref="InoreaderClient(IUserAuthToken,System.Net.Http.HttpClient?,bool?)"/> constructor.
+    // /// </summary>
+    // IUserAuthToken AuthToken { get; }
 
     /// <summary>
     /// Fired after every API response so you can keep track of rate limits if you wish
@@ -34,17 +34,17 @@ public interface IInoreaderClient: IDisposable {
     /// </summary>
     /// <param name="stream">A feed (<see cref="StreamId.Feed"/>), tag/folder (<see cref="StreamId.Label"/>), state (like <see cref="StreamId.Starred"/>), or your entire newsfeed (<see cref="StreamId.ReadingList"/>) containing the articles you want to find.</param>
     /// <param name="maxArticles">Maximum number of articles to return in one page, limited to 200 (not 100 as documented).</param>
-    /// <param name="startTime">Lower bound on the <see cref="Article.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="ascendingOrder"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
+    /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="ascendingOrder"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
     /// <param name="subtract">Exclude articles which also appear in this stream, for example, <see cref="StreamId.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for appearing in any streams.</param>
     /// <param name="intersect">Only return articles which also appear in this stream, for example, <see cref="StreamId.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not appearing in any streams.</param>
     /// <param name="pagination">The <see cref="PaginatedListResponse.PaginationToken"/> from a prior response to fetch subsequent pages, or <c>null</c> to fetch the first page.</param>
-    /// <param name="ascendingOrder"><c>true</c> to sort articles in the response list ascending by <see cref="Article.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
+    /// <param name="ascendingOrder"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
     /// <param name="includeFoldersInLabels"><c>false</c> for the response <see cref="Article.Labels"/> to only contain system labels like <see cref="StreamId.Starred"/> as well as tags you have added to the article, but not the folder that the article's feed is in, or <c>true</c> to also contain the folder.</param>
     /// <param name="includeAnnotations"><c>true</c> for the response <see cref="Article.Annotations"/> to be populated with the annotations you have added to the article, or <c>false</c> to leave it as the empty list.</param>
     /// <returns>Response envelope containing zero or more <see cref="Article"/> instances.</returns>
     /// <remarks>See <see href="https://www.inoreader.com/developers/stream-contents"/></remarks>
     /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-    Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? startTime = null, StreamId? subtract = null, StreamId? intersect = null,
+    Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                         PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFoldersInLabels = true, bool includeAnnotations = false);
 
     /// <summary>
@@ -53,16 +53,16 @@ public interface IInoreaderClient: IDisposable {
     /// </summary>
     /// <param name="stream">A feed (<see cref="StreamId.Feed"/>), tag/folder (<see cref="StreamId.Label"/>), state (like <see cref="StreamId.Starred"/>), or your entire newsfeed (<see cref="StreamId.ReadingList"/>) containing the articles you want to find.</param>
     /// <param name="maxArticles">Maximum number of articles to return in one page, limited to 200 (not 100 as documented).</param>
-    /// <param name="startTime">Lower bound on the <see cref="Article.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="ascendingOrder"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
+    /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="ascendingOrder"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
     /// <param name="subtract">Exclude articles which also appear in this stream, for example, <see cref="StreamId.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for appearing in any streams.</param>
     /// <param name="intersect">Only return articles which also appear in this stream, for example, <see cref="StreamId.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not appearing in any streams.</param>
     /// <param name="pagination">The <see cref="PaginatedListResponse.PaginationToken"/> from a prior response to fetch subsequent pages, or <c>null</c> to fetch the first page.</param>
-    /// <param name="ascendingOrder"><c>true</c> to sort articles in the response list ascending by <see cref="Article.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
+    /// <param name="ascendingOrder"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
     /// <param name="includeFoldersInLabels"><c>false</c> for the response <see cref="Article.Labels"/> to only contain system labels like <see cref="StreamId.Starred"/> as well as tags you have added to the article, but not the folder that the article's feed is in, or <c>true</c> to also contain the folder.</param>
-    /// <returns>Response envelope containing zero or more <see cref=""/></returns>
+    /// <returns>Response envelope containing zero or more <see cref="MinimalArticle"/> objects</returns>
     /// <remarks>See <see href="https://www.inoreader.com/developers/item-ids"/></remarks>
     /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-    Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? startTime = null, StreamId? subtract = null, StreamId? intersect = null,
+    Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                               PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFoldersInLabels = true);
 
     /// <summary>

@@ -19,9 +19,9 @@ public record Article: BaseArticle {
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring("tag:google.com,2005:reader/item/".Length), 16));
 
     [JsonPropertyName("categories")]
-    public ISet<StreamId> Labels { get; } = new HashSet<StreamId>();
+    public required ISet<StreamId> Labels { get; init; }
 
-    public IReadOnlyList<Annotation> Annotations { get; } = new List<Annotation>();
+    public required IReadOnlyList<Annotation> Annotations { get; init; }
 
     public required string Title { get; init; }
 
@@ -31,8 +31,10 @@ public record Article: BaseArticle {
     [JsonPropertyName("updated")]
     public required DateTimeOffset? UpdateTime { get; init; }
 
-    public required Link Canonical { get; init; }
-    public required Link Alternate { get; init; }
+    [JsonInclude]
+    private IReadOnlyList<Link> Canonical { get; init; } = null!;
+
+    public Uri Source => Canonical[0].Href;
 
     [JsonInclude]
     private Summary Summary { get; init; } = null!;
@@ -41,11 +43,12 @@ public record Article: BaseArticle {
 
     public required string Author { get; init; }
 
-    [JsonInclude]
+    [JsonInclude] [JsonPropertyName("origin")]
     private Origin Feed { get; init; } = null!;
 
     public Uri FeedUrl => Feed.StreamId.FeedUri;
     public string FeedName => Feed.Title;
+    public Uri FeedPageUrl => Feed.HtmlUrl;
 
     public bool IsStarred => Labels.Contains(StreamId.Starred);
     public bool IsRead => Labels.Contains(StreamId.Read);

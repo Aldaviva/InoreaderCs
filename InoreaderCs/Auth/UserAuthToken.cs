@@ -10,9 +10,9 @@ public interface IUserAuthToken {
 
 }
 
-public class OAuthUserToken(Func<string> userTokenProvider): IUserAuthToken {
+public class OAuthUserToken(string userToken): IUserAuthToken {
 
-    public AuthenticationHeaderValue AuthenticationHeaderValue => new("Bearer", userTokenProvider());
+    public AuthenticationHeaderValue AuthenticationHeaderValue => new("Bearer", userToken);
     public IDictionary<string, object>? RequestHeaders => null;
     public string Prefix => "Bearer ";
 
@@ -20,7 +20,7 @@ public class OAuthUserToken(Func<string> userTokenProvider): IUserAuthToken {
 
 public class AppUserToken(string userToken, long appId, string appKey): IUserAuthToken {
 
-    public AuthenticationHeaderValue AuthenticationHeaderValue { get; } = new("GoogleLogin", "auth=" + userToken);
+    public AuthenticationHeaderValue AuthenticationHeaderValue => new("GoogleLogin", "auth=" + userToken);
 
     public IDictionary<string, object>? RequestHeaders { get; } = new Dictionary<string, object> {
         ["AppId"]  = appId,

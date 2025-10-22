@@ -16,7 +16,7 @@ public record FullArticles: PaginatedListResponse {
     public required DateTimeOffset UpdateTime { get; init; }
 
     [JsonPropertyName("items")]
-    public IReadOnlyList<Article> Articles { get; } = new List<Article>();
+    public required IReadOnlyList<Article> Articles { get; init; }
 
 }
 

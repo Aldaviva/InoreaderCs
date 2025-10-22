@@ -10,6 +10,20 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>
         <NoWarn>$(NoWarn);8524</NoWarn>
+        <PackageProjectUrl>https://github.com/Aldaviva/InoreaderCs</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Aldaviva/InoreaderCs.git</RepositoryUrl>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <Description>.NET client for the Inoreader HTTP API</Description>
+        <PackageTags>inoreader api-client rss atom</PackageTags>
+        <PackageIcon>icon.png</PackageIcon>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <IncludeSource>true</IncludeSource>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>

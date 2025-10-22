@@ -20,11 +20,14 @@ public class InoreaderClient: IInoreaderClient {
     internal static readonly MediaTypeHeaderValue ApplicationJsonType = new("application/json");
     private static readonly  Encoding             MessageEncoding     = new UTF8Encoding(false, true);
 
+    private static readonly JsonConverter<DateTimeOffset?> StringToDateTimeOffsetReader = new StringToDateTimeOffsetReader();
+
     internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = {
             new JsonStringEnumConverter(),
-            new StringToDateTimeOffsetConverter(),
+            StringToDateTimeOffsetReader,
+            new NonNullableValueReader<DateTimeOffset>(StringToDateTimeOffsetReader),
             new StringToStreamIdConverter()
         }
     };
@@ -37,17 +40,16 @@ public class InoreaderClient: IInoreaderClient {
     /// <inheritdoc />
     public HttpClient HttpClient { get; }
 
-    /// <inheritdoc />
-    public IUserAuthToken AuthToken { get; set; }
+    // /// <inheritdoc />
+    // public IUserAuthToken AuthToken { get; }
 
-    public InoreaderClient(IUserAuthToken userAuthToken, HttpClient? httpClient = null, bool? disposeHttpClient = null) {
-        AuthToken          = userAuthToken;
+    public InoreaderClient(Func<Task<IUserAuthToken>> userAuthTokenProvider, HttpClient? httpClient = null, bool? disposeHttpClient = null) {
         _disposeHttpClient = disposeHttpClient ?? httpClient is null;
         HttpClient         = httpClient ?? new UnfuckedHttpClient();
 
         _apiTarget = HttpClient
             .Target(ApiBase)
-            .Register(new InoreaderAuthenticationFilter(() => AuthToken))
+            .Register(new InoreaderAuthenticationFilter(userAuthTokenProvider))
             .Register(_rateLimitReader)
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")
@@ -68,13 +70,13 @@ public class InoreaderClient: IInoreaderClient {
     }
 
     /// <inheritdoc />
-    public async Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? startTime = null, StreamId? subtract = null, StreamId? intersect = null,
+    public async Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                                      PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFoldersInLabels = true, bool includeAnnotations = false) {
         try {
             return await _apiTarget.Path("stream/contents/{streamId}")
                 .ResolveTemplate("streamId", stream)
                 .QueryParam("n", maxArticles)
-                .QueryParam("ot", startTime?.ToUnixTimeMicroseconds())
+                .QueryParam("ot", minTime?.ToUnixTimeMicroseconds())
                 .QueryParam("r", ascendingOrder ? "o" : null)
                 .QueryParam("xt", subtract)
                 .QueryParam("it", intersect)
@@ -89,12 +91,12 @@ public class InoreaderClient: IInoreaderClient {
     }
 
     /// <inheritdoc />
-    public async Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? startTime = null, StreamId? subtract = null, StreamId? intersect = null,
+    public async Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                                            PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFoldersInLabels = true) {
         try {
             return await _apiTarget.Path("stream/items/ids")
                 .QueryParam("n", maxArticles)
-                .QueryParam("ot", startTime?.ToUnixTimeMicroseconds())
+                .QueryParam("ot", minTime?.ToUnixTimeMicroseconds())
                 .QueryParam("r", ascendingOrder ? "o" : null)
                 .QueryParam("xt", subtract)
                 .QueryParam("it", intersect)
