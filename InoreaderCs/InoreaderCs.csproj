@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <Version>0.0.1-beta.1</Version>
+        <Authors>Ben Hutchison</Authors>
+        <Copyright>© 2025 $(Authors)</Copyright>
+        <Company>$(Authors)</Company>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>latest</LangVersion>
+        <NoWarn>$(NoWarn);8524</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- <AdditionalFiles Include="ExceptionAdjustments.txt" /> -->
+        <InternalsVisibleTo Include="Tests;DynamicProxyGenAssembly2" />
+        <None Include="..\Readme.md;icon.png" Pack="true" PackagePath="\" />
+        <None Include="*.sln.DotSettings;*.csproj.DotSettings" Visible="false" />
+        <None Include="..\.github*\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+        <PackageReference Include="Unfucked" Version="0.0.1-beta.16" />
+        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.16" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+        <PackageReference Include="System.Net.Http.Json" Version="9.0.10" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' == 'Release'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+    
+</Project>
