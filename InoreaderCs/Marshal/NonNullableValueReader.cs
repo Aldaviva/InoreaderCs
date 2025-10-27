@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace InoreaderCs.Marshal;
 
-public class NonNullableValueReader<T>(JsonConverter<T?> nullableConverter): JsonConverter<T> where T: struct {
+internal class NonNullableValueReader<T>(JsonConverter<T?> nullableConverter): JsonConverter<T> where T: struct {
 
     /// <exception cref="JsonException"></exception>
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>

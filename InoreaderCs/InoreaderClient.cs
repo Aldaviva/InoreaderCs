@@ -1,28 +1,32 @@
 using InoreaderCs.Auth;
-using InoreaderCs.Entities;
 using InoreaderCs.Marshal;
 using InoreaderCs.RateLimiting;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Unfucked;
-using Unfucked.HTTP;
 using Unfucked.HTTP.Config;
 using Unfucked.HTTP.Exceptions;
 
 namespace InoreaderCs;
 
-public class InoreaderClient: IInoreaderClient {
+/// <summary>
+/// <para>Client for the Inoreader HTTP API.</para>
+/// <para>To get started, construct a new instance of this class. Pass either an <see cref="Oauth2Client"/> or <see cref="PasswordAuthClient"/> instance constructed with your registered app details and any other credentials required.</para>
+/// <para>Once you have an instance, you can send API requests by calling methods like <see cref="ListFullArticles"/>.</para>
+/// </summary>
+/// <remarks>See <see href="https://www.inoreader.com/developers/"/></remarks>
+public partial class InoreaderClient: IInoreaderClient {
 
-    internal static readonly Uri                  ApiBase             = new("https://www.inoreader.com/");
-    internal static readonly MediaTypeHeaderValue ApplicationJsonType = new("application/json");
-    private static readonly  Encoding             MessageEncoding     = new UTF8Encoding(false, true);
+    internal static readonly Uri      ApiBase         = new("https://www.inoreader.com/");
+    private static readonly  Encoding MessageEncoding = new UTF8Encoding(false, true);
 
     private static readonly JsonConverter<DateTimeOffset?> StringToDateTimeOffsetReader = new StringToDateTimeOffsetReader();
 
-    internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) {
+    /// <summary>
+    /// JSON response deserialization preferences
+    /// </summary>
+    protected static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = {
             new JsonStringEnumConverter(),
@@ -38,24 +42,31 @@ public class InoreaderClient: IInoreaderClient {
     private readonly object          _eventLock       = new();
 
     /// <inheritdoc />
-    public HttpClient HttpClient { get; }
+    public IUnfuckedHttpClient HttpClient { get; }
 
-    // /// <inheritdoc />
-    // public IUserAuthToken AuthToken { get; }
-
-    public InoreaderClient(Func<Task<IUserAuthToken>> userAuthTokenProvider, HttpClient? httpClient = null, bool? disposeHttpClient = null) {
+    /// <summary>
+    /// Construct a new Inoreader API client instance, with one given type of authentication.
+    /// </summary>
+    /// <param name="authClient">Provides authentication, using either OAuth2 (<see cref="Oauth2Client"/>) or a user's password (<see cref="PasswordAuthClient"/>).</param>
+    /// <param name="httpClient">Optional HTTP client if you want to customize how requests and responses are handled, or <c>null</c> to use a default instance</param>
+    /// <param name="disposeHttpClient">Whether <paramref name="httpClient"/> will be disposed along with this object. By default, it is only disposed when a custom <paramref name="httpClient"/> was provided and was not <c>null</c>.</param>
+    public InoreaderClient(IAuthClient authClient, IUnfuckedHttpClient? httpClient = null, bool? disposeHttpClient = null) {
         _disposeHttpClient = disposeHttpClient ?? httpClient is null;
         HttpClient         = httpClient ?? new UnfuckedHttpClient();
+        if (authClient is AbstractAuthClient { OverriddenHttpClient: null } auth) {
+            auth.HttpClient = HttpClient;
+        }
 
         _apiTarget = HttpClient
             .Target(ApiBase)
-            .Register(new InoreaderAuthenticationFilter(userAuthTokenProvider))
+            .Register(new InoreaderAuthenticationFilter(authClient))
             .Register(_rateLimitReader)
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")
-            .Accept(ApplicationJsonType);
+            .Accept("application/json");
     }
 
+    /// <inheritdoc />
     public event EventHandler<RateLimitStatistics>? RateLimitStatisticsReceived {
         add {
             lock (_eventLock) {
@@ -66,62 +77,6 @@ public class InoreaderClient: IInoreaderClient {
             lock (_eventLock) {
                 _rateLimitReader.StatisticsReceived -= value;
             }
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
-                                                     PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFoldersInLabels = true, bool includeAnnotations = false) {
-        try {
-            return await _apiTarget.Path("stream/contents/{streamId}")
-                .ResolveTemplate("streamId", stream)
-                .QueryParam("n", maxArticles)
-                .QueryParam("ot", minTime?.ToUnixTimeMicroseconds())
-                .QueryParam("r", ascendingOrder ? "o" : null)
-                .QueryParam("xt", subtract)
-                .QueryParam("it", intersect)
-                .QueryParam("c", pagination)
-                .QueryParam("includeAllDirectStreamIds", includeFoldersInLabels)
-                .QueryParam("annotations", includeAnnotations)
-                .Get<FullArticles>()
-                .ConfigureAwait(false);
-        } catch (HttpException e) {
-            throw TransformError(e, $"Failed to list articles in feed {stream}");
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
-                                                           PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFoldersInLabels = true) {
-        try {
-            return await _apiTarget.Path("stream/items/ids")
-                .QueryParam("n", maxArticles)
-                .QueryParam("ot", minTime?.ToUnixTimeMicroseconds())
-                .QueryParam("r", ascendingOrder ? "o" : null)
-                .QueryParam("xt", subtract)
-                .QueryParam("it", intersect)
-                .QueryParam("c", pagination)
-                .QueryParam("s", stream)
-                .QueryParam("includeAllDirectStreamIds", includeFoldersInLabels)
-                .Get<MinimalArticles>()
-                .ConfigureAwait(false);
-        } catch (HttpException e) {
-            throw TransformError(e, $"Failed to list article IDs in feed {stream}");
-        }
-    }
-
-    /// <inheritdoc />
-    public Task LabelArticles(StreamId label, bool removeLabel = false, params IEnumerable<Article> articles) => LabelArticles(label, removeLabel, articles.Select(article => article.ShortId));
-
-    /// <inheritdoc />
-    public async Task LabelArticles(StreamId label, bool removeLabel = false, params IEnumerable<string> articleIds) {
-        try {
-            if (articleIds.Select(id => new KeyValuePair<string, string>("i", id)).ToList() is { Count: not 0 } ids) {
-                HttpContent body = new FormUrlEncodedContent(ids.Prepend(new KeyValuePair<string, string>(removeLabel ? "r" : "a", label.ToString())));
-                (await _apiTarget.Path("edit-tag").Post(body).ConfigureAwait(false)).Dispose();
-            }
-        } catch (HttpException e) {
-            throw TransformError(e, $"Failed to {(removeLabel ? "untag" : "tag")} articles with tag {label}");
         }
     }
 

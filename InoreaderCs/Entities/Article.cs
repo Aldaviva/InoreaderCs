@@ -1,84 +1,194 @@
+using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
 
 namespace InoreaderCs.Entities;
 
+/// <summary>
+/// Base class for both full articles (which contain all properties) and minimal articles (references or pointers to articles that only contain IDs and timestamps).
+/// </summary>
 public abstract record BaseArticle {
 
+    /// <summary>
+    /// <para>Unique ID of the article as a decimal number, without the Google-Reader–compatible prefix. Can be used any place article IDs are sent to the Inoreader API. Useful for saving bandwidth compared to the <see cref="Article.LongId"/>.</para>
+    /// <para>Documentation: <see href="https://www.inoreader.com/developers/article-ids"/></para>
+    /// </summary>
     public abstract string ShortId { get; }
 
+    /// <summary>
+    /// The date and time, in microseconds since the Unix epoch, when the article was first fetched from its origin feed by Inoreader.
+    /// </summary>
     [JsonPropertyName("timestampUsec")]
     public required DateTimeOffset CrawlTime { get; init; }
 
 }
 
+/// <summary>
+/// <para>One news article, item, entry, or post from a feed. Contains all properties of the article.</para>
+/// <para>Documentation: <see href="https://www.inoreader.com/developers/stream-contents#:~:text=Description%20of%20the%20items%20list%3A"/></para>
+/// </summary>
 public record Article: BaseArticle {
 
+    /// <summary>
+    /// <para>Full Google-Reader–compatible unique ID as a <see href="https://en.wikipedia.org/wiki/Tag_URI_scheme" /> for this article, ending with a hexadecimal number.</para>
+    /// <para>Example: <c>tag:google.com,2005:reader/item/0000000af0175be2</c></para>
+    /// <para>To convert this to a short ID, see <see cref="ShortId"/>.</para>
+    /// <para>Documentation: <see href="https://www.inoreader.com/developers/article-ids"/></para>
+    /// </summary>
     [JsonPropertyName("id")]
     public required string LongId { get; init; }
 
+    /// <inheritdoc />
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring("tag:google.com,2005:reader/item/".Length), 16));
 
+    /// <summary>
+    /// <para>Zero or more IDs of streams that this article appears in, including its tags, folders, and system labels like <see cref="StreamId.Read"/> or <see cref="StreamId.Starred"/>.</para>
+    /// <para>To determine if an article has a given label, you can call <see cref="FoldersTagsAndStates"/><c>.Contains(</c><see cref="StreamId.Annotated"/><c>)</c> or <see cref="FoldersTagsAndStates"/><c>.Contains(StreamId.Label("My folder or tag"))</c>.</para>
+    /// <para>When fetching articles with <see cref="IInoreaderClient.ListFullArticles"/>, this set will only contain folders when the <c>includeFoldersInLabels</c> parameter is <c>true</c>.</para>
+    /// <para>This always contains <see cref="StreamId.ReadingList"/>.</para>
+    /// </summary>
     [JsonPropertyName("categories")]
-    public required ISet<StreamId> Labels { get; init; }
+    public required ISet<StreamId> FoldersTagsAndStates { get; init; }
 
+    /// <summary>
+    /// <para>Zero or more notes that the user has added to this article.</para>
+    /// <para>When fetching articles with <see cref="IInoreaderClient.ListFullArticles"/>, this set will be empty when the <c>includeAnnotations</c> parameter is <c>false</c>.</para>
+    /// </summary>
     public required IReadOnlyList<Annotation> Annotations { get; init; }
 
+    /// <summary>
+    /// The title, summary, or headline of the article.
+    /// </summary>
     public required string Title { get; init; }
 
+    /// <summary>
+    /// When the feed reports that the article was first published.
+    /// </summary>
     [JsonPropertyName("published")]
     public required DateTimeOffset PublishTime { get; init; }
 
+    /// <summary>
+    /// When the feed reports that the article was most recently updated after being published, or <c>null</c> if it was never updated after being published.
+    /// </summary>
     [JsonPropertyName("updated")]
     public required DateTimeOffset? UpdateTime { get; init; }
 
     [JsonInclude]
     private IReadOnlyList<Link> Canonical { get; init; } = null!;
 
-    public Uri Source => Canonical[0].Href;
+    /// <summary>
+    /// The URL of the article's web page.
+    /// </summary>
+    public Uri PageUrl => Canonical[0].Href;
 
     [JsonInclude]
-    private Summary Summary { get; init; } = null!;
+    private SummaryContainer Summary { get; init; } = null!;
 
+    /// <summary>
+    /// The description, body, or contents of the article.
+    /// </summary>
     public string Description => Summary.Content;
 
+    /// <summary>
+    /// The name of the article's author.
+    /// </summary>
     public required string Author { get; init; }
 
     [JsonInclude] [JsonPropertyName("origin")]
     private Origin Feed { get; init; } = null!;
 
+    /// <summary>
+    /// <para>The URL of the feed that this article is from, which points to an RSS or Atom document.</para>
+    /// <para>For the article's web page URL, see <see cref="PageUrl"/>. For the feed's web page URL, see <see cref="FeedPageUrl"/>.</para>
+    /// </summary>
     public Uri FeedUrl => Feed.StreamId.FeedUri;
+
+    /// <summary>
+    /// The name or title of the feed that this article is from.
+    /// </summary>
     public string FeedName => Feed.Title;
+
+    /// <summary>
+    /// <para>The URL of the web page of the feed that this article is from.</para>
+    /// <para>For the RSS URL, see <see cref="FeedUrl"/>. For the article's web page URL, see <see cref="PageUrl"/>.</para>
+    /// </summary>
     public Uri FeedPageUrl => Feed.HtmlUrl;
 
-    public bool IsStarred => Labels.Contains(StreamId.Starred);
-    public bool IsRead => Labels.Contains(StreamId.Read);
+    /// <summary>
+    /// <para><c>true</c> if the user added a star to this article, also known as Read Later or Saved, or <c>false</c> if the article is not starred.</para>
+    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.LabelArticles(StreamId,bool,IEnumerable{Article})"/> with the <c>label</c> parameter set to <see cref="StreamId.Starred"/>.</para>
+    /// </summary>
+    public bool IsStarred => FoldersTagsAndStates.Contains(StreamId.Starred);
 
+    /// <summary>
+    /// <c>true</c> if either the user read the article or the article is more than 30 days old, or <c>if it is unread and less than 30 days old.</c>
+    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.LabelArticles(StreamId,bool,IEnumerable{Article})"/> with the <c>label</c> parameter set to <see cref="StreamId.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
+    /// </summary>
+    public bool IsRead => FoldersTagsAndStates.Contains(StreamId.Read);
+
+    /// <inheritdoc cref="Equals(object)" />
     public virtual bool Equals(Article? other) => other is not null && (ReferenceEquals(this, other) || CrawlTime.Equals(other.CrawlTime));
 
+    /// <inheritdoc cref="GetHashCode" />
     public override int GetHashCode() => CrawlTime.GetHashCode();
+
+    private record Origin(StreamId StreamId, string Title, Uri HtmlUrl);
+
+    private record SummaryContainer(string Content);
+
+    private record Link(Uri Href, MediaTypeHeaderValue? Type = null);
 
 }
 
-internal record Origin(StreamId StreamId, string Title, Uri HtmlUrl);
-
-internal record Summary(string Content);
-
+/// <summary>
+/// A custom user annotation or note added to an article.
+/// </summary>
 public record Annotation {
 
+    /// <summary>
+    /// Unique ID of this annotation.
+    /// </summary>
     public required long Id { get; init; }
+
+    /// <summary>
+    /// If the annotation highlights a range of text, this is the start index of the range, otherwise <c>0</c>.
+    /// </summary>
     public required int Start { get; init; }
+
+    /// <summary>
+    /// If the annotation highlights a range of text, this is the end index of the range, otherwise <c>0</c>.
+    /// </summary>
     public required int End { get; init; }
 
-    [JsonPropertyName("added_on")] // this class switched from lower camel case to lower snake case for some reason
+    /// <summary>
+    /// When the user created the annotation.
+    /// </summary>
+    [JsonPropertyName("added_on")] // Unlike the rest of the API, this class switched its property names from lower camel case to lower snake case for some reason
     public required DateTimeOffset AddedOn { get; init; }
 
+    /// <summary>
+    /// If the annotation highlights a range of text, the text that was highlighted, otherwise <see cref="string.Empty"/>.
+    /// </summary>
     public required string Text { get; init; }
+
+    /// <summary>
+    /// The custom text of the note that the user supplied.
+    /// </summary>
     public required string Note { get; init; }
+
+    /// <summary>
+    /// The numeric ID of the user who added the note.
+    /// </summary>
     public required long UserId { get; init; }
 
+    /// <summary>
+    /// The full name (not username or email address) of the user who added the note.
+    /// </summary>
     [JsonPropertyName("user_name")]
-    public required string UserName { get; init; }
+    public required string UserFullName { get; init; }
 
+    /// <summary>
+    /// URL of a JPEG image which is the user's profile picture or avatar.
+    /// </summary>
     [JsonPropertyName("user_profile_picture")]
     public required Uri UserProfilePicture { get; init; }
 

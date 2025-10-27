@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace InoreaderCs.Marshal;
 
-public class StringToDateTimeOffsetReader: JsonConverter<DateTimeOffset?> {
+internal class StringToDateTimeOffsetReader: JsonConverter<DateTimeOffset?> {
 
     private const long UnixEpochTicks = 621355968000000000;
 

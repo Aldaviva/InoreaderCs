@@ -16,7 +16,7 @@ public class StreamId {
     /// <summary>Articles which you have marked as read, or are more than 30 days old</summary>
     public static StreamId Read { get; } = new(SystemIdPrefix + "/read");
 
-    /// <summary>Articles which you have starred</summary>
+    /// <summary>Articles which you have starred, favorited, or saved to Read Later</summary>
     public static StreamId Starred { get; } = new(SystemIdPrefix + "/starred");
 
     /// <summary>Articles to which you have added annotations</summary>
@@ -37,6 +37,9 @@ public class StreamId {
     /// <summary>One specific feed</summary>
     public static StreamId Feed(Uri feedUri) => new("feed/" + feedUri);
 
+    /// <summary>
+    /// The raw <c>tag</c> URL of the stream, such as <c>user/-/state/com.google/starred</c>.
+    /// </summary>
     public string Id { get; }
 
     private StreamId(string id) {
@@ -72,29 +75,25 @@ public class StreamId {
         return new Uri(feedStreamId.Substring("feed/".Length), UriKind.Absolute);
     }
 
-    protected bool Equals(StreamId other) {
-        return Id == other.Id;
-    }
+    /// <summary>
+    /// Compare streams by <see cref="Id"/>.
+    /// </summary>
+    /// <returns><c>true</c> if this instance has the same <see cref="Id"/> as <paramref name="other"/>, or <c>false</c> otherwise.</returns>
+    private bool Equals(StreamId other) => Id == other.Id;
 
-    public override bool Equals(object? obj) {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        return obj.GetType() == GetType() && Equals((StreamId) obj);
-    }
+    /// <inheritdoc cref="Equals(StreamId)" />
+    public override bool Equals(object? other) => other is not null && (ReferenceEquals(this, other) || (other.GetType() == GetType() && Equals((StreamId) other)));
 
-    public override int GetHashCode() {
-        return Id.GetHashCode();
-    }
+    /// <returns>The hashcode of the <see cref="Id"/>.</returns>
+    public override int GetHashCode() => Id.GetHashCode();
 
-    public static bool operator ==(StreamId? left, StreamId? right) {
-        return Equals(left, right);
-    }
+    /// <returns><c>true</c> if <paramref name="a"/> has the same <see cref="Id"/> as <paramref name="b"/>, or <c>false</c> otherwise.</returns>
+    public static bool operator ==(StreamId? a, StreamId? b) => Equals(a, b);
 
-    public static bool operator !=(StreamId? left, StreamId? right) {
-        return !Equals(left, right);
-    }
+    /// <returns><c>false</c> if <paramref name="a"/> has the same <see cref="Id"/> as <paramref name="b"/>, or <c>true</c> otherwise.</returns>
+    public static bool operator !=(StreamId? a, StreamId? b) => !Equals(a, b);
 
-    /// <returns>The stream ID, such as <c>user/-/state/com.google/read</c></returns>
+    /// <returns>The stream ID, such as <c>user/-/state/com.google/read</c>.</returns>
     public override string ToString() => Id;
 
 }

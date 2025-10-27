@@ -2,7 +2,7 @@ using Unfucked.HTTP.Filters;
 
 namespace InoreaderCs.RateLimiting;
 
-public interface IRateLimitReader: ClientResponseFilter {
+internal interface IRateLimitReader: ClientResponseFilter {
 
     event EventHandler<RateLimitStatistics>? StatisticsReceived;
 
@@ -12,7 +12,7 @@ public interface IRateLimitReader: ClientResponseFilter {
  * https://www.inoreader.com/developers/rate-limiting
  * Usage resets at midnight in Bulgaria (UTC+2 or UTC+3 DST), where Innologica is based
  */
-public class RateLimitReader: IRateLimitReader {
+internal class RateLimitReader: IRateLimitReader {
 
     private const int    OfficialAndroidAppZone1Limit = 20_000_000;
     public const  string RequestPropertyKey           = nameof(RateLimitStatistics);
@@ -24,7 +24,7 @@ public class RateLimitReader: IRateLimitReader {
         try {
             /*
              * If the Zone 1 limit is 20 million requests per day, then the rate limit is being counted against the official first-party Inoreader Android app, so ignore it because we're not in danger of running out.
-             * Otherwise, if the Zone 1 limit is 5000, then the rate limit is being counted against my custom (second-party?) OAuth app, so count it so we can tell if we're about to exhaust our quota.
+             * Otherwise, if the Zone 1 limit is 5000, then the rate limit is being counted against my custom (second-party?) OAuth2 app, so count it so we can tell if we're about to exhaust our quota.
              */
             int zone1Limit = Convert.ToInt32(response.Headers.GetValues("X-Reader-Zone1-Limit").First());
             if (zone1Limit < OfficialAndroidAppZone1Limit) {

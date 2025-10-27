@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace InoreaderCs.Marshal;
 
-public class StringToStreamIdConverter: JsonConverter<StreamId> {
+internal class StringToStreamIdConverter: JsonConverter<StreamId> {
 
     /// <exception cref="JsonException"></exception>
     public override StreamId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>

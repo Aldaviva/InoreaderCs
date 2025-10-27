@@ -9,7 +9,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>
-        <NoWarn>$(NoWarn);8524</NoWarn>
+        <NoWarn>$(NoWarn);8524;IDE0057</NoWarn>
         <PackageProjectUrl>https://github.com/Aldaviva/InoreaderCs</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Aldaviva/InoreaderCs.git</RepositoryUrl>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -27,7 +27,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- <AdditionalFiles Include="ExceptionAdjustments.txt" /> -->
+        <AdditionalFiles Include="ExceptionAdjustments.txt" />
         <InternalsVisibleTo Include="Tests;DynamicProxyGenAssembly2" />
         <None Include="..\Readme.md;icon.png" Pack="true" PackagePath="\" />
         <None Include="*.sln.DotSettings;*.csproj.DotSettings" Visible="false" />
@@ -35,9 +35,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-        <PackageReference Include="Unfucked" Version="0.0.1-beta.16" />
-        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.16" />
+        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.17" />
     </ItemGroup>
 
     <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
