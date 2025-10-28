@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Security.Authentication;
 using Unfucked.HTTP.Exceptions;
 
 namespace InoreaderCs.Auth;
@@ -34,15 +33,18 @@ public class PasswordAuthClient: AbstractAuthClient {
         bool shouldSave = false;
         await Synchronizer.WaitAsync().ConfigureAwait(false);
         try {
-            if (CachedPersistedTokenResponses?.AppAuthToken is null) {
+            if (CachedPersistedTokenResponses?.PasswordAuthToken is null) {
                 _logger.LogDebug("Loading saved app token...");
-                CachedPersistedTokenResponses = await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false);
+                CachedPersistedTokenResponses ??= new PersistedAuthTokens();
+                if (await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false) is { } loadedAuthTokens) {
+                    CachedPersistedTokenResponses.LoadDefaults(loadedAuthTokens);
+                }
             }
 
-            if (CachedPersistedTokenResponses?.AppAuthToken is null) {
+            if (CachedPersistedTokenResponses.PasswordAuthToken is null) {
                 _logger.LogInformation("No saved app token, creating new one...");
                 string appAuthToken = await AuthorizeAppUser().ConfigureAwait(false);
-                CachedPersistedTokenResponses = new PersistedAuthTokens { AppAuthToken = appAuthToken };
+                CachedPersistedTokenResponses.PasswordAuthToken = appAuthToken;
                 _logger.LogInformation("Successfully created a new app auth token.");
                 shouldSave = true;
             }
@@ -52,15 +54,15 @@ public class PasswordAuthClient: AbstractAuthClient {
                 _logger.LogDebug("Saved auth tokens.");
             }
 
-            return new UserPasswordToken(CachedPersistedTokenResponses.AppAuthToken, _passwordAuthParameters.AppId, _passwordAuthParameters.AppKey);
+            return new UserPasswordToken(CachedPersistedTokenResponses.PasswordAuthToken, _passwordAuthParameters.AppId, _passwordAuthParameters.AppKey);
 
         } finally {
             Synchronizer.Release();
         }
     }
 
-    /// <exception cref="AuthenticationException"></exception>
     /// <exception cref="ProcessingException"></exception>
+    /// <exception cref="InoreaderException.Unauthorized"></exception>
     private async Task<string> AuthorizeAppUser() {
         FormUrlEncodedContent requestBody = new(new Dictionary<string, string> {
             { "Email", _passwordAuthParameters.UserEmailAddress },
@@ -83,7 +85,7 @@ public class PasswordAuthClient: AbstractAuthClient {
 
             return responseMap["Auth"];
         } catch (WebApplicationException e) {
-            throw new AuthenticationException($"Failed to create web API user auth token: {(int) e.StatusCode}");
+            throw new InoreaderException.Unauthorized($"Failed to create web API user auth token: {(int) e.StatusCode}", e);
         } catch (ProcessingException e) {
             _logger.LogError(e, "Network or serialization error while creating web API user auth token");
             throw;

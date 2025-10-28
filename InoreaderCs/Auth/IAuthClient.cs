@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using Unfucked.HTTP.Exceptions;
 
 namespace InoreaderCs.Auth;
@@ -13,8 +12,8 @@ public interface IAuthClient: IDisposable {
     /// Do whatever it takes to get a valid user authentication token. This can include reading a cached token from disk, refreshing an expired token, or requesting a new one, possibly with interactive user input.
     /// </summary>
     /// <returns>A user access token that is not expired</returns>
+    /// <exception cref="InoreaderException.Unauthorized">Wrong credentials or denied access.</exception>
     /// <exception cref="ProcessingException">Network or deserialization error while requesting auth token.</exception>
-    /// <exception cref="AuthenticationException">Wrong credentials.</exception>
     Task<IUserAuthToken> FetchValidUserToken();
 
 }

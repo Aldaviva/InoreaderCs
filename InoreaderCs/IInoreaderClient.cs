@@ -39,6 +39,7 @@ public interface IInoreaderClient: IDisposable {
     /// <returns>Response envelope containing zero or more <see cref="Article"/> instances.</returns>
     /// <remarks>See <see href="https://www.inoreader.com/developers/stream-contents"/></remarks>
     /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+    /// <exception cref="ProcessingException">Network, deserialization, or filtering error.</exception>
     Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                         PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFolders = true, bool includeAnnotations = false);
 
@@ -57,6 +58,7 @@ public interface IInoreaderClient: IDisposable {
     /// <returns>Response envelope containing zero or more <see cref="MinimalArticle"/> objects</returns>
     /// <remarks>See <see href="https://www.inoreader.com/developers/item-ids"/></remarks>
     /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+    /// <exception cref="ProcessingException">Network, deserialization, or filtering error.</exception>
     Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                               PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFolders = true);
 
@@ -71,6 +73,7 @@ public interface IInoreaderClient: IDisposable {
     /// <param name="articles">one or more articles to modify</param>
     /// <remarks>See <see href="https://www.inoreader.com/developers/edit-tag"/></remarks>
     /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+    /// <exception cref="ProcessingException">Network, deserialization, or filtering error.</exception>
     Task LabelArticles(StreamId label, bool removeLabel = false, params IEnumerable<Article> articles);
 
     /// <inheritdoc cref="LabelArticles(StreamId,bool,IEnumerable{Article})" />

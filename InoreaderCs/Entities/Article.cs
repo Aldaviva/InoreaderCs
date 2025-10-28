@@ -38,6 +38,7 @@ public record Article: BaseArticle {
     public required string LongId { get; init; }
 
     /// <inheritdoc />
+    // ExceptionAdjustment: M:System.Convert.ToInt64(System.String,System.Int32) -T:System.FormatException
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring("tag:google.com,2005:reader/item/".Length), 16));
 
     /// <summary>

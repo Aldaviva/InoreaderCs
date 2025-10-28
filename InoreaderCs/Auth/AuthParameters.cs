@@ -5,7 +5,7 @@ namespace InoreaderCs.Auth;
 /// </summary>
 /// <param name="AppId">The OAuth2 app's unique ID</param>
 /// <param name="AppKey">The OAuth2 app's secret key</param>
-public readonly record struct OauthParameters(int AppId, string AppKey);
+public record Oauth2Parameters(int AppId, string AppKey);
 
 /// <summary>
 /// User and client app inputs to the password authorization flow used by <see cref="PasswordAuthClient"/>, created when registering an Inoreader user account and an API app in Inoreader (<see href="https://www.inoreader.com/developers/register-app"/>).
@@ -14,4 +14,4 @@ public readonly record struct OauthParameters(int AppId, string AppKey);
 /// <param name="UserPassword">The Inoreader user's password</param>
 /// <param name="AppId">The OAuth2 app's unique ID</param>
 /// <param name="AppKey">The OAuth2 app's secret key</param>
-public readonly record struct PasswordAuthParameters(string UserEmailAddress, string UserPassword, int AppId, string AppKey);
+public record PasswordAuthParameters(string UserEmailAddress, string UserPassword, int AppId, string AppKey);

@@ -7,14 +7,14 @@ namespace InoreaderCs;
 /// </summary>
 /// <param name="message">Error description.</param>
 /// <param name="cause">Cause of the error.</param>
-public class InoreaderException(string message, Exception cause): ApplicationException(message, cause) {
+public class InoreaderException(string message, Exception? cause): ApplicationException(message, cause) {
 
     /// <summary>
     /// Not authorized error.
     /// </summary>
     /// <param name="message">Error description.</param>
     /// <param name="cause">Cause of the error.</param>
-    public class Unauthorized(string message, Exception cause): InoreaderException(message, cause);
+    public class Unauthorized(string message, Exception? cause): InoreaderException(message, cause);
 
     /// <summary>Too many requests.</summary>
     /// <param name="stats">Rate limit quota and usage from the offending request.</param>

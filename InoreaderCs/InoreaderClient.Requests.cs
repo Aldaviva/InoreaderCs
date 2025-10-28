@@ -9,7 +9,7 @@ public partial class InoreaderClient {
     public async Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                                      PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFolders = true, bool includeAnnotations = false) {
         try {
-            return await _apiTarget.Path("stream/contents/{streamId}")
+            return await ApiTarget.Path("stream/contents/{streamId}")
                 .ResolveTemplate("streamId", stream)
                 .QueryParam("n", Math.Min(maxArticles, 200))
                 .QueryParam("ot", minTime?.ToUnixTimeMicroseconds())
@@ -30,7 +30,7 @@ public partial class InoreaderClient {
     public async Task<MinimalArticles> ListMinimalArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
                                                            PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFolders = true) {
         try {
-            return await _apiTarget.Path("stream/items/ids")
+            return await ApiTarget.Path("stream/items/ids")
                 .QueryParam("n", Math.Min(maxArticles, 1000))
                 .QueryParam("ot", minTime?.ToUnixTimeMicroseconds())
                 .QueryParam("r", ascendingOrder ? "o" : null)
@@ -54,7 +54,7 @@ public partial class InoreaderClient {
         try {
             if (articleIds.Select(id => new KeyValuePair<string, string>("i", id)).ToList() is { Count: not 0 } ids) {
                 HttpContent body = new FormUrlEncodedContent(ids.Prepend(new KeyValuePair<string, string>(removeLabel ? "r" : "a", label.ToString())));
-                (await _apiTarget.Path("edit-tag").Post(body).ConfigureAwait(false)).Dispose();
+                (await ApiTarget.Path("edit-tag").Post(body).ConfigureAwait(false)).Dispose();
             }
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to {(removeLabel ? "untag" : "tag")} articles with tag {label}");

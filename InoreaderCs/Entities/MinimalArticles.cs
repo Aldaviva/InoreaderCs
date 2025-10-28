@@ -11,7 +11,7 @@ public record MinimalArticles: PaginatedListResponse {
     /// Zero or more minimal articles.
     /// </summary>
     [JsonPropertyName("itemRefs")]
-    public required IReadOnlyList<MinimalArticle> Articles { get; init; }
+    public IReadOnlyList<MinimalArticle> Articles { get; init; } = [];
 
 }
 

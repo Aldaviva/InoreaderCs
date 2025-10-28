@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -20,7 +19,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     private static readonly UrlBuilder InoreaderOauthBase = InoreaderClient.ApiBase.ToBuilder().Path("oauth2");
 
     private readonly ILogger<Oauth2Client> _logger;
-    private readonly OauthParameters       _oauthParameters;
+    private readonly Oauth2Parameters      _oauthParameters;
 
     /// <summary>
     /// Create a new Inoreader authentication client that logs in with OAuth2 and a registered app ID and secret.
@@ -29,7 +28,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <param name="authTokenPersister">Saves and loads cached auth tokens.</param>
     /// <param name="httpClient">Optional HTTP client to use when creating an app auth token for the user.</param>
     /// <param name="loggerFactory">If you want to emit logs from this class in your logging infrastructure.</param>
-    protected Oauth2Client(OauthParameters oauthParameters, IAuthTokenPersister authTokenPersister, IUnfuckedHttpClient? httpClient, ILoggerFactory? loggerFactory): base(authTokenPersister,
+    protected Oauth2Client(Oauth2Parameters oauthParameters, IAuthTokenPersister authTokenPersister, IUnfuckedHttpClient? httpClient, ILoggerFactory? loggerFactory): base(authTokenPersister,
         httpClient) {
         _oauthParameters = oauthParameters;
         _logger          = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<Oauth2Client>();
@@ -65,13 +64,16 @@ public abstract class Oauth2Client: AbstractAuthClient {
         try {
             if (CachedPersistedTokenResponses?.AccessToken is null) {
                 _logger.LogDebug("Loading saved auth token...");
-                CachedPersistedTokenResponses = await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false);
+                CachedPersistedTokenResponses ??= new PersistedAuthTokens();
+                if (await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false) is { } loadedAuthTokens) {
+                    CachedPersistedTokenResponses.LoadDefaults(loadedAuthTokens);
+                }
             }
 
-            if (CachedPersistedTokenResponses?.AccessToken is null) {
+            if (CachedPersistedTokenResponses.AccessToken is null) {
                 _logger.LogInformation("No saved auth token, starting new authorization process...");
                 OAuth2TokenResponse response = await Authorize().ConfigureAwait(false);
-                CachedPersistedTokenResponses = new PersistedAuthTokens().Load(response);
+                CachedPersistedTokenResponses.Load(response);
                 _logger.LogInformation("Successfully authorized with a new auth token.");
                 shouldSave = true;
             } else if (CachedPersistedTokenResponses.Expiration?.Subtract(EarlyRefreshPeriod) < DateTimeOffset.Now && CachedPersistedTokenResponses.RefreshToken is { } refreshToken) {
@@ -79,7 +81,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                     _logger.LogDebug("Saved auth token is too old (expired {expiration:F}), refreshing it...", CachedPersistedTokenResponses.Expiration);
                     CachedPersistedTokenResponses.Load(await RefreshAuthToken(refreshToken).ConfigureAwait(false));
                     _logger.LogDebug("Successfully refreshed auth token.");
-                } catch (AuthenticationException e) {
+                } catch (InoreaderException.Unauthorized e) {
                     _logger.LogWarning("Failed to refresh auth token ({msg}), starting new authorization process...", e.Message);
                     CachedPersistedTokenResponses.Load(await Authorize().ConfigureAwait(false));
                     _logger.LogDebug("Successfully reauthorized with a new auth token.");
@@ -102,8 +104,9 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <summary>
     /// Perform the initial consent, redirect, and auth code exchange.
     /// </summary>
-    /// <exception cref="AuthenticationException">Authentication failed</exception>
     /// <returns>An OAuth2 access token, refresh token, and expiration date.</returns>
+    /// <exception cref="InoreaderException.Unauthorized">User denied consent, or other OAuth2 error</exception>
+    /// <exception cref="ProcessingException"></exception>
     protected async Task<OAuth2TokenResponse> Authorize() {
         TaskCompletionSource<bool> onAuthorized = new();
 
@@ -138,14 +141,17 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 onAuthorized.TrySetResult(true);
                 return authToken;
             } else if (consentResult.ErrorCode is not null) {
-                throw new AuthenticationException(consentResult.ErrorCode switch {
+                throw new InoreaderException.Unauthorized(consentResult.ErrorCode switch {
                     "access_denied" => "FeedAssistant was denied access to your Inoreader account",
                     _               => $"{consentResult.ErrorCode}: {consentResult.ErrorMessage}"
-                });
+                }, null);
             } else {
-                throw new AuthenticationException("Invalid request parameters");
+                throw new InoreaderException.Unauthorized("Wrong CSRF token, you are being hacked", null);
             }
-        } catch (AuthenticationException e) {
+        } catch (InoreaderException.Unauthorized e) {
+            onAuthorized.TrySetException(e);
+            throw;
+        } catch (ProcessingException e) {
             onAuthorized.TrySetException(e);
             throw;
         }
@@ -155,15 +161,15 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <summary>
     /// Exchange an old refresh token for a new access token and refresh token.
     /// </summary>
-    /// <exception cref="AuthenticationException"></exception>
     /// <exception cref="ProcessingException"></exception>
+    /// <exception cref="InoreaderException.Unauthorized"></exception>
     private Task<OAuth2TokenResponse> RefreshAuthToken(string refreshToken) =>
         RequestOAuthToken("refresh_token", Singleton.Dictionary("refresh_token", refreshToken));
 
     /// <summary>
     /// Exchange some credentials (like an authorization code or refresh token) for a new access token and refresh token.
     /// </summary>
-    /// <exception cref="AuthenticationException"></exception>
+    /// <exception cref="InoreaderException.Unauthorized"></exception>
     /// <exception cref="ProcessingException"></exception>
     private async Task<OAuth2TokenResponse> RequestOAuthToken(string grantType, IEnumerable<KeyValuePair<string, string>> requestBody) {
         FormUrlEncodedContent body = new(new Dictionary<string, string>(requestBody.ToDictionary(pair => pair.Key, pair => pair.Value)) {
@@ -177,7 +183,13 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 .Path("token")
                 .Post<OAuth2TokenResponse>(body).ConfigureAwait(false);
         } catch (WebApplicationException e) {
-            throw new AuthenticationException($"Failed to refresh auth token: {(int) e.StatusCode} {ParseError(e.ResponseBody)?["error_description"]?.GetValue<string>()}");
+            try {
+                throw new InoreaderException.Unauthorized($"Failed to get auth token: {(int) e.StatusCode} {ParseError(e.ResponseBody)?["error_description"]?.GetValue<string>()}", e);
+            } catch (JsonException e2) {
+                throw new ProcessingException(e2, new HttpExceptionParams(e.Verb, e.RequestUrl, e.ResponseHeaders, e.ResponseBody, e.RequestProperties));
+            } catch (FormatException e2) {
+                throw new ProcessingException(e2, new HttpExceptionParams(e.Verb, e.RequestUrl, e.ResponseHeaders, e.ResponseBody, e.RequestProperties));
+            }
         } catch (ProcessingException e) {
             _logger.LogError(e, "Network or serialization error while refreshing auth token");
             throw;

@@ -13,13 +13,13 @@ public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister,
     /// <summary>
     /// HTTP client used when requesting auth tokens.
     /// </summary>
+    // ExceptionAdjustment: P:System.Lazy`1.Value get -T:System.MemberAccessException
+    // ExceptionAdjustment: P:System.Lazy`1.Value get -T:System.MissingMemberException
     public IUnfuckedHttpClient HttpClient {
         get => OverriddenHttpClient ?? _defaultHttpClient.Value;
         set {
             OverriddenHttpClient = value;
-            if (_defaultHttpClient.IsValueCreated) {
-                _defaultHttpClient.Value.Dispose();
-            }
+            _defaultHttpClient.TryDisposeValue();
         }
     }
 
@@ -46,9 +46,7 @@ public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister,
     protected virtual void Dispose(bool disposing) {
         if (disposing) {
             Synchronizer.Dispose();
-            if (_defaultHttpClient.IsValueCreated) {
-                _defaultHttpClient.Value.Dispose();
-            }
+            _defaultHttpClient.TryDisposeValue();
         }
     }
 

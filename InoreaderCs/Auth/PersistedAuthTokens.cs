@@ -20,7 +20,7 @@ public record PersistedAuthTokens {
     /// <summary>
     /// User access token from a user's email address and password. Does not expire.
     /// </summary>
-    public virtual string? AppAuthToken { get; set; }
+    public virtual string? PasswordAuthToken { get; set; }
 
     /// <summary>
     /// Copy an OAuth2 token into this persisted object.
@@ -31,6 +31,21 @@ public record PersistedAuthTokens {
         AccessToken  = oauthToken.AccessToken;
         RefreshToken = oauthToken.RefreshToken;
         Expiration   = oauthToken.Expiration;
+        return this;
+    }
+
+    /// <summary>
+    /// Copy all properties from another instance into this object, useful for 
+    /// </summary>
+    /// <param name="source">Another instance of this class, perhaps loaded from disk</param>
+    /// <returns>This instance, mutated</returns>
+    public virtual PersistedAuthTokens LoadDefaults(PersistedAuthTokens source) {
+        if (AccessToken is null && source.AccessToken is not null) {
+            AccessToken  = source.AccessToken;
+            RefreshToken = source.RefreshToken;
+            Expiration   = source.Expiration;
+        }
+        PasswordAuthToken ??= source.PasswordAuthToken;
         return this;
     }
 

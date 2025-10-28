@@ -37,9 +37,13 @@ public partial class InoreaderClient: IInoreaderClient {
     };
 
     private readonly bool            _disposeHttpClient;
-    private readonly WebTarget       _apiTarget;
     private readonly RateLimitReader _rateLimitReader = new();
     private readonly object          _eventLock       = new();
+
+    /// <summary>
+    /// Target for Inoreader API with preconfigured URL, content type, authentication, rate-limit metrics, and JSON deserialization settings
+    /// </summary>
+    protected readonly WebTarget ApiTarget;
 
     /// <inheritdoc />
     public IUnfuckedHttpClient HttpClient { get; }
@@ -57,9 +61,9 @@ public partial class InoreaderClient: IInoreaderClient {
             auth.HttpClient = HttpClient;
         }
 
-        _apiTarget = HttpClient
+        ApiTarget = HttpClient
             .Target(ApiBase)
-            .Register(new InoreaderAuthenticationFilter(authClient))
+            .Register(new AuthRequestFilter(authClient), ClientConfig.FirstFilterPosition)
             .Register(_rateLimitReader)
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")

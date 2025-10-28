@@ -5,7 +5,7 @@ namespace InoreaderCs.Marshal;
 
 internal class StringToDateTimeOffsetReader: JsonConverter<DateTimeOffset?> {
 
-    private const long UnixEpochTicks = 621355968000000000;
+    internal const long UnixEpochTicks = 621355968000000000;
 
     /// <exception cref="JsonException"></exception>
     public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
