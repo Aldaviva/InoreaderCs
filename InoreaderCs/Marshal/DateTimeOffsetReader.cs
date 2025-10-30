@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace InoreaderCs.Marshal;
 
-internal class StringToDateTimeOffsetReader: JsonConverter<DateTimeOffset?> {
+internal class DateTimeOffsetReader: JsonConverter<DateTimeOffset?> {
 
     internal const long UnixEpochTicks = 621355968000000000;
 
@@ -17,14 +17,20 @@ internal class StringToDateTimeOffsetReader: JsonConverter<DateTimeOffset?> {
                 _                    => null
             };
             return number switch {
-                0        => null,
-                not null => new DateTimeOffset((number.Value >= 1000000000000000 ? number.Value * 10 : number.Value * 10000) + UnixEpochTicks, TimeSpan.Zero),
-                _        => throw new JsonException($"{nameof(number)}={number}, {nameof(reader.TokenType)}={tokenType}")
+                0     => null,
+                { } n => new DateTimeOffset(AutoRangeToTicksSinceUnixEpoch(n) + UnixEpochTicks, TimeSpan.Zero),
+                _     => throw new JsonException($"{nameof(number)}={number}, {nameof(reader.TokenType)}={tokenType}")
             };
         } catch (FormatException e) {
             throw new JsonException(null, e);
         }
     }
+
+    private static long AutoRangeToTicksSinceUnixEpoch(long mysteryTime) => mysteryTime * mysteryTime switch {
+        >= 100000000000000 => 10,      // microseconds
+        >= 100000000000    => 10000,   // milliseconds
+        _                  => 10000000 // seconds
+    };
 
     public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options) { }
 

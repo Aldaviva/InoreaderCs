@@ -98,7 +98,7 @@ public record Article: BaseArticle {
     private Origin Feed { get; init; } = null!;
 
     /// <summary>
-    /// <para>The URL of the feed that this article is from, which points to an RSS or Atom document.</para>
+    /// <para>The URL of the feed that this article is from, which points to an RSS or Atom XML document.</para>
     /// <para>For the article's web page URL, see <see cref="PageUrl"/>. For the feed's web page URL, see <see cref="FeedPageUrl"/>.</para>
     /// </summary>
     public Uri FeedUrl => Feed.StreamId.FeedUri;
@@ -116,13 +116,13 @@ public record Article: BaseArticle {
 
     /// <summary>
     /// <para><c>true</c> if the user added a star to this article, also known as Read Later or Saved, or <c>false</c> if the article is not starred.</para>
-    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.LabelArticles(StreamId,bool,IEnumerable{Article})"/> with the <c>label</c> parameter set to <see cref="StreamId.Starred"/>.</para>
+    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.MarkArticles"/> with the <c>label</c> parameter set to <see cref="StreamId.Starred"/>.</para>
     /// </summary>
     public bool IsStarred => FoldersTagsAndStates.Contains(StreamId.Starred);
 
     /// <summary>
     /// <c>true</c> if either the user read the article or the article is more than 30 days old, or <c>if it is unread and less than 30 days old.</c>
-    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.LabelArticles(StreamId,bool,IEnumerable{Article})"/> with the <c>label</c> parameter set to <see cref="StreamId.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
+    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.MarkArticles"/> with the <c>label</c> parameter set to <see cref="StreamId.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
     /// </summary>
     public bool IsRead => FoldersTagsAndStates.Contains(StreamId.Read);
 

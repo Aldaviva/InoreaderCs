@@ -1,12 +1,9 @@
 using InoreaderCs.Auth;
 using InoreaderCs.Marshal;
 using InoreaderCs.RateLimiting;
-using System.Net;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Unfucked.HTTP.Config;
-using Unfucked.HTTP.Exceptions;
 
 namespace InoreaderCs;
 
@@ -16,18 +13,18 @@ namespace InoreaderCs;
 /// <para>Once you have an instance, you can send API requests by calling methods like <see cref="ListFullArticles"/>.</para>
 /// </summary>
 /// <remarks>See <see href="https://www.inoreader.com/developers/"/></remarks>
-public partial class InoreaderClient: IInoreaderClient {
+public class InoreaderClient: IInoreaderClient {
 
-    internal static readonly Uri      ApiBase         = new("https://www.inoreader.com/");
-    private static readonly  Encoding MessageEncoding = new UTF8Encoding(false, true);
+    internal static readonly Uri ApiBase = new("https://www.inoreader.com/");
 
-    private static readonly JsonConverter<DateTimeOffset?> StringToDateTimeOffsetReader = new StringToDateTimeOffsetReader();
+    private static readonly JsonConverter<DateTimeOffset?> StringToDateTimeOffsetReader = new DateTimeOffsetReader();
 
     /// <summary>
     /// JSON response deserialization preferences
     /// </summary>
     protected static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNamingPolicy              = JsonNamingPolicy.CamelCase,
+        AllowOutOfOrderMetadataProperties = true,
         Converters = {
             new JsonStringEnumConverter(),
             StringToDateTimeOffsetReader,
@@ -41,9 +38,11 @@ public partial class InoreaderClient: IInoreaderClient {
     private readonly object          _eventLock       = new();
 
     /// <summary>
-    /// Target for Inoreader API with preconfigured URL, content type, authentication, rate-limit metrics, and JSON deserialization settings
+    /// <para>Target for Inoreader API with preconfigured URL (<c>https://www.inoreader.com/reader/api/0/user-info</c>), content type, authentication, rate-limit metrics, and JSON deserialization settings.</para>
     /// </summary>
     protected readonly WebTarget ApiTarget;
+
+    private readonly Requests _requests;
 
     /// <inheritdoc />
     public IUnfuckedHttpClient HttpClient { get; }
@@ -68,7 +67,27 @@ public partial class InoreaderClient: IInoreaderClient {
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")
             .Accept("application/json");
+
+        _requests = new Requests(ApiTarget);
     }
+
+    /// <inheritdoc />
+    public IInoreaderClient.IArticleMethods Articles => _requests;
+
+    /// <inheritdoc />
+    public IInoreaderClient.IFolderMethods Folders => _requests;
+
+    /// <inheritdoc />
+    public IInoreaderClient.INewsfeedMethods Newsfeed => _requests;
+
+    /// <inheritdoc />
+    public IInoreaderClient.ISubscriptionMethods Subscriptions => _requests;
+
+    /// <inheritdoc />
+    public IInoreaderClient.ITagMethods Tags => _requests;
+
+    /// <inheritdoc />
+    public IInoreaderClient.IUserMethods Users => _requests;
 
     /// <inheritdoc />
     public event EventHandler<RateLimitStatistics>? RateLimitStatisticsReceived {
@@ -82,19 +101,6 @@ public partial class InoreaderClient: IInoreaderClient {
                 _rateLimitReader.StatisticsReceived -= value;
             }
         }
-    }
-
-    private static InoreaderException TransformError(HttpException cause, string message) {
-        return cause switch {
-            ForbiddenException or NotAuthorizedException              => new InoreaderException.Unauthorized("Inoreader auth failure", cause),
-            ClientErrorException { StatusCode: (HttpStatusCode) 429 } => new InoreaderException.RateLimited((RateLimitStatistics) cause.RequestProperties![RateLimitReader.RequestPropertyKey]!, cause),
-            _ => new InoreaderException(message + (cause is WebApplicationException { ResponseBody: { } body } ? ": " + MessageEncoding.GetString(body.Span
-#if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
-                        .ToArray()
-#endif
-                ).Trim().TrimStart(1, "Error=") : null),
-                cause)
-        };
     }
 
     /// <inheritdoc cref="Dispose()" />

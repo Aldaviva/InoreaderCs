@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace InoreaderCs.Entities;
 
 /// <summary>
@@ -8,34 +10,48 @@ public class StreamId {
     private const string SystemIdPrefix = "user/-/state/com.google";
 
     /// <summary>All articles in your account, identical to <see cref="ReadingList"/></summary>
-    public static StreamId Root { get; } = new(SystemIdPrefix + "/root");
+    public static readonly StreamId Root = new(SystemIdPrefix + "/root");
 
     /// <summary>All articles in your account, identical to <see cref="Root"/></summary>
-    public static StreamId ReadingList { get; } = new(SystemIdPrefix + "/reading-list");
+    public static readonly StreamId ReadingList = new(SystemIdPrefix + "/reading-list");
 
     /// <summary>Articles which you have marked as read, or are more than 30 days old</summary>
-    public static StreamId Read { get; } = new(SystemIdPrefix + "/read");
+    public static readonly StreamId Read = new(SystemIdPrefix + "/read");
 
     /// <summary>Articles which you have starred, favorited, or saved to Read Later</summary>
-    public static StreamId Starred { get; } = new(SystemIdPrefix + "/starred");
+    public static readonly StreamId Starred = new(SystemIdPrefix + "/starred");
 
     /// <summary>Articles to which you have added annotations</summary>
-    public static StreamId Annotated { get; } = new(SystemIdPrefix + "/annotated");
+    public static readonly StreamId Annotated = new(SystemIdPrefix + "/annotated");
 
     /// <summary>Articles which have been broadcast, whatever that means</summary>
-    public static StreamId Broadcast { get; } = new(SystemIdPrefix + "/broadcast");
+    public static readonly StreamId Broadcast = new(SystemIdPrefix + "/broadcast");
 
     /// <summary>Articles which have been liked by other users using some social feature</summary>
-    public static StreamId Like { get; } = new(SystemIdPrefix + "/like");
+    public static readonly StreamId Like = new(SystemIdPrefix + "/like");
 
     /// <summary>Articles which are saved web pages or something</summary>
-    public static StreamId SavedWebPages { get; } = new(SystemIdPrefix + "/saved-web-pages");
+    public static readonly StreamId SavedWebPages = new(SystemIdPrefix + "/saved-web-pages");
 
-    /// <summary>A folder that contains a feed, or a tag that you have added to an article</summary>
-    public static StreamId Label(string folderOrTagName) => new("user/-/label/" + folderOrTagName);
+    private static StreamId ForLabel(string folderOrTagName) => new("user/-/label/" + folderOrTagName);
+
+    /// <summary>A tag that you have added to an article</summary>
+    public static StreamId ForTag(string tagName) => ForLabel(tagName);
+
+    /// <summary>A folder that contains a feed</summary>
+    public static StreamId ForFolder(string folderName) => ForLabel(folderName);
+
+    /// <summary>A system state, either <see cref="Entities.ArticleState.Read"/> or <see cref="Entities.ArticleState.Starred"/></summary>
+#if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+    [return: NotNullIfNotNull(nameof(state))]
+#endif
+    public static StreamId? ForState(ArticleState? state) => state is null ? null : state.Value switch {
+        ArticleState.Read    => Read,
+        ArticleState.Starred => Starred
+    };
 
     /// <summary>One specific feed</summary>
-    public static StreamId Feed(Uri feedUri) => new("feed/" + feedUri);
+    public static StreamId ForFeed(Uri feedUri) => new("feed/" + feedUri.AbsoluteUri);
 
     /// <summary>
     /// The raw <c>tag</c> URL of the stream, such as <c>user/-/state/com.google/starred</c>.
@@ -51,11 +67,14 @@ public class StreamId {
         string[] segments = id.Split(['/'], 3);
 
         return segments[0] switch {
-            "feed" => Feed(FeedStreamIdToUri(id)),
+            "feed" => ForFeed(FeedStreamIdToUri(id)),
             "user" => new StreamId($"{segments[0]}/-/{segments[2]}"),
             _      => throw new ArgumentOutOfRangeException($"Unable to parse stream ID \"{id}\", see the list of supported stream IDs at https://www.inoreader.com/developers/stream-ids")
         };
     }
+
+    /// <inheritdoc cref="Id" />
+    public static implicit operator string(StreamId streamId) => streamId.Id;
 
     /// <summary>
     /// Get the URI of the feed, if this stream ID points to a URI (e.g. <c>feed/http://feeds.arstechnica.com/arstechnica/science</c>), otherwise, throws an <see cref="ArgumentException"/> if it does not point to a feed URI.
@@ -67,6 +86,21 @@ public class StreamId {
                 return FeedStreamIdToUri(Id);
             } else {
                 throw new ArgumentException($"This is not a stream ID for a feed. Its ID is \"{Id}\", which does not start with \"feed/\"");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Get the name of the folder or tag (e.g. <c>Science</c>) if this stream ID points to a label (e.g. <c>user/-/label/Science</c>), otherwise, throws an <see cref="ArgumentException"/> if it does not point to a label.
+    /// </summary>
+    /// <exception cref="ArgumentException">if the stream ID does not start with <c>user/-/label/</c></exception>
+    public string LabelName {
+        get {
+            const string prefix = "user/-/label/";
+            if (Id.StartsWith(prefix)) {
+                return Id.Substring(prefix.Length);
+            } else {
+                throw new ArgumentException($"This is not a stream ID for a folder or tag. Its ID is \"{Id}\", which does not start with \"label/\"");
             }
         }
     }
