@@ -7,15 +7,17 @@
 
 Like [IsaacSchemm/InoreaderFs](https://github.com/IsaacSchemm/InoreaderFs), but not fucked up:
 
-- The `ot` query parameter to `stream/items/ids` is sent in the correct microsecond format, not seconds, so it isn't ignored
-- Has a built-in OAuth2 client with refresh logic and a password-based auth client, both of which make auth requests automatically
-- Parse, handle, and use Stream IDs for well-known system states, folders, and tags
-- Observe rate-limiting statistics
-- Uses modern, interchangeable, customizable `HttpClient` instead of ancient, disgusting `HttpWebRequest`
-- Set custom `User-Agent` or any other HTTP request headers
-- Easily get article's read and starred state, short ID, description, and original feed name and URL
-- Objects are configurable because they are not static classes, so you don't need to pass authentication to literally every request, you can just set it up once, for example in an IoC context, and not have to pass it around your entire codebase.
+- Correctly send the `ot` query parameter to `stream/items/ids` in microsecond format, not seconds, so it isn't ignored.
+- Has a built-in OAuth2 client with smart refresh logic as well as a password-based auth client, both of which make auth requests automatically and support pluggable persistence strategies.
+- Observe rate-limiting statistics.
+- Uses modern, interchangeable, customizable `HttpClient` instead of ancient, disgusting `HttpWebRequest`.
+- Allows you to set custom HTTP request headers, such as `User-Agent`.
+- Easily gets article's read and starred state, short ID, description, and original feed name and URL.
+- Instances are configurable because they are not static classes, so you don't need to supply authentication to literally every request, you can just set it up once, for example in an IoC context, and not have to pass it around your entire codebase.
 - Interfaces allow mocking and interchangeability, instead of everything being sealed static classes.
-- Full documentation of methods and entities
-- Exceptions have information about what went wrong
-- Updated in the last 6 years
+- Hierarchical interface structure makes it easier to find the API method you want and understand what it applies to.
+- Facade pattern hides the complexity of the Inoreader API's very overloaded methods with lots of conditionally valid parameters.
+- Avoids the insane concept of stream IDs and all their complexity of parsing, translating, handling, and using them, because developers today shouldn't have to deal with weird Google decisions from 2001 that Inoreader bent over backwards to be compatible with for no real benefit because there is no Google Reader client that anyone pointed at Inoreader as a drop-in replacement backend.
+- Full documentation of methods and entities.
+- Exceptions have information about what went wrong.
+- Updated in the last 6 years by someone who uses Inoreader and this library heavily every day.

@@ -6,4 +6,4 @@ internal record SubscriptionListResponse {
 
 }
 
-public record MinimalFolder(StreamId Id, string Label);
+internal record MinimalFolder(StreamId Id, string Label);

@@ -3,15 +3,9 @@ using System.Text.Json.Serialization;
 namespace InoreaderCs.Entities;
 
 /// <summary>
-/// Response container envelope for <see cref="IInoreaderClient.ListFullArticles"/>.
+/// Response container envelope for listing articles.
 /// </summary>
-public record FullArticles: PaginatedListResponse {
-
-    /// <summary>
-    /// The stream that was requested, such as <see cref="StreamId.ReadingList"/>.
-    /// </summary>
-    [JsonPropertyName("id")]
-    public required StreamId Stream { get; init; }
+public record DetailedArticles: PaginatedListResponse {
 
     /// <summary>
     /// The name of the stream that was requested, such as <c>Reading List</c>.

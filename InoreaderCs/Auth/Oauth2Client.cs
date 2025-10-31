@@ -16,7 +16,7 @@ namespace InoreaderCs.Auth;
 public abstract class Oauth2Client: AbstractAuthClient {
 
     private static readonly TimeSpan   EarlyRefreshPeriod = TimeSpan.FromMinutes(5);
-    private static readonly UrlBuilder InoreaderOauthBase = InoreaderClient.ApiBase.ToBuilder().Path("oauth2");
+    private static readonly UrlBuilder InoreaderOauthBase = InoreaderClient.ApiRoot.ToBuilder().Path("oauth2");
 
     private readonly ILogger<Oauth2Client> _logger;
     private readonly Oauth2Parameters      _oauthParameters;

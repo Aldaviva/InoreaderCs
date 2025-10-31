@@ -1,13 +1,16 @@
+#if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace InoreaderCs.Entities;
 
 /// <summary>
 /// See <see href="https://www.inoreader.com/developers/stream-ids"/> and <see href="https://www.inoreader.com/developers/stream-contents#:~:text=ID%20formats.-,categories,-is%20a%20list"/>
 /// </summary>
-public class StreamId {
+internal class StreamId {
 
     private const string SystemIdPrefix = "user/-/state/com.google";
+    private const string LabelPrefix    = "user/-/label/";
 
     /// <summary>All articles in your account, identical to <see cref="ReadingList"/></summary>
     public static readonly StreamId Root = new(SystemIdPrefix + "/root");
@@ -33,7 +36,7 @@ public class StreamId {
     /// <summary>Articles which are saved web pages or something</summary>
     public static readonly StreamId SavedWebPages = new(SystemIdPrefix + "/saved-web-pages");
 
-    private static StreamId ForLabel(string folderOrTagName) => new("user/-/label/" + folderOrTagName);
+    private static StreamId ForLabel(string folderOrTagName) => new(LabelPrefix + folderOrTagName);
 
     /// <summary>A tag that you have added to an article</summary>
     public static StreamId ForTag(string tagName) => ForLabel(tagName);
@@ -94,16 +97,18 @@ public class StreamId {
     /// Get the name of the folder or tag (e.g. <c>Science</c>) if this stream ID points to a label (e.g. <c>user/-/label/Science</c>), otherwise, throws an <see cref="ArgumentException"/> if it does not point to a label.
     /// </summary>
     /// <exception cref="ArgumentException">if the stream ID does not start with <c>user/-/label/</c></exception>
-    public string LabelName {
+    public string? LabelName {
         get {
-            const string prefix = "user/-/label/";
-            if (Id.StartsWith(prefix)) {
-                return Id.Substring(prefix.Length);
+            if (Id.StartsWith(LabelPrefix)) {
+                return Id.Substring(LabelPrefix.Length);
             } else {
-                throw new ArgumentException($"This is not a stream ID for a folder or tag. Its ID is \"{Id}\", which does not start with \"label/\"");
+                // throw new ArgumentException($"This is not a stream ID for a folder or tag. Its ID is \"{Id}\", which does not start with \"label/\"");
+                return null;
             }
         }
     }
+
+    // public bool IsLabel => Id.StartsWith(LabelPrefix);
 
     private static Uri FeedStreamIdToUri(string feedStreamId) {
         return new Uri(feedStreamId.Substring("feed/".Length), UriKind.Absolute);

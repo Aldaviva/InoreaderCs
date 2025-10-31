@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
 
@@ -41,18 +42,40 @@ public record Article: BaseArticle {
     // ExceptionAdjustment: M:System.Convert.ToInt64(System.String,System.Int32) -T:System.FormatException
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring("tag:google.com,2005:reader/item/".Length), 16));
 
+    [JsonInclude]
+    private ISet<StreamId> Categories { get; init; } = new HashSet<StreamId>();
+
     /// <summary>
-    /// <para>Zero or more IDs of streams that this article appears in, including its tags, folders, and system labels like <see cref="StreamId.Read"/> or <see cref="StreamId.Starred"/>.</para>
-    /// <para>To determine if an article has a given label, you can call <see cref="FoldersTagsAndStates"/><c>.Contains(</c><see cref="StreamId.Annotated"/><c>)</c> or <see cref="FoldersTagsAndStates"/><c>.Contains(StreamId.Label("My folder or tag"))</c>.</para>
-    /// <para>When fetching articles with <see cref="IInoreaderClient.ListFullArticles"/>, this set will only contain folders when the <c>includeFoldersInLabels</c> parameter is <c>true</c>.</para>
-    /// <para>This always contains <see cref="StreamId.ReadingList"/>.</para>
+    /// Zero or more folders that this article feed's subscription is organized into. If the <c>showFolders</c> argument to <seealso cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/> is set to <c>false</c>, this will be the empty set.
     /// </summary>
-    [JsonPropertyName("categories")]
-    public required ISet<StreamId> FoldersTagsAndStates { get; init; }
+    [JsonIgnore]
+    public IImmutableSet<string> Folders { get; private set; } = ImmutableHashSet<string>.Empty;
+
+    /// <summary>
+    /// Zero or more tags that have been added to this article.
+    /// </summary>
+    [JsonIgnore]
+    public IImmutableSet<string> Tags { get; private set; } = ImmutableHashSet<string>.Empty;
+
+    internal async Task SetCategories(LabelNameCache.Labels labels) {
+        HashSet<string> folders = [];
+        HashSet<string> tags    = [];
+        foreach (StreamId category in Categories) {
+            if (category.LabelName is { } labelName) {
+                if (labels.Folders.Contains(labelName)) {
+                    folders.Add(labelName);
+                } else { // tag or unknown, possibly due to stale tag list cache, so assume new tag
+                    tags.Add(labelName);
+                }
+            }
+        }
+        Folders = folders.ToImmutableHashSet();
+        Tags    = tags.ToImmutableHashSet();
+    }
 
     /// <summary>
     /// <para>Zero or more notes that the user has added to this article.</para>
-    /// <para>When fetching articles with <see cref="IInoreaderClient.ListFullArticles"/>, this set will be empty when the <c>includeAnnotations</c> parameter is <c>false</c>.</para>
+    /// <para>When fetching articles with <see cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/>, this set will be empty when the <c>showAnnotations</c> parameter is <c>false</c>.</para>
     /// </summary>
     public required IReadOnlyList<Annotation> Annotations { get; init; }
 
@@ -116,15 +139,15 @@ public record Article: BaseArticle {
 
     /// <summary>
     /// <para><c>true</c> if the user added a star to this article, also known as Read Later or Saved, or <c>false</c> if the article is not starred.</para>
-    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.MarkArticles"/> with the <c>label</c> parameter set to <see cref="StreamId.Starred"/>.</para>
+    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.IArticleMethods.MarkArticles"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Starred"/>.</para>
     /// </summary>
-    public bool IsStarred => FoldersTagsAndStates.Contains(StreamId.Starred);
+    public bool IsStarred => Categories.Contains(StreamId.Starred);
 
     /// <summary>
     /// <c>true</c> if either the user read the article or the article is more than 30 days old, or <c>if it is unread and less than 30 days old.</c>
-    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.MarkArticles"/> with the <c>label</c> parameter set to <see cref="StreamId.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
+    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.IArticleMethods.MarkArticles"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
     /// </summary>
-    public bool IsRead => FoldersTagsAndStates.Contains(StreamId.Read);
+    public bool IsRead => Categories.Contains(StreamId.Read);
 
     /// <inheritdoc cref="Equals(object)" />
     public virtual bool Equals(Article? other) => other is not null && (ReferenceEquals(this, other) || CrawlTime.Equals(other.CrawlTime));

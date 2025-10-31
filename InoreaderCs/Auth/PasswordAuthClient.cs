@@ -73,7 +73,7 @@ public class PasswordAuthClient: AbstractAuthClient {
         requestBody.Headers.ContentLanguage.Add("en_US");
 
         try {
-            string responseBody = await HttpClient.Target(InoreaderClient.ApiBase)
+            string responseBody = await HttpClient.Target(InoreaderClient.ApiRoot)
                 .Path("accounts/ClientLogin")
                 .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.5")
                 .Post<string>(requestBody).ConfigureAwait(false);

@@ -16,7 +16,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <Description>.NET client for the Inoreader HTTP API</Description>
-        <PackageTags>inoreader api-client rss atom</PackageTags>
+        <PackageTags>inoreader api-client rss atom nws reader feed newsfeed syndication</PackageTags>
         <PackageIcon>icon.png</PackageIcon>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <IncludeSource>true</IncludeSource>
@@ -24,6 +24,7 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> <!-- System.Net.Http.Json 9 and dependencies are only tested on .NET ≥ 8, but we need it because that is the lowest version that provides JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object -->
     </PropertyGroup>
 
     <ItemGroup>

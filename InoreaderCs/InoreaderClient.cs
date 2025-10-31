@@ -10,12 +10,12 @@ namespace InoreaderCs;
 /// <summary>
 /// <para>Client for the Inoreader HTTP API.</para>
 /// <para>To get started, construct a new instance of this class. Pass either an <see cref="Oauth2Client"/> or <see cref="PasswordAuthClient"/> instance constructed with your registered app details and any other credentials required.</para>
-/// <para>Once you have an instance, you can send API requests by calling methods like <see cref="ListFullArticles"/>.</para>
+/// <para>Once you have an instance, you can send API requests by calling methods like <see cref="Newsfeed"/>.<c>ListArticlesDetailed</c>.</para>
 /// </summary>
 /// <remarks>See <see href="https://www.inoreader.com/developers/"/></remarks>
 public class InoreaderClient: IInoreaderClient {
 
-    internal static readonly Uri ApiBase = new("https://www.inoreader.com/");
+    internal static readonly Uri ApiRoot = new("https://www.inoreader.com/");
 
     private static readonly JsonConverter<DateTimeOffset?> StringToDateTimeOffsetReader = new DateTimeOffsetReader();
 
@@ -33,19 +33,15 @@ public class InoreaderClient: IInoreaderClient {
         }
     };
 
-    private readonly bool            _disposeHttpClient;
-    private readonly RateLimitReader _rateLimitReader = new();
-    private readonly object          _eventLock       = new();
-
-    /// <summary>
-    /// <para>Target for Inoreader API with preconfigured URL (<c>https://www.inoreader.com/reader/api/0/user-info</c>), content type, authentication, rate-limit metrics, and JSON deserialization settings.</para>
-    /// </summary>
-    protected readonly WebTarget ApiTarget;
-
-    private readonly Requests _requests;
+    private readonly  IUnfuckedHttpClient _httpClient;
+    private readonly  bool                _disposeHttpClient;
+    internal readonly Requests.Requests   Requests;
+    private readonly  RateLimitReader     _rateLimitReader = new();
+    private readonly  object              _eventLock       = new();
+    internal readonly LabelNameCache      LabelNameCache;
 
     /// <inheritdoc />
-    public IUnfuckedHttpClient HttpClient { get; }
+    public WebTarget ApiBase { get; set; }
 
     /// <summary>
     /// Construct a new Inoreader API client instance, with one given type of authentication.
@@ -55,39 +51,40 @@ public class InoreaderClient: IInoreaderClient {
     /// <param name="disposeHttpClient">Whether <paramref name="httpClient"/> will be disposed along with this object. By default, it is only disposed when a custom <paramref name="httpClient"/> was provided and was not <c>null</c>.</param>
     public InoreaderClient(IAuthClient authClient, IUnfuckedHttpClient? httpClient = null, bool? disposeHttpClient = null) {
         _disposeHttpClient = disposeHttpClient ?? httpClient is null;
-        HttpClient         = httpClient ?? new UnfuckedHttpClient();
+        _httpClient        = httpClient ?? new UnfuckedHttpClient();
         if (authClient is AbstractAuthClient { OverriddenHttpClient: null } auth) {
-            auth.HttpClient = HttpClient;
+            auth.HttpClient = _httpClient;
         }
 
-        ApiTarget = HttpClient
-            .Target(ApiBase)
-            .Register(new AuthRequestFilter(authClient), ClientConfig.FirstFilterPosition)
+        ApiBase = _httpClient
+            .Target(ApiRoot)
+            .Register(new AuthRequestFilter(authClient))
             .Register(_rateLimitReader)
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")
             .Accept("application/json");
 
-        _requests = new Requests(ApiTarget);
+        Requests       = new Requests.Requests(this);
+        LabelNameCache = new LabelNameCache(this, TimeSpan.FromHours(1));
     }
 
     /// <inheritdoc />
-    public IInoreaderClient.IArticleMethods Articles => _requests;
+    public IInoreaderClient.IArticleMethods Articles => Requests;
 
     /// <inheritdoc />
-    public IInoreaderClient.IFolderMethods Folders => _requests;
+    public IInoreaderClient.IFolderMethods Folders => Requests;
 
     /// <inheritdoc />
-    public IInoreaderClient.INewsfeedMethods Newsfeed => _requests;
+    public IInoreaderClient.INewsfeedMethods Newsfeed => Requests;
 
     /// <inheritdoc />
-    public IInoreaderClient.ISubscriptionMethods Subscriptions => _requests;
+    public IInoreaderClient.ISubscriptionMethods Subscriptions => Requests;
 
     /// <inheritdoc />
-    public IInoreaderClient.ITagMethods Tags => _requests;
+    public IInoreaderClient.ITagMethods Tags => Requests;
 
     /// <inheritdoc />
-    public IInoreaderClient.IUserMethods Users => _requests;
+    public IInoreaderClient.IUserMethods Users => Requests;
 
     /// <inheritdoc />
     public event EventHandler<RateLimitStatistics>? RateLimitStatisticsReceived {
@@ -106,7 +103,7 @@ public class InoreaderClient: IInoreaderClient {
     /// <inheritdoc cref="Dispose()" />
     protected virtual void Dispose(bool disposing) {
         if (disposing && _disposeHttpClient) {
-            HttpClient.Dispose();
+            _httpClient.Dispose();
         }
     }
 

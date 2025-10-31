@@ -10,7 +10,7 @@ internal class OldRequests {
 
     /// <inheritdoc />
     public async Task<FullArticles> ListFullArticles(StreamId stream, int maxArticles = 20, DateTimeOffset? minTime = null, StreamId? subtract = null, StreamId? intersect = null,
-                                                     PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFolders = true, bool includeAnnotations = false,
+                                                     PaginationToken? pagination = null, bool ascendingOrder = false, bool includeFolders = true, bool showAnnotations = false,
                                                      CancellationToken cancellationToken = default) {
         try {
             return await apiTarget
@@ -23,7 +23,7 @@ internal class OldRequests {
                 .QueryParam("it", intersect)
                 .QueryParam("c", pagination)
                 .QueryParam("includeAllDirectStreamIds", includeFolders)
-                .QueryParam("annotations", Convert.ToInt32(includeAnnotations)) // docs are wrong, "true" is ignored
+                .QueryParam("annotations", Convert.ToInt32(showAnnotations)) // docs are wrong, "true" is ignored
                 .Get<FullArticles>(cancellationToken)
                 .ConfigureAwait(false);
         } catch (HttpException e) {
