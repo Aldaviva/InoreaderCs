@@ -23,7 +23,11 @@ public record Subscription {
     private IReadOnlyList<MinimalFolder> Categories { get; init; } = [];
 
     private readonly Lazy<ISet<string>> _folders;
-    private ISet<string> Folders => _folders.Value;
+
+    /// <summary>
+    /// Set of zero or more names of folders that the subscription belongs to.
+    /// </summary>
+    public ISet<string> Folders => _folders.Value;
 
     // public required string SortId { get; init; }
 

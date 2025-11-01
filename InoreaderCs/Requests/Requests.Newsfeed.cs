@@ -35,7 +35,7 @@ internal partial class Requests {
 
         return new NewsfeedUnreadCounts(
             AllArticles: new StreamUnreadState(readingListResponse!.Count, readingListResponse.NewestArticleTime),
-            Starred: new StreamUnreadState(starredResponse!.Count, starredResponse.NewestArticleTime),
+            StarredArticleCount: starredResponse!.Count,
             unreadCounts.Max);
     }
 

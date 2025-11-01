@@ -80,29 +80,26 @@ internal class StreamId {
     public static implicit operator string(StreamId streamId) => streamId.Id;
 
     /// <summary>
-    /// Get the URI of the feed, if this stream ID points to a URI (e.g. <c>feed/http://feeds.arstechnica.com/arstechnica/science</c>), otherwise, throws an <see cref="ArgumentException"/> if it does not point to a feed URI.
+    /// Get the URI of the feed, if this stream ID points to a URI (e.g. <c>feed/http://feeds.arstechnica.com/arstechnica/science</c>), otherwise, returns <c>null</c> if it does not point to a feed URI.
     /// </summary>
-    /// <exception cref="ArgumentException">if the stream ID does not start with <c>feed/</c></exception>
-    public Uri FeedUri {
+    public Uri? FeedUri {
         get {
             if (Id.StartsWith("feed/")) {
                 return FeedStreamIdToUri(Id);
             } else {
-                throw new ArgumentException($"This is not a stream ID for a feed. Its ID is \"{Id}\", which does not start with \"feed/\"");
+                return null;
             }
         }
     }
 
     /// <summary>
-    /// Get the name of the folder or tag (e.g. <c>Science</c>) if this stream ID points to a label (e.g. <c>user/-/label/Science</c>), otherwise, throws an <see cref="ArgumentException"/> if it does not point to a label.
+    /// Get the name of the folder or tag (e.g. <c>Science</c>) if this stream ID points to a label (e.g. <c>user/-/label/Science</c>), otherwise, returns <c>null</c> if it does not point to a label.
     /// </summary>
-    /// <exception cref="ArgumentException">if the stream ID does not start with <c>user/-/label/</c></exception>
     public string? LabelName {
         get {
             if (Id.StartsWith(LabelPrefix)) {
                 return Id.Substring(LabelPrefix.Length);
             } else {
-                // throw new ArgumentException($"This is not a stream ID for a folder or tag. Its ID is \"{Id}\", which does not start with \"label/\"");
                 return null;
             }
         }

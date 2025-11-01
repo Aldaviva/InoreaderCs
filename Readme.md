@@ -21,3 +21,4 @@ Like [IsaacSchemm/InoreaderFs](https://github.com/IsaacSchemm/InoreaderFs), but 
 - Full documentation of methods and entities.
 - Exceptions have information about what went wrong.
 - Updated in the last 6 years by someone who uses Inoreader and this library heavily every day.
+- Includes correct, strongly-typed arguments in API methods like `subscription/edit`, which are incorrect in the official documentation and unehlpful, weakly-typed strings in InoreaderFs.

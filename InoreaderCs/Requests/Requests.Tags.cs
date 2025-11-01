@@ -6,7 +6,7 @@ internal partial class Requests {
 
     /// <inheritdoc />
     async Task<IEnumerable<TagState>> IInoreaderClient.ITagMethods.List(CancellationToken cancellationToken) =>
-        (await ListTagAndFolderStates(cancellationToken).ConfigureAwait(false)).OfType<TagState>();
+        (await ListTagAndFolderStates(cancellationToken).ConfigureAwait(false)).OfTypeExactly<TagState>();
 
     /// <inheritdoc />
     Task<DetailedArticles> IInoreaderClient.ITagMethods.ListArticlesDetailed(string withTag, int maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,
@@ -22,7 +22,7 @@ internal partial class Requests {
 
     /// <inheritdoc />
     Task<LabelUnreadCounts> IInoreaderClient.ITagMethods.GetUnreadCounts(CancellationToken cancellationToken) =>
-        GetUnreadCounts(true, cancellationToken);
+        GetLabelUnreadCounts(true, cancellationToken);
 
     /// <inheritdoc />
     Task IInoreaderClient.ITagMethods.MarkAllArticlesAsRead(string withTag, DateTimeOffset maxSeenArticleTime, CancellationToken cancellationToken) =>

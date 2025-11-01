@@ -59,7 +59,7 @@ public interface IInoreaderClient: IDisposable {
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="showAnnotations"><c>true</c> for the response <see cref="Article.Annotations"/> to be populated with the annotations you have added to the article, or <c>false</c> to leave it as the empty list.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="Article"/> instances.</returns>
+        /// <returns>Response envelope containing zero or more <see cref="Article"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/stream-contents" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<DetailedArticles> ListArticlesDetailed(string inFolder, int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
@@ -79,7 +79,7 @@ public interface IInoreaderClient: IDisposable {
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects</returns>
+        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<BriefArticles> ListArticlesBrief(string inFolder, int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
@@ -156,7 +156,7 @@ public interface IInoreaderClient: IDisposable {
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="showAnnotations"><c>true</c> for the response <see cref="Article.Annotations"/> to be populated with the annotations you have added to the article, or <c>false</c> to leave it as the empty list.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="Article"/> instances.</returns>
+        /// <returns>Response envelope containing zero or more <see cref="Article"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/stream-contents" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<DetailedArticles> ListArticlesDetailed(string withTag, int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
@@ -176,7 +176,7 @@ public interface IInoreaderClient: IDisposable {
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects</returns>
+        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<BriefArticles> ListArticlesBrief(string withTag, int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
@@ -242,7 +242,7 @@ public interface IInoreaderClient: IDisposable {
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="showAnnotations"><c>true</c> for the response <see cref="Article.Annotations"/> to be populated with the annotations you have added to the article, or <c>false</c> to leave it as the empty list.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="Article"/> instances.</returns>
+        /// <returns>Response envelope containing zero or more <see cref="Article"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/stream-contents" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<DetailedArticles> ListArticlesDetailed(int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
@@ -261,7 +261,7 @@ public interface IInoreaderClient: IDisposable {
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects</returns>
+        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<BriefArticles> ListArticlesBrief(int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null, PaginationToken? pagination = null,
@@ -300,6 +300,48 @@ public interface IInoreaderClient: IDisposable {
         /// <seealso href="https://www.inoreader.com/developers/subscription-list"/>
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task<IEnumerable<Subscription>> List(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// <para>List articles in a given feed subscription.</para>
+        /// <para>For example, to list the 20 most recent unread articles, you can set <paramref name="subtract"/> to <see cref="ArticleState.Read"/>.</para>
+        /// <para>To list starred articles, you can set <paramref name="intersect"/> to <see cref="ArticleState.Starred"/>.</para>
+        /// <para>If you only need the IDs, timestamps, tags, or folders of the articles rather than all of their contents, you can save bandwidth by calling <see cref="ListArticlesBrief"/> instead.</para>
+        /// </summary>
+        /// <param name="feedLocation">URL of the RSS or Atom XML document for the feed.</param>
+        /// <param name="maxArticles">Maximum number of articles to return in one page, limited to 200 (not 100 as documented).</param>
+        /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
+        /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
+        /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
+        /// <param name="pagination">The <see cref="PaginatedListResponse.PaginationToken"/> from a prior response to fetch subsequent pages, or <c>null</c> to fetch the first page.</param>
+        /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
+        /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
+        /// <param name="showAnnotations"><c>true</c> for the response <see cref="Article.Annotations"/> to be populated with the annotations you have added to the article, or <c>false</c> to leave it as the empty list.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <returns>Response envelope containing zero or more <see cref="Article"/> objects.</returns>
+        /// <seealso href="https://www.inoreader.com/developers/stream-contents" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task<DetailedArticles> ListArticlesDetailed(Uri feedLocation, int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
+                                                    PaginationToken? pagination = null, bool sortAscending = false, bool showFolders = true, bool showAnnotations = false,
+                                                    CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// <para>List only the IDs, crawl times, and labels of articles in a given feed subscription.</para>
+        /// <para>This method is more lightweight than <see cref="ListArticlesDetailed"/>, and should be used whenever it is sufficient, so that server load and bandwidth are minimized.</para>
+        /// </summary>
+        /// <param name="feedLocation">URL of the RSS or Atom XML document for the feed.</param>
+        /// <param name="maxArticles">Maximum number of articles to return in one page, limited to 1000.</param>
+        /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
+        /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
+        /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
+        /// <param name="pagination">The <see cref="PaginatedListResponse.PaginationToken"/> from a prior response to fetch subsequent pages, or <c>null</c> to fetch the first page.</param>
+        /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
+        /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
+        /// <seealso href="https://www.inoreader.com/developers/item-ids" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task<BriefArticles> ListArticlesBrief(Uri feedLocation, int maxArticles = 20, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
+                                              PaginationToken? pagination = null, bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Rename an existing feed subscription.</para>
@@ -361,6 +403,25 @@ public interface IInoreaderClient: IDisposable {
         /// <seealso href="https://www.inoreader.com/developers/edit-subscription"/>
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
         Task Unsubscribe(Uri feedLocation, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Count how many articles are unread for each feed subscription.
+        /// </summary>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <returns>A mapping from each subscription feed URL to the number of unread articles and the timestamp of the latest article.</returns>
+        /// <seealso href="https://www.inoreader.com/developers/unread-counts" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task<SubscriptionUnreadCounts> GetUnreadCounts(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Mark all articles in one feed subscription as read.
+        /// </summary>
+        /// <param name="feedLocation">URL of the RSS or Atom XML document for the feed.</param>
+        /// <param name="maxSeenArticleTime">The time when the article list was most recently fetched and rendered. This prevents very recent articles from being marked as read before the user can see them, if they were polled between when the feed was last rendered and when the mark as read API call is received by the server.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <seealso href="https://www.inoreader.com/developers/mark-all-as-read"/>
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task MarkAllArticlesAsRead(Uri feedLocation, DateTimeOffset maxSeenArticleTime, CancellationToken cancellationToken = default);
 
     }
 

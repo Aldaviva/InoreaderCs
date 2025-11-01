@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-        <Version>0.0.1-beta.3</Version>
+        <Version>0.0.1-beta.4</Version>
         <Authors>Ben Hutchison</Authors>
         <Copyright>© 2025 $(Authors)</Copyright>
         <Company>$(Authors)</Company>
@@ -16,7 +16,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <Description>.NET client for the Inoreader HTTP API</Description>
-        <PackageTags>inoreader api-client rss atom nws reader feed newsfeed syndication</PackageTags>
+        <PackageTags>inoreader api-client rss atom news reader feed newsfeed syndication</PackageTags>
         <PackageIcon>icon.png</PackageIcon>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <IncludeSource>true</IncludeSource>
@@ -40,7 +40,7 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
         <PackageReference Include="System.Net.Http.Json" Version="9.0.10" /> <!-- 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties -->
         <PackageReference Include="Unfucked" Version="0.0.1-beta.19" />
-        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.18" />
+        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.19" />
         <PackageReference Include="UnionTypes" Version="1.1.0" />
     </ItemGroup>
 

@@ -22,7 +22,7 @@ internal partial class Requests {
 
     /// <inheritdoc />
     Task<LabelUnreadCounts> IInoreaderClient.IFolderMethods.GetUnreadCounts(CancellationToken cancellationToken) =>
-        GetUnreadCounts(false, cancellationToken);
+        GetLabelUnreadCounts(false, cancellationToken);
 
     /// <inheritdoc />
     Task IInoreaderClient.IFolderMethods.MarkAllArticlesAsRead(string inFolder, DateTimeOffset maxSeenArticleTime, CancellationToken cancellationToken) =>

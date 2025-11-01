@@ -14,10 +14,10 @@ public record User {
     public int Id { get; init; }
 
     /// <summary>
-    /// User's full name, also called real name.
+    /// Username that you log in with, not your full/real name.
     /// </summary>
     [JsonPropertyName("userName")]
-    public required string Name { get; init; }
+    public required string Username { get; init; }
 
     /// <summary>
     /// Seems to always be the same as <see cref="Id"/>.
@@ -31,10 +31,10 @@ public record User {
     [JsonPropertyName("userEmail")]
     public required string EmailAddress { get; init; }
 
-    /// <summary>
+    /*/// <summary>
     /// Undocumented.
     /// </summary>
-    public bool IsBloggerUser { get; init; }
+    public bool IsBloggerUser { get; init; }*/
 
     /// <summary>
     /// When the user account was created.
@@ -42,9 +42,9 @@ public record User {
     [JsonPropertyName("signupTimeSec")]
     public DateTimeOffset SignupTime { get; init; }
 
-    /// <summary>
+    /*/// <summary>
     /// Undocumented.
     /// </summary>
-    public bool IsMultiLoginEnabled { get; init; }
+    public bool IsMultiLoginEnabled { get; init; }*/
 
 }

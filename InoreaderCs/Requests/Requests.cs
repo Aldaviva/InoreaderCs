@@ -157,6 +157,7 @@ internal partial class Requests(InoreaderClient client):
                     }), cancellationToken)
                     .ConfigureAwait(false))
                 .Dispose();
+            // If the stream did not already exist, the response body is "Error=Tag not found!" instead of "OK", but I don't care because either way it successfully doesn't exist now.
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to delete folder or tag {stream}");
         }
@@ -171,8 +172,8 @@ internal partial class Requests(InoreaderClient client):
                         ["ac"] = action.ToString().ToLowerInvariant(),
                         ["s"]  = stream.Id,
                         ["t"]  = newTitle,
-                        ["a"]  = newFolder,
-                        ["r"]  = removeFromFolder
+                        ["a"]  = newFolder != null ? StreamId.ForFolder(newFolder).Id : null,
+                        ["r"]  = removeFromFolder != null ? StreamId.ForFolder(removeFromFolder).Id : null
                     }.Compact()), cancellationToken)
                     .ConfigureAwait(false))
                 .Dispose();
@@ -183,9 +184,9 @@ internal partial class Requests(InoreaderClient client):
 
     private enum SubscriptionEditAction {
 
-        Follow,
+        Subscribe, // Incorrectly documented as "follow"
         Edit,
-        Unfollow
+        Unsubscribe // Incorrectly documented as "unfollow", found in Android app in com.innologica.inoreader.httpreq.MessageToServer.SendEditSubscriptionToServer(List<NameValuePair>,String)
 
     }
 
@@ -201,7 +202,7 @@ internal partial class Requests(InoreaderClient client):
     }
 
     /// <exception cref="InoreaderException"></exception>
-    private async Task<LabelUnreadCounts> GetUnreadCounts(bool tagsInsteadOfFolders, CancellationToken cancellationToken) {
+    private async Task<LabelUnreadCounts> GetLabelUnreadCounts(bool tagsInsteadOfFolders, CancellationToken cancellationToken) {
         Task<UnreadCountResponses>  unreadCountsTask = GetUnreadCounts(cancellationToken);
         Task<LabelNameCache.Labels> labelNamesTask   = client.LabelNameCache.GetLabelNames(cancellationToken);
 

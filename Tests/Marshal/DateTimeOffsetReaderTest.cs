@@ -1,7 +1,6 @@
-using InoreaderCs.Marshal;
 using System.Text.Json;
 
-namespace Tests;
+namespace Tests.Marshal;
 
 public class DateTimeOffsetReaderTest {
 
@@ -27,11 +26,5 @@ public class DateTimeOffsetReaderTest {
         { 1761688228815, new DateTimeOffset(2025, 10, 28, 21, 50, 28, 815, TimeSpan.Zero), "milliseconds" },
         { 1761688228815123, new DateTimeOffset(2025, 10, 28, 21, 50, 28, 815, 123, TimeSpan.Zero), "microseconds" }
     };
-
-    // private record MyJsonObject {
-    //
-    //     public DateTimeOffset dateTimeOffset
-    //
-    // }
 
 }
