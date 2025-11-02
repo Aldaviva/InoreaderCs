@@ -2,7 +2,7 @@ using InoreaderCs.Entities;
 
 namespace InoreaderCs.Requests;
 
-internal partial class Requests {
+internal partial class ClientRequests {
 
     /// <inheritdoc />
     async Task<IEnumerable<TagState>> IInoreaderClient.ITagMethods.List(CancellationToken cancellationToken) =>

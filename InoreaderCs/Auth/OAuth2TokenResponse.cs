@@ -5,7 +5,7 @@ namespace InoreaderCs.Auth;
 /// <summary>
 /// Response of a granted user OAuth2 token from the Inoreader HTTP API.
 /// </summary>
-public record OAuth2TokenResponse {
+public record Oauth2TokenResponse {
 
     /// <summary>
     /// The user OAuth2 token, to be sent in future requests.

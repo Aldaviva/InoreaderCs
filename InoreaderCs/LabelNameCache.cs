@@ -16,7 +16,7 @@ internal class LabelNameCache {
 
     public LabelNameCache(InoreaderClient client, TimeSpan cacheDuration) {
         _client        = client;
-        _cacheDuration = cacheDuration;
+        _cacheDuration = cacheDuration >= TimeSpan.FromSeconds(1) ? cacheDuration : TimeSpan.FromHours(1);
 
         client.Requests.TagAndFolderStatesListed += OnTagAndFolderStatesListed;
         TagAndFolderStatesListed                 += OnTagAndFolderStatesListedUnsynchronized;

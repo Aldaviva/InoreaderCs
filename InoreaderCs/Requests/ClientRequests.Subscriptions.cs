@@ -3,7 +3,7 @@ using Unfucked.HTTP.Exceptions;
 
 namespace InoreaderCs.Requests;
 
-internal partial class Requests {
+internal partial class ClientRequests {
 
     /// <inheritdoc />
     async Task<IEnumerable<Subscription>> IInoreaderClient.ISubscriptionMethods.List(CancellationToken cancellationToken) {

@@ -1,4 +1,4 @@
-using InoreaderCs.RateLimiting;
+using InoreaderCs.RateLimit;
 
 namespace InoreaderCs;
 

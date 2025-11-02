@@ -1,4 +1,4 @@
-namespace InoreaderCs.RateLimiting;
+namespace InoreaderCs.RateLimit;
 
 /// <summary>
 /// <para>Quota and usage of the Inoreader API rate limit returned in a response.</para>

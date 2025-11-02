@@ -1,6 +1,7 @@
 using InoreaderCs.Auth;
 using InoreaderCs.Marshal;
-using InoreaderCs.RateLimiting;
+using InoreaderCs.RateLimit;
+using InoreaderCs.Requests;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Unfucked.HTTP.Config;
@@ -35,7 +36,7 @@ public class InoreaderClient: IInoreaderClient {
 
     private readonly  IUnfuckedHttpClient _httpClient;
     private readonly  bool                _disposeHttpClient;
-    internal readonly Requests.Requests   Requests;
+    internal readonly ClientRequests      Requests;
     private readonly  RateLimitReader     _rateLimitReader = new();
     private readonly  object              _eventLock       = new();
     internal readonly LabelNameCache      LabelNameCache;
@@ -44,28 +45,25 @@ public class InoreaderClient: IInoreaderClient {
     public WebTarget ApiBase { get; set; }
 
     /// <summary>
-    /// Construct a new Inoreader API client instance, with one given type of authentication.
+    /// Construct a new Inoreader API client instance, with options including the mandatory authentication client.
     /// </summary>
-    /// <param name="authClient">Provides authentication, using either OAuth2 (<see cref="Oauth2Client"/>) or a user's password (<see cref="PasswordAuthClient"/>).</param>
-    /// <param name="httpClient">Optional HTTP client if you want to customize how requests and responses are handled, or <c>null</c> to use a default instance</param>
-    /// <param name="disposeHttpClient">Whether <paramref name="httpClient"/> will be disposed along with this object. By default, it is only disposed when a custom <paramref name="httpClient"/> was provided and was not <c>null</c>.</param>
-    public InoreaderClient(IAuthClient authClient, IUnfuckedHttpClient? httpClient = null, bool? disposeHttpClient = null) {
-        _disposeHttpClient = disposeHttpClient ?? httpClient is null;
-        _httpClient        = httpClient ?? new UnfuckedHttpClient();
-        if (authClient is AbstractAuthClient { OverriddenHttpClient: null } auth) {
+    public InoreaderClient(InoreaderOptions options) {
+        _disposeHttpClient = options.DisposeHttpClient ?? options.HttpClient is null;
+        _httpClient        = options.HttpClient ?? new UnfuckedHttpClient();
+        if (options.AuthClient is AbstractAuthClient { OverriddenHttpClient: null } auth) {
             auth.HttpClient = _httpClient;
         }
 
         ApiBase = _httpClient
             .Target(ApiRoot)
-            .Register(new AuthRequestFilter(authClient))
+            .Register(new AuthRequestFilter(options.AuthClient))
             .Register(_rateLimitReader)
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")
             .Accept("application/json");
 
-        Requests       = new Requests.Requests(this);
-        LabelNameCache = new LabelNameCache(this, TimeSpan.FromHours(1));
+        Requests       = new ClientRequests(this);
+        LabelNameCache = new LabelNameCache(this, options.LabelNameCacheDuration);
     }
 
     /// <inheritdoc />

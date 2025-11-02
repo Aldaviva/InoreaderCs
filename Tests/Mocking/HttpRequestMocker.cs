@@ -16,10 +16,11 @@ public class HttpRequestMocker(IUnfuckedHttpHandler httpHandler) {
         MockRequest(verb, url, expectedRequestBody, htmlResponse, MediaTypeNames.Text.Html, status);
 
     private Expression<Func<Task<HttpResponseMessage>>> MockRequest(HttpMethod verb, Uri url, string? expectedRequestBody, string responseBody, string responseContentType, HttpStatusCode status) {
-        Expression<Func<Task<HttpResponseMessage>>> callSpecification = () => httpHandler.TestableSendAsync(A<HttpRequestMessage>.That.Matches(message =>
-            message.Method == verb &&
-            message.RequestUri == url &&
-            (expectedRequestBody == null ? message.Content == null : expectedRequestBody == message.Content.ReadAsString())
+        Expression<Func<Task<HttpResponseMessage>>> callSpecification = () => httpHandler.TestableSendAsync(An<HttpRequestMessage>.That.Matches(message =>
+                message.Method == verb &&
+                message.RequestUri == url &&
+                (expectedRequestBody == null ? message.Content == null : expectedRequestBody == message.Content.ReadAsString()), "HTTP {0} request to {1}{2}", verb, url,
+            expectedRequestBody != null ? " with request body " + expectedRequestBody : string.Empty
         ), A<CancellationToken>._);
 
         A.CallTo(callSpecification).ReturnsLazily(async (HttpRequestMessage request, CancellationToken ct) => {

@@ -1,6 +1,7 @@
+using Unfucked.HTTP.Exceptions;
 using Unfucked.HTTP.Filters;
 
-namespace InoreaderCs.RateLimiting;
+namespace InoreaderCs.RateLimit;
 
 internal interface IRateLimitReader: ClientResponseFilter {
 
@@ -19,8 +20,8 @@ internal class RateLimitReader: IRateLimitReader {
 
     public event EventHandler<RateLimitStatistics>? StatisticsReceived;
 
-    /// <exception cref="FormatException"></exception>
-    public Task<HttpResponseMessage> Filter(HttpResponseMessage response, FilterContext context, CancellationToken cancellationToken) {
+    /// <inheritdoc />
+    public async ValueTask<HttpResponseMessage> Filter(HttpResponseMessage response, FilterContext context, CancellationToken cancellationToken) {
         try {
             /*
              * If the Zone 1 limit is 20 million requests per day, then the rate limit is being counted against the official first-party Inoreader Android app, so ignore it because we're not in danger of running out.
@@ -42,13 +43,18 @@ internal class RateLimitReader: IRateLimitReader {
             }
         } catch (InvalidOperationException) {
             // response does not contain rate-limiting headers
+        } catch (FormatException e) {
+            throw new ProcessingException(e, await HttpExceptionParams.FromResponse(response, cancellationToken).ConfigureAwait(false));
         }
-        return Task.FromResult(response);
+        return response;
     }
 
 #pragma warning disable CS0618 // Type or member is obsolete - it's not obsolete in .NET Standard 2.0, which this library targets
+
     public static RateLimitStatistics? Read(HttpResponseMessage response) => response.RequestMessage is { } request ? Read(request) : null;
+
     public static RateLimitStatistics? Read(HttpRequestMessage request) => request.Properties.TryGetValue(RequestPropertyKey, out object? stats) ? stats as RateLimitStatistics : null;
+
 #pragma warning restore CS0618 // Type or member is obsolete
 
 }

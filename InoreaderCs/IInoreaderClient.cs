@@ -1,9 +1,8 @@
 using InoreaderCs.Entities;
-using InoreaderCs.RateLimiting;
+using InoreaderCs.RateLimit;
 using Unfucked.HTTP.Config;
 using Unfucked.HTTP.Exceptions;
 using Unfucked.HTTP.Filters;
-using UnionTypes;
 
 namespace InoreaderCs;
 
@@ -431,58 +430,112 @@ public interface IInoreaderClient: IDisposable {
     public interface IArticleMethods {
 
         /// <summary>
-        /// <para>Add an <see cref="ArticleState"/> to one or more <paramref name="articlesOrIds"/>.</para>
+        /// <para>Add an <see cref="ArticleState"/> to one or more <paramref name="articles"/>.</para>
         /// <para>For example, to mark an article as read, you can set <paramref name="markState"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To star an article, you can set <paramref name="markState"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If an article already has the specified <paramref name="markState"/>, it is preserve and ignored, instead of throwing an error.</para>
-        /// <para>To tag an article, see <see cref="TagArticles"/>.</para>
+        /// <para>To tag an article, see <see cref="TagArticles(string,CancellationToken,IEnumerable{Article})"/>.</para>
         /// </summary>
-        /// <param name="markState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to add to the <paramref name="articlesOrIds"/>.</param>
-        /// <param name="articlesOrIds">One or more <see cref="Article"/>s, or their IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>), to modify.</param>
+        /// <param name="markState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to add to the <paramref name="articles"/>.</param>
+        /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task MarkArticles(ArticleState markState, CancellationToken cancellationToken = default, params IEnumerable<Union<Article, string>> articlesOrIds);
+        Task MarkArticles(ArticleState markState, CancellationToken cancellationToken = default, params IEnumerable<Article> articles);
 
         /// <summary>
-        /// <para>Remove an <see cref="ArticleState"/> from one or more <paramref name="articlesOrIds"/>.</para>
+        /// <para>Add an <see cref="ArticleState"/> to one or more <paramref name="articlesIds"/>.</para>
+        /// <para>For example, to mark an article as read, you can set <paramref name="markState"/> to <see cref="ArticleState.Read"/>.</para>
+        /// <para>To star an article, you can set <paramref name="markState"/> to <see cref="ArticleState.Starred"/>.</para>
+        /// <para>If an article already has the specified <paramref name="markState"/>, it is preserve and ignored, instead of throwing an error.</para>
+        /// <para>To tag an article, see <see cref="TagArticles(string,CancellationToken,IEnumerable{string})"/>.</para>
+        /// </summary>
+        /// <param name="markState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to add to the <paramref name="articlesIds"/>.</param>
+        /// <param name="articlesIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task MarkArticles(ArticleState markState, CancellationToken cancellationToken = default, params IEnumerable<string> articlesIds);
+
+        /// <summary>
+        /// <para>Remove an <see cref="ArticleState"/> from one or more <paramref name="articles"/>.</para>
         /// <para>For example, to mark an article as unread, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To unstar an article, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If an article already doesn't have the specified <paramref name="unmarkState"/>, it is ignored, instead of throwing an error.</para>
-        /// <para>To untag an article, see <see cref="UntagArticles"/>.</para>
+        /// <para>To untag an article, see <see cref="UntagArticles(string,CancellationToken,IEnumerable{Article})"/>.</para>
         /// </summary>
-        /// <param name="unmarkState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to remove from the <paramref name="articlesOrIds"/>.</param>
-        /// <param name="articlesOrIds">One or more <see cref="Article"/>s, or their IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>), to modify.</param>
+        /// <param name="unmarkState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to remove from each article.</param>
+        /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task UnmarkArticles(ArticleState unmarkState, CancellationToken cancellationToken = default, params IEnumerable<Union<Article, string>> articlesOrIds);
+        Task UnmarkArticles(ArticleState unmarkState, CancellationToken cancellationToken = default, params IEnumerable<Article> articles);
 
         /// <summary>
-        /// <para>Add a <paramref name="tag"/> to one or more <paramref name="articlesOrIds"/>.</para>
+        /// <para>Remove an <see cref="ArticleState"/> from one or more <paramref name="articlesIds"/>.</para>
+        /// <para>For example, to mark an article as unread, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Read"/>.</para>
+        /// <para>To unstar an article, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Starred"/>.</para>
+        /// <para>If an article already doesn't have the specified <paramref name="unmarkState"/>, it is ignored, instead of throwing an error.</para>
+        /// <para>To untag an article, see <see cref="UntagArticles(string,CancellationToken,IEnumerable{string})"/>.</para>
+        /// </summary>
+        /// <param name="unmarkState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to remove from each article.</param>
+        /// <param name="articlesIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task UnmarkArticles(ArticleState unmarkState, CancellationToken cancellationToken = default, params IEnumerable<string> articlesIds);
+
+        /// <summary>
+        /// <para>Add a <paramref name="tag"/> to one or more <paramref name="articles"/>.</para>
         /// <para>For example, to tag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
         /// <para>If an article already has the specified <paramref name="tag"/>, it is preserve and ignored, instead of throwing an error.</para>
-        /// <para>To mark an article as starred or read, see <see cref="MarkArticles"/>.</para>
+        /// <para>To mark an article as starred or read, see <see cref="MarkArticles(ArticleState,CancellationToken,IEnumerable{Article})"/>.</para>
         /// </summary>
         /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to add to each article.</param>
-        /// <param name="articlesOrIds">One or more <see cref="Article"/>s, or their IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>), to modify.</param>
+        /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task TagArticles(string tag, CancellationToken cancellationToken = default, params IEnumerable<Union<Article, string>> articlesOrIds);
+        Task TagArticles(string tag, CancellationToken cancellationToken = default, params IEnumerable<Article> articles);
 
         /// <summary>
-        /// <para>Remove a tag from one or more <paramref name="articlesOrIds"/>.</para>
-        /// <para>For example, to untag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
-        /// <para>If an article already doesn't have the specified <paramref name="tag"/>, it is ignored, instead of throwing an error.</para>
-        /// <para>To unmark an article as starred or read, see <see cref="UnmarkArticles"/>.</para>
+        /// <para>Add a <paramref name="tag"/> to one or more <paramref name="articleIds"/>.</para>
+        /// <para>For example, to tag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
+        /// <para>If an article already has the specified <paramref name="tag"/>, it is preserve and ignored, instead of throwing an error.</para>
+        /// <para>To mark an article as starred or read, see <see cref="MarkArticles(ArticleState,CancellationToken,IEnumerable{string})"/>.</para>
         /// </summary>
-        /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to remove from each article.</param>
-        /// <param name="articlesOrIds">One or more <see cref="Article"/>s, or their IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>), to modify.</param>
+        /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to add to each article.</param>
+        /// <param name="articleIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task UntagArticles(string tag, CancellationToken cancellationToken = default, params IEnumerable<Union<Article, string>> articlesOrIds);
+        Task TagArticles(string tag, CancellationToken cancellationToken = default, params IEnumerable<string> articleIds);
+
+        /// <summary>
+        /// <para>Remove a tag from one or more <paramref name="articles"/>.</para>
+        /// <para>For example, to untag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
+        /// <para>If an article already doesn't have the specified <paramref name="tag"/>, it is ignored, instead of throwing an error.</para>
+        /// <para>To unmark an article as starred or read, see <see cref="UnmarkArticles(ArticleState,CancellationToken,IEnumerable{Article})"/>.</para>
+        /// </summary>
+        /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to remove from each article.</param>
+        /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task UntagArticles(string tag, CancellationToken cancellationToken = default, params IEnumerable<Article> articles);
+
+        /// <summary>
+        /// <para>Remove a tag from one or more <paramref name="articleIds"/>.</para>
+        /// <para>For example, to untag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
+        /// <para>If an article already doesn't have the specified <paramref name="tag"/>, it is ignored, instead of throwing an error.</para>
+        /// <para>To unmark an article as starred or read, see <see cref="UnmarkArticles(ArticleState,CancellationToken,IEnumerable{string})"/>.</para>
+        /// </summary>
+        /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to remove from each article.</param>
+        /// <param name="articleIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task UntagArticles(string tag, CancellationToken cancellationToken = default, params IEnumerable<string> articleIds);
 
     }
 

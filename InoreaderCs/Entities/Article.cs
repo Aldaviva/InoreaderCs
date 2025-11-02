@@ -77,7 +77,7 @@ public record Article: BaseArticle {
     /// <para>Zero or more notes that the user has added to this article.</para>
     /// <para>When fetching articles with <see cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/>, this set will be empty when the <c>showAnnotations</c> parameter is <c>false</c>.</para>
     /// </summary>
-    public required IReadOnlyList<Annotation> Annotations { get; init; }
+    public IReadOnlyList<Annotation> Annotations { get; init; } = [];
 
     /// <summary>
     /// The title, summary, or headline of the article.
@@ -88,13 +88,13 @@ public record Article: BaseArticle {
     /// When the feed reports that the article was first published.
     /// </summary>
     [JsonPropertyName("published")]
-    public required DateTimeOffset PublishTime { get; init; }
+    public DateTimeOffset PublishTime { get; init; }
 
     /// <summary>
     /// When the feed reports that the article was most recently updated after being published, or <c>null</c> if it was never updated after being published.
     /// </summary>
     [JsonPropertyName("updated")]
-    public required DateTimeOffset? UpdateTime { get; init; }
+    public DateTimeOffset? UpdateTime { get; init; }
 
     [JsonInclude]
     private IReadOnlyList<Link> Canonical { get; init; } = null!;

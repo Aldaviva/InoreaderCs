@@ -2,7 +2,7 @@ using InoreaderCs.Entities;
 
 namespace InoreaderCs.Requests;
 
-internal partial class Requests {
+internal partial class ClientRequests {
 
     /// <inheritdoc />
     Task<DetailedArticles> IInoreaderClient.INewsfeedMethods.ListArticlesDetailed(int maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,

@@ -1,13 +1,12 @@
 using InoreaderCs.Entities;
-using InoreaderCs.RateLimiting;
+using InoreaderCs.RateLimit;
 using System.Net;
 using System.Text;
 using Unfucked.HTTP.Exceptions;
-using UnionTypes;
 
 namespace InoreaderCs.Requests;
 
-internal partial class Requests(InoreaderClient client):
+internal partial class ClientRequests(InoreaderClient client):
     IInoreaderClient.IArticleMethods,
     IInoreaderClient.IFolderMethods,
     IInoreaderClient.INewsfeedMethods,
@@ -74,23 +73,20 @@ internal partial class Requests(InoreaderClient client):
         }
     }
 
+    /// <returns>Length of <paramref name="articleIds"/></returns>
     /// <exception cref="InoreaderException"></exception>
-    private async Task MarkArticles(StreamId label, bool removeLabel, CancellationToken cancellationToken, params IEnumerable<Union<Article, string>> articlesOrIds) {
+    private async Task<int> MarkArticles(StreamId label, bool removeLabel, CancellationToken cancellationToken, params IEnumerable<string> articleIds) {
         try {
-            IReadOnlyList<KeyValuePair<string, string>> articleIdFormParams = articlesOrIds
-                .Select(articleOrId => articleOrId.Switch(article => article.ShortId, id => id))
-                .Select(id => new KeyValuePair<string, string>("i", id))
-                .ToList();
+            IReadOnlyList<KeyValuePair<string, string>> articleIdFormParams = articleIds.Select(id => new KeyValuePair<string, string>("i", id)).ToList();
 
             if (articleIdFormParams.Count != 0) {
                 (await ApiBase
                         .Path("edit-tag")
-                        .Post(new FormUrlEncodedContent(articleIdFormParams
-                                .Prepend(new KeyValuePair<string, string>(removeLabel ? "r" : "a", label.ToString()))),
-                            cancellationToken)
+                        .Post(new FormUrlEncodedContent(articleIdFormParams.Prepend(new KeyValuePair<string, string>(removeLabel ? "r" : "a", label.Id))), cancellationToken)
                         .ConfigureAwait(false))
                     .Dispose();
             }
+            return articleIdFormParams.Count;
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to {(removeLabel ? "untag" : "tag")} articles with tag {label}");
         }

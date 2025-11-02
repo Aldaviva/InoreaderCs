@@ -72,7 +72,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
 
             if (CachedPersistedTokenResponses.AccessToken is null) {
                 _logger.LogInformation("No saved auth token, starting new authorization process...");
-                OAuth2TokenResponse response = await Authorize().ConfigureAwait(false);
+                Oauth2TokenResponse response = await Authorize().ConfigureAwait(false);
                 CachedPersistedTokenResponses.Load(response);
                 _logger.LogInformation("Successfully authorized with a new auth token.");
                 shouldSave = true;
@@ -95,7 +95,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 _logger.LogDebug("Saved auth tokens.");
             }
 
-            return new OAuth2UserToken(CachedPersistedTokenResponses.AccessToken!);
+            return new Oauth2UserToken(CachedPersistedTokenResponses.AccessToken!);
         } finally {
             Synchronizer.Release();
         }
@@ -107,7 +107,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <returns>An OAuth2 access token, refresh token, and expiration date.</returns>
     /// <exception cref="InoreaderException.Unauthorized">User denied consent, or other OAuth2 error</exception>
     /// <exception cref="ProcessingException"></exception>
-    protected async Task<OAuth2TokenResponse> Authorize() {
+    private async Task<Oauth2TokenResponse> Authorize() {
         TaskCompletionSource<bool> onAuthorized = new();
 
         Uri    codeReceiverCallbackUri = AuthorizationReceiverCallbackUrl;
@@ -133,7 +133,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
 #endif
                ) {
 
-                OAuth2TokenResponse authToken = await RequestOAuthToken("authorization_code", new Dictionary<string, string> {
+                Oauth2TokenResponse authToken = await RequestOAuthToken("authorization_code", new Dictionary<string, string> {
                     { "code", consentResult.AuthorizationCode },
                     { "redirect_uri", codeReceiverCallbackUri.ToString() },
                     { "scope", "" }
@@ -142,7 +142,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 return authToken;
             } else if (consentResult.ErrorCode is not null) {
                 throw new InoreaderException.Unauthorized(consentResult.ErrorCode switch {
-                    "access_denied" => "FeedAssistant was denied access to your Inoreader account",
+                    "access_denied" => "Application was denied access to your Inoreader account",
                     _               => $"{consentResult.ErrorCode}: {consentResult.ErrorMessage}"
                 }, null);
             } else {
@@ -155,7 +155,6 @@ public abstract class Oauth2Client: AbstractAuthClient {
             onAuthorized.TrySetException(e);
             throw;
         }
-
     }
 
     /// <summary>
@@ -163,7 +162,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// </summary>
     /// <exception cref="ProcessingException"></exception>
     /// <exception cref="InoreaderException.Unauthorized"></exception>
-    private Task<OAuth2TokenResponse> RefreshAuthToken(string refreshToken) =>
+    private Task<Oauth2TokenResponse> RefreshAuthToken(string refreshToken) =>
         RequestOAuthToken("refresh_token", Singleton.Dictionary("refresh_token", refreshToken));
 
     /// <summary>
@@ -171,7 +170,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// </summary>
     /// <exception cref="InoreaderException.Unauthorized"></exception>
     /// <exception cref="ProcessingException"></exception>
-    private async Task<OAuth2TokenResponse> RequestOAuthToken(string grantType, IEnumerable<KeyValuePair<string, string>> requestBody) {
+    private async Task<Oauth2TokenResponse> RequestOAuthToken(string grantType, IEnumerable<KeyValuePair<string, string>> requestBody) {
         FormUrlEncodedContent body = new(new Dictionary<string, string>(requestBody.ToDictionary(pair => pair.Key, pair => pair.Value)) {
             { "client_id", _oauthParameters.AppId.ToString() },
             { "client_secret", _oauthParameters.AppKey },
@@ -181,7 +180,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
         try {
             return await HttpClient.Target(InoreaderOauthBase)
                 .Path("token")
-                .Post<OAuth2TokenResponse>(body).ConfigureAwait(false);
+                .Post<Oauth2TokenResponse>(body).ConfigureAwait(false);
         } catch (WebApplicationException e) {
             try {
                 throw new InoreaderException.Unauthorized($"Failed to get auth token: {(int) e.StatusCode} {ParseError(e.ResponseBody)?["error_description"]?.GetValue<string>()}", e);

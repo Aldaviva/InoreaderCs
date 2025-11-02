@@ -75,7 +75,7 @@ public class PasswordAuthClient: AbstractAuthClient {
         try {
             string responseBody = await HttpClient.Target(InoreaderClient.ApiRoot)
                 .Path("accounts/ClientLogin")
-                .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.5")
+                .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.6")
                 .Post<string>(requestBody).ConfigureAwait(false);
 
             Dictionary<string, string> responseMap = responseBody.Trim()
@@ -85,9 +85,9 @@ public class PasswordAuthClient: AbstractAuthClient {
 
             return responseMap["Auth"];
         } catch (WebApplicationException e) {
-            throw new InoreaderException.Unauthorized($"Failed to create web API user auth token: {(int) e.StatusCode}", e);
+            throw new InoreaderException.Unauthorized($"Failed to create password auth token: {(int) e.StatusCode}", e);
         } catch (ProcessingException e) {
-            _logger.LogError(e, "Network or serialization error while creating web API user auth token");
+            _logger.LogError(e, "Network or serialization error while creating password auth token");
             throw;
         }
     }

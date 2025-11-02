@@ -23,7 +23,7 @@ public interface IUserAuthToken {
 /// An OAuth2 user authentication token for the Inoreader HTTP API.
 /// </summary>
 /// <param name="userToken">The OAuth2 access token.</param>
-public class OAuth2UserToken(string userToken): IUserAuthToken {
+public class Oauth2UserToken(string userToken): IUserAuthToken {
 
     /// <inheritdoc />
     public AuthenticationHeaderValue AuthenticationHeaderValue => new("Bearer", userToken);
@@ -35,7 +35,7 @@ public class OAuth2UserToken(string userToken): IUserAuthToken {
 
 /// <summary>
 /// <para>A user authentication token generated from a username and password for the Inoreader HTTP API.</para>
-/// <para>For the OAuth2 equivalent, see <see cref="OAuth2UserToken"/>.</para>
+/// <para>For the OAuth2 equivalent, see <see cref="Oauth2UserToken"/>.</para>
 /// </summary>
 /// <param name="userToken">The user auth token.</param>
 /// <param name="appId">The registered ID of an Inoreader client app.</param>

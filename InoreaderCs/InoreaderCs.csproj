@@ -41,7 +41,6 @@
         <PackageReference Include="System.Net.Http.Json" Version="9.0.10" /> <!-- 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties -->
         <PackageReference Include="Unfucked" Version="0.0.1-beta.19" />
         <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.19" />
-        <PackageReference Include="UnionTypes" Version="1.1.0" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' == 'Release'">

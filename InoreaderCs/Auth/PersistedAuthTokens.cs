@@ -8,13 +8,13 @@ namespace InoreaderCs.Auth;
 /// </summary>
 public record PersistedAuthTokens {
 
-    /// <inheritdoc cref="OAuth2TokenResponse.AccessToken" />
+    /// <inheritdoc cref="Oauth2TokenResponse.AccessToken" />
     public virtual string? AccessToken { get; set; }
 
-    /// <inheritdoc cref="OAuth2TokenResponse.RefreshToken" />
+    /// <inheritdoc cref="Oauth2TokenResponse.RefreshToken" />
     public virtual string? RefreshToken { get; set; }
 
-    /// <inheritdoc cref="OAuth2TokenResponse.Expiration" />
+    /// <inheritdoc cref="Oauth2TokenResponse.Expiration" />
     public virtual DateTimeOffset? Expiration { get; set; }
 
     /// <summary>
@@ -27,7 +27,7 @@ public record PersistedAuthTokens {
     /// </summary>
     /// <param name="oauthToken">An OAuth2 token response from the Inoreader API.</param>
     /// <returns>This instance, mutated.</returns>
-    public virtual PersistedAuthTokens Load(OAuth2TokenResponse oauthToken) {
+    public virtual PersistedAuthTokens Load(Oauth2TokenResponse oauthToken) {
         AccessToken  = oauthToken.AccessToken;
         RefreshToken = oauthToken.RefreshToken;
         Expiration   = oauthToken.Expiration;

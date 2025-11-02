@@ -8,7 +8,7 @@ internal class AuthRequestFilter(IAuthClient authClient): ClientRequestFilter {
 
     /// <exception cref="ProcessingException"></exception>
     /// <exception cref="InoreaderException.Unauthorized"></exception>
-    public async Task<HttpRequestMessage> Filter(HttpRequestMessage request, FilterContext context, CancellationToken cancellationToken) {
+    public async ValueTask<HttpRequestMessage> Filter(HttpRequestMessage request, FilterContext context, CancellationToken cancellationToken) {
         HttpRequestHeaders headers = request.Headers;
         if (request.RequestUri!.BelongsToDomain(InoreaderClient.ApiRoot) && headers.Authorization == null) {
             try {
