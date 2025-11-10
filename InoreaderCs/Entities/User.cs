@@ -5,6 +5,7 @@ namespace InoreaderCs.Entities;
 /// <summary>
 /// Basic information about the account of the current user.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/add-subscription"/></remarks>
 public record User {
 
     /// <summary>

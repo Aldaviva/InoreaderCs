@@ -9,7 +9,7 @@ public class DateTimeOffsetReaderTest {
     private static readonly JsonSerializerOptions JsonOptions = new() {
         Converters = {
             DateTimeOffsetReader,
-            new NonNullableValueReader<DateTimeOffset>(DateTimeOffsetReader)
+            new NonNullableStructReader<DateTimeOffset>(DateTimeOffsetReader)
         }
     };
 

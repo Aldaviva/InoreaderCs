@@ -5,6 +5,7 @@ namespace InoreaderCs.Auth;
 /// <summary>
 /// Response of a granted user OAuth2 token from the Inoreader HTTP API.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/oauth#:~:text=Content%2Dtype%20header!-,Response%3A,-%7B%0A%20%20%22access_token%22%3A%20%22%5BACCESS_TOKEN%5D%22%2C%20%0A%20%20%22token_type"/></remarks>
 public record Oauth2TokenResponse {
 
     /// <summary>

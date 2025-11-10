@@ -1,8 +1,8 @@
 namespace InoreaderCs.Auth;
 
 /// <summary>
-/// <para>Saves and loads user authentication tokens to durable storage, such as files on disk.</para>
-/// <para>You must provided your own implementation of this interface by subclassing it. There are no built-in subclasses becase the persistence logic is up to you.</para>
+/// <para>Saves and loads user authentication tokens to durable storage, such as files on disk or a database.</para>
+/// <para>You must provided your own implementation of this interface by subclassing it. There are no built-in subclasses because the persistence logic is up to you.</para>
 /// </summary>
 public interface IAuthTokenPersister {
 

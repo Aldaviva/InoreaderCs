@@ -16,7 +16,7 @@ internal partial class ClientRequests(InoreaderClient client):
 
     private static readonly Encoding MessageEncoding = new UTF8Encoding(false, true);
 
-    private WebTarget ApiBase => client.ApiBase;
+    private IWebTarget ApiBase => client.ApiBase;
 
     internal event EventHandler<IEnumerable<StreamState>>? TagAndFolderStatesListed;
 

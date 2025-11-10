@@ -25,8 +25,8 @@ public abstract record BaseArticle {
 
 /// <summary>
 /// <para>One news article, item, entry, or post from a feed. Contains all properties of the article.</para>
-/// <para>Documentation: <see href="https://www.inoreader.com/developers/stream-contents#:~:text=Description%20of%20the%20items%20list%3A"/></para>
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/stream-contents#:~:text=Description%20of%20the%20items%20list%3A"/></remarks>
 public record Article: BaseArticle {
 
     /// <summary>
@@ -124,7 +124,7 @@ public record Article: BaseArticle {
     /// <para>The URL of the feed that this article is from, which points to an RSS or Atom XML document.</para>
     /// <para>For the article's web page URL, see <see cref="PageUrl"/>. For the feed's web page URL, see <see cref="FeedPageUrl"/>.</para>
     /// </summary>
-    public Uri FeedUrl => Feed.StreamId.FeedUri;
+    public Uri FeedUrl => Feed.StreamId.FeedUri!;
 
     /// <summary>
     /// The name or title of the feed that this article is from.
@@ -139,13 +139,13 @@ public record Article: BaseArticle {
 
     /// <summary>
     /// <para><c>true</c> if the user added a star to this article, also known as Read Later or Saved, or <c>false</c> if the article is not starred.</para>
-    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.IArticleMethods.MarkArticles"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Starred"/>.</para>
+    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.IArticleMethods.MarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Starred"/>.</para>
     /// </summary>
     public bool IsStarred => Categories.Contains(StreamId.Starred);
 
     /// <summary>
     /// <c>true</c> if either the user read the article or the article is more than 30 days old, or <c>if it is unread and less than 30 days old.</c>
-    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.IArticleMethods.MarkArticles"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
+    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.IArticleMethods.MarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
     /// </summary>
     public bool IsRead => Categories.Contains(StreamId.Read);
 

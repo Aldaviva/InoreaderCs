@@ -2,7 +2,7 @@ using InoreaderCs.Auth;
 using System.Collections.Immutable;
 using System.Net.Http.Headers;
 
-namespace Tests.Requests;
+namespace Tests;
 
 public class NoOpAuthClient: IAuthClient {
 
@@ -13,7 +13,7 @@ public class NoOpAuthClient: IAuthClient {
     private class NoOpAuthToken: IUserAuthToken {
 
         public AuthenticationHeaderValue AuthenticationHeaderValue => new("anonymous", null);
-        public IDictionary<string, object>? RequestHeaders => ImmutableDictionary<string, object>.Empty;
+        public IDictionary<string, object> RequestHeaders => ImmutableDictionary<string, object>.Empty;
 
     }
 

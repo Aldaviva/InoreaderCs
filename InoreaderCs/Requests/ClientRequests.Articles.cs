@@ -5,23 +5,23 @@ namespace InoreaderCs.Requests;
 internal partial class ClientRequests {
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.MarkArticles(ArticleState markState, CancellationToken cancellationToken, params IEnumerable<string> articleIds) =>
+    Task IInoreaderClient.IArticleMethods.MarkArticles(ArticleState markState, IEnumerable<string> articleIds, CancellationToken cancellationToken) =>
         MarkArticles(StreamId.ForState(markState)!, false, cancellationToken, articleIds);
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.MarkArticles(ArticleState markState, CancellationToken cancellationToken, params IEnumerable<Article> articles) =>
-        ((IInoreaderClient.IArticleMethods) this).MarkArticles(markState, cancellationToken, articles.Select(article => article.ShortId));
+    Task IInoreaderClient.IArticleMethods.MarkArticles(ArticleState markState, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
+        ((IInoreaderClient.IArticleMethods) this).MarkArticles(markState, articles.Select(article => article.ShortId), cancellationToken);
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState unmarkState, CancellationToken cancellationToken, params IEnumerable<string> articleIds) =>
+    Task IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState unmarkState, IEnumerable<string> articleIds, CancellationToken cancellationToken) =>
         MarkArticles(StreamId.ForState(unmarkState)!, true, cancellationToken, articleIds);
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState unmarkState, CancellationToken cancellationToken, params IEnumerable<Article> articles) =>
-        ((IInoreaderClient.IArticleMethods) this).UnmarkArticles(unmarkState, cancellationToken, articles.Select(article => article.ShortId));
+    Task IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState unmarkState, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
+        ((IInoreaderClient.IArticleMethods) this).UnmarkArticles(unmarkState, articles.Select(article => article.ShortId), cancellationToken);
 
     /// <inheritdoc />
-    async Task IInoreaderClient.IArticleMethods.TagArticles(string tag, CancellationToken cancellationToken, params IEnumerable<string> articleIds) {
+    async Task IInoreaderClient.IArticleMethods.TagArticles(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken) {
         int articleCount = await MarkArticles(StreamId.ForTag(tag), false, cancellationToken, articleIds).ConfigureAwait(false);
         if (articleCount != 0) {
             client.LabelNameCache.Edit(tag, false, false);
@@ -29,15 +29,15 @@ internal partial class ClientRequests {
     }
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.TagArticles(string tag, CancellationToken cancellationToken, params IEnumerable<Article> articles) =>
-        ((IInoreaderClient.IArticleMethods) this).TagArticles(tag, cancellationToken, articles.Select(article => article.ShortId));
+    Task IInoreaderClient.IArticleMethods.TagArticles(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
+        ((IInoreaderClient.IArticleMethods) this).TagArticles(tag, articles.Select(article => article.ShortId), cancellationToken);
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.UntagArticles(string tag, CancellationToken cancellationToken, params IEnumerable<string> articleIds) =>
+    Task IInoreaderClient.IArticleMethods.UntagArticles(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken) =>
         MarkArticles(StreamId.ForTag(tag), true, cancellationToken, articleIds);
 
     /// <inheritdoc />
-    Task IInoreaderClient.IArticleMethods.UntagArticles(string tag, CancellationToken cancellationToken, params IEnumerable<Article> articles) =>
-        ((IInoreaderClient.IArticleMethods) this).UntagArticles(tag, cancellationToken, articles.Select(article => article.ShortId));
+    Task IInoreaderClient.IArticleMethods.UntagArticles(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
+        ((IInoreaderClient.IArticleMethods) this).UntagArticles(tag, articles.Select(article => article.ShortId), cancellationToken);
 
 }

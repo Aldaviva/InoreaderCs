@@ -6,7 +6,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task SendNoRequestIfZeroItemIds() {
-        await Inoreader.Articles.TagArticles("My tag", CancellationToken.None, Enumerable.Empty<string>());
+        await Inoreader.Articles.TagArticles("My tag", Enumerable.Empty<string>(), CancellationToken.None);
 
         A.CallTo(() => HttpHandler.TestableSendAsync(An<HttpRequestMessage>._, A<CancellationToken>._)).MustNotHaveHappened();
     }

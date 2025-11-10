@@ -11,8 +11,10 @@ using System.Security.Cryptography;
 namespace InoreaderCs.Auth;
 
 /// <summary>
-/// 3-legged OAuth2 Inoreader authentication client that logs in with a registered app ID and secret and shows the user a consent page, which will grant a user access token.
+/// <para>3-legged OAuth2 Inoreader authentication client that logs in with a registered app ID and secret and shows the user a consent page, which will grant a user access token.</para>
+/// <para>You must subclass this abstract superclass to provide ways to determine your web server's callback URL and show the consent page to the user, such as launching a web browser.</para>
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/oauth"/></remarks>
 public abstract class Oauth2Client: AbstractAuthClient {
 
     private static readonly TimeSpan   EarlyRefreshPeriod = TimeSpan.FromMinutes(5);
@@ -28,8 +30,8 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <param name="authTokenPersister">Saves and loads cached auth tokens.</param>
     /// <param name="httpClient">Optional HTTP client to use when creating an app auth token for the user.</param>
     /// <param name="loggerFactory">If you want to emit logs from this class in your logging infrastructure.</param>
-    protected Oauth2Client(Oauth2Parameters oauthParameters, IAuthTokenPersister authTokenPersister, IUnfuckedHttpClient? httpClient, ILoggerFactory? loggerFactory): base(authTokenPersister,
-        httpClient) {
+    /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/oauth"/></remarks>
+    protected Oauth2Client(Oauth2Parameters oauthParameters, IAuthTokenPersister authTokenPersister, IHttpClient? httpClient, ILoggerFactory? loggerFactory): base(authTokenPersister, httpClient) {
         _oauthParameters = oauthParameters;
         _logger          = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<Oauth2Client>();
     }
@@ -84,7 +86,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 } catch (InoreaderException.Unauthorized e) {
                     _logger.LogWarning("Failed to refresh auth token ({msg}), starting new authorization process...", e.Message);
                     CachedPersistedTokenResponses.Load(await Authorize().ConfigureAwait(false));
-                    _logger.LogDebug("Successfully reauthorized with a new auth token.");
+                    _logger.LogInformation("Successfully reauthorized with a new auth token.");
                 }
 
                 shouldSave = true;
@@ -115,7 +117,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
 
         Uri consentUri = InoreaderOauthBase.Path("auth")
             .QueryParam(new Dictionary<string, string> {
-                { "client_id", _oauthParameters.AppId.ToString() },
+                { "client_id", _oauthParameters.ClientId.ToString() },
                 { "redirect_uri", codeReceiverCallbackUri.ToString() },
                 { "response_type", "code" },
                 { "scope", "read write" },
@@ -172,8 +174,8 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <exception cref="ProcessingException"></exception>
     private async Task<Oauth2TokenResponse> RequestOAuthToken(string grantType, IEnumerable<KeyValuePair<string, string>> requestBody) {
         FormUrlEncodedContent body = new(new Dictionary<string, string>(requestBody.ToDictionary(pair => pair.Key, pair => pair.Value)) {
-            { "client_id", _oauthParameters.AppId.ToString() },
-            { "client_secret", _oauthParameters.AppKey },
+            { "client_id", _oauthParameters.ClientId.ToString() },
+            { "client_secret", _oauthParameters.ClientSecret },
             { "grant_type", grantType }
         });
 
@@ -190,7 +192,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 throw new ProcessingException(e2, new HttpExceptionParams(e.Verb, e.RequestUrl, e.ResponseHeaders, e.ResponseBody, e.RequestProperties));
             }
         } catch (ProcessingException e) {
-            _logger.LogError(e, "Network or serialization error while refreshing auth token");
+            _logger.LogError(e, "Network or serialization error while requesting auth token");
             throw;
         }
 

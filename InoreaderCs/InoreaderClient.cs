@@ -10,7 +10,7 @@ namespace InoreaderCs;
 
 /// <summary>
 /// <para>Client for the Inoreader HTTP API.</para>
-/// <para>To get started, construct a new instance of this class. Pass either an <see cref="Oauth2Client"/> or <see cref="PasswordAuthClient"/> instance constructed with your registered app details and any other credentials required.</para>
+/// <para>To get started, construct a new instance of this class. Pass either an <see cref="Oauth2Client"/> subclass or <see cref="PasswordAuthClient"/> instance constructed with your registered app details and any other credentials required.</para>
 /// <para>Once you have an instance, you can send API requests by calling methods like <see cref="Newsfeed"/>.<c>ListArticlesDetailed</c>.</para>
 /// </summary>
 /// <remarks>See <see href="https://www.inoreader.com/developers/"/></remarks>
@@ -18,7 +18,7 @@ public class InoreaderClient: IInoreaderClient {
 
     internal static readonly Uri ApiRoot = new("https://www.inoreader.com/");
 
-    private static readonly JsonConverter<DateTimeOffset?> StringToDateTimeOffsetReader = new DateTimeOffsetReader();
+    private static readonly JsonConverter<DateTimeOffset?> DateTimeOffsetReader = new DateTimeOffsetReader();
 
     /// <summary>
     /// JSON response deserialization preferences
@@ -28,25 +28,27 @@ public class InoreaderClient: IInoreaderClient {
         AllowOutOfOrderMetadataProperties = true,
         Converters = {
             new JsonStringEnumConverter(),
-            StringToDateTimeOffsetReader,
-            new NonNullableValueReader<DateTimeOffset>(StringToDateTimeOffsetReader),
+            DateTimeOffsetReader,
+            DateTimeOffsetReader.ToNonNullable(),
             new StringToStreamIdConverter()
         }
     };
 
-    private readonly  IUnfuckedHttpClient _httpClient;
-    private readonly  bool                _disposeHttpClient;
-    internal readonly ClientRequests      Requests;
-    private readonly  RateLimitReader     _rateLimitReader = new();
-    private readonly  object              _eventLock       = new();
-    internal readonly LabelNameCache      LabelNameCache;
+    private readonly  IHttpClient     _httpClient;
+    private readonly  bool            _disposeHttpClient;
+    internal readonly ClientRequests  Requests;
+    private readonly  RateLimitReader _rateLimitReader = new();
+    private readonly  object          _eventLock       = new();
+    internal readonly LabelNameCache  LabelNameCache;
 
     /// <inheritdoc />
-    public WebTarget ApiBase { get; set; }
+    public IWebTarget ApiBase { get; set; }
 
     /// <summary>
     /// Construct a new Inoreader API client instance, with options including the mandatory authentication client.
     /// </summary>
+    /// <param name="options">Parameters for this instance, including the mandatory <see cref="InoreaderOptions.AuthClient"/>.</param>
+    /// <remarks>See <see href="https://www.inoreader.com/developers/"/></remarks>
     public InoreaderClient(InoreaderOptions options) {
         _disposeHttpClient = options.DisposeHttpClient ?? options.HttpClient is null;
         _httpClient        = options.HttpClient ?? new UnfuckedHttpClient();

@@ -7,15 +7,23 @@ namespace InoreaderCs.Entities;
 /// </summary>
 /// <param name="UnreadCount">Number of unread articles.</param>
 /// <param name="NewestArticleTime">Most recent article crawl time. This is null for folders and tags, and only has a non-null value for subscriptions and the entire newsfeed.</param>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record StreamUnreadState(int UnreadCount, DateTimeOffset? NewestArticleTime);
 
 /// <summary>
 /// Mapping from folder or tag name to its number of unread articles and latest crawl time.
 /// </summary>
 /// <param name="UnreadCountsByLabelName">Map with the folder or tag name for the key (without any prefix), and the unread state as the value.</param>
-/// <param name="MaxDisplayableCount">The largest number of articles that can be displayed before being capped. For example, if this is <c>1000</c>, then all numbers of articles greater than 1000 will be reported as 1000, so you should render that case as <c>1000+</c> to illustrate the clipping.</param>
+/// <param name="MaxDisplayableCount">The largest number of articles that can be displayed before being capped. For example, if this is <c>1000</c>, then all numbers of articles greater than 1000 will be reported as 1000, so you should render that case as something like <c>1000+</c> to illustrate the clipping.</param>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record LabelUnreadCounts(IDictionary<string, StreamUnreadState> UnreadCountsByLabelName, int MaxDisplayableCount);
 
+/// <summary>
+/// Mapping from feed URL to its number of unread articles and latest crawl time.
+/// </summary>
+/// <param name="Subscriptions">Map with the feed subscription's RSS or Atom XML URL for the key, and the unread state as the value.</param>
+/// <param name="MaxDisplayableCount">The largest number of articles that can be displayed before being capped. For example, if this is <c>1000</c>, then all numbers of articles greater than 1000 will be reported as 1000, so you should render that case as something like <c>1000+</c> to illustrate the clipping.</param>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record SubscriptionUnreadCounts(IDictionary<Uri, StreamUnreadState> Subscriptions, int MaxDisplayableCount);
 
 /// <summary>
@@ -23,7 +31,8 @@ public record SubscriptionUnreadCounts(IDictionary<Uri, StreamUnreadState> Subsc
 /// </summary>
 /// <param name="AllArticles">Total number of unread articles in the user's entire newsfeed, limited to <paramref name="MaxDisplayableCount"/>.</param>
 /// <param name="StarredArticleCount">Number of articles that are starred in the user's entire newsfeed, limited to <paramref name="MaxDisplayableCount"/>. Includes both read and unread articles.</param>
-/// <param name="MaxDisplayableCount">The largest number of articles that can be displayed before being capped. For example, if this is <c>1000</c>, then all numbers of articles greater than 1000 will be reported as 1000, so you should render that case as <c>1000+</c> to illustrate the clipping.</param>
+/// <param name="MaxDisplayableCount">The largest number of articles that can be displayed before being capped. For example, if this is <c>1000</c>, then all numbers of articles greater than 1000 will be reported as 1000, so you should render that case as something like <c>1000+</c> to illustrate the clipping.</param>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record NewsfeedUnreadCounts(StreamUnreadState AllArticles, int StarredArticleCount, int MaxDisplayableCount);
 
 internal record UnreadCountResponses(int Max, IEnumerable<UnreadCountResponse> UnreadCounts);

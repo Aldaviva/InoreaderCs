@@ -6,6 +6,7 @@ namespace InoreaderCs.Entities;
 /// <summary>
 /// Response container envelope base class for paginated lists of objects.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/stream-contents#:~:text=c%20%2D-,Continuation,-%2D%20a%20string%20used"/></remarks>
 public abstract record PaginatedListResponse {
 
     /// <summary>
@@ -29,6 +30,7 @@ public abstract record PaginatedListResponse {
 /// <para>Be aware that sometimes the API server ignores this value and returns the first page multiple times, so you may want to apply some uniqueness filtering on the client side.</para>
 /// </summary>
 /// <param name="Continuation">pagination continuation token or cursor</param>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/stream-contents#:~:text=c%20%2D-,Continuation,-%2D%20a%20string%20used"/></remarks>
 [JsonConverter(typeof(Reader))]
 [method: JsonConstructor]
 public readonly record struct PaginationToken(string Continuation) {

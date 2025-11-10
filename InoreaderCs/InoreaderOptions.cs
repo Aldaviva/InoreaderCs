@@ -11,7 +11,7 @@ public record InoreaderOptions {
     public required IAuthClient AuthClient { get; set; }
 
     /// <summary>Optional HTTP client if you want to customize how requests and responses are handled, or <c>null</c> to use a default instance.</summary>
-    public IUnfuckedHttpClient? HttpClient { get; set; }
+    public IHttpClient? HttpClient { get; set; }
 
     /// <summary>Whether <see cref="HttpClient"/> will be disposed along with this object. By default, it is only disposed when a custom <see cref="HttpClient"/> was provided and was not <c>null</c>.</summary>
     public bool? DisposeHttpClient { get; set; }

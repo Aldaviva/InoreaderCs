@@ -5,17 +5,17 @@ namespace InoreaderCs.Auth;
 /// </summary>
 /// <param name="authTokenPersister">Used to save granted authentication tokens to disk so they don't have to be requested every time the app starts.</param>
 /// <param name="httpClient">HTTP client used when requesting auth tokens, or <c>null</c> to use a default instance. Only the default instance will be disposed when this class is disposed.</param>
-public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister, IUnfuckedHttpClient? httpClient): IAuthClient {
+public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister, IHttpClient? httpClient): IAuthClient {
 
-    internal IUnfuckedHttpClient? OverriddenHttpClient { get; private set; } = httpClient;
-    private readonly Lazy<IUnfuckedHttpClient> _defaultHttpClient = new(() => new UnfuckedHttpClient(), LazyThreadSafetyMode.PublicationOnly);
+    internal IHttpClient? OverriddenHttpClient { get; private set; } = httpClient;
+    private readonly Lazy<IHttpClient> _defaultHttpClient = new(() => new UnfuckedHttpClient(), LazyThreadSafetyMode.PublicationOnly);
 
     /// <summary>
     /// HTTP client used when requesting auth tokens.
     /// </summary>
     // ExceptionAdjustment: P:System.Lazy`1.Value get -T:System.MemberAccessException
     // ExceptionAdjustment: P:System.Lazy`1.Value get -T:System.MissingMemberException
-    public IUnfuckedHttpClient HttpClient {
+    public IHttpClient HttpClient {
         get => OverriddenHttpClient ?? _defaultHttpClient.Value;
         set {
             OverriddenHttpClient = value;

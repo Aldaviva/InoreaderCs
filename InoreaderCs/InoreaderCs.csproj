@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-        <Version>0.0.1-beta.4</Version>
+        <Version>0.0.1-beta.5</Version>
         <Authors>Ben Hutchison</Authors>
         <Copyright>© 2025 $(Authors)</Copyright>
         <Company>$(Authors)</Company>
@@ -19,12 +19,14 @@
         <PackageTags>inoreader api-client rss atom news reader feed newsfeed syndication</PackageTags>
         <PackageIcon>icon.png</PackageIcon>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSource>true</IncludeSource>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
-        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> <!-- System.Net.Http.Json 9 and dependencies are only tested on .NET ≥ 8, but we need it because that is the lowest version that provides JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object -->
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+        <!-- System.Net.Http.Json 9 and dependencies are only tested on .NET ≥ 8, but we need it because that is the lowest version that provides JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object -->
     </PropertyGroup>
 
     <ItemGroup>
@@ -39,12 +41,11 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
         <PackageReference Include="System.Net.Http.Json" Version="9.0.10" /> <!-- 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties -->
-        <PackageReference Include="Unfucked" Version="0.0.1-beta.19" />
-        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.19" />
+        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.20" />
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' == 'Release'">
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' != 'Debug'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
-    
+
 </Project>

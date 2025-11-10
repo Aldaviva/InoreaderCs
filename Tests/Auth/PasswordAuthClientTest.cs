@@ -11,7 +11,7 @@ public class PasswordAuthClientTest: IDisposable {
     private readonly PasswordAuthParameters _password    = new("user@aldaviva.com", "abc123", 456, "789");
     private readonly IAuthTokenPersister    _persister   = A.Fake<IAuthTokenPersister>();
     private readonly IUnfuckedHttpHandler   _httpHandler = A.Fake<UnfuckedHttpHandler>(options => options.CallsBaseMethods());
-    private readonly IUnfuckedHttpClient    _http;
+    private readonly IHttpClient            _http;
     private readonly PasswordAuthClient     _auth;
 
     public PasswordAuthClientTest() {

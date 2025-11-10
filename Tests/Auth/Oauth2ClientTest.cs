@@ -12,7 +12,7 @@ public class Oauth2ClientTest: IDisposable {
     private readonly IAuthTokenPersister  _persister    = A.Fake<IAuthTokenPersister>();
     private readonly IUnfuckedHttpHandler _httpHandler  = A.Fake<UnfuckedHttpHandler>(options => options.CallsBaseMethods());
     private readonly HttpRequestMocker    _requestMocker;
-    private readonly IUnfuckedHttpClient  _http;
+    private readonly IHttpClient          _http;
     private readonly Oauth2Client         _auth;
 
     private readonly IAnyCallConfigurationWithReturnTypeSpecified<Task<ConsentResult>> _showConsentPageToUser;
@@ -123,7 +123,7 @@ public class Oauth2ClientTest: IDisposable {
         _showConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult(null, null, "access_denied", "User canceled"));
 
         Func<Task<IUserAuthToken>> thrower = () => _auth.FetchValidUserToken();
-        thrower.Should().ThrowAsync<InoreaderException.Unauthorized>().WithMessage("Application was denied access to your Inoreader account");
+        await thrower.Should().ThrowAsync<InoreaderException.Unauthorized>().WithMessage("Application was denied access to your Inoreader account");
 
         _showConsentPageToUser.MustHaveHappenedOnceExactly();
     }

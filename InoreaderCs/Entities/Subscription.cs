@@ -5,6 +5,7 @@ namespace InoreaderCs.Entities;
 /// <summary>
 /// A followed feed.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/subscription-list"/></remarks>
 public record Subscription {
 
     /// <inheritdoc cref="Subscription" />
@@ -31,7 +32,7 @@ public record Subscription {
 
     // public required string SortId { get; init; }
 
-    // firstitemmsec seems to be completely broken because the API server returns nonsense dates. They should all be roughly 30 days ago, but in my account the values range from 73 days ago to 2252 days ago. The parsing is correct with respect to microsecond precision, so it's not a ranging problem.
+    // <c>firstitemmsec</c> seems to be completely broken because the API server returns nonsense dates. They should all be roughly 30 days ago, but in my account the values range from 73 days ago to 2252 days ago. My parsing is correct with respect to microsecond precision, so it's not a ranging problem.
     /*/// <summary>
     /// <para>The time limit of when articles can still be marked as unread. Any articles with a <see cref="BaseArticle.CrawlTime"/> older than this are too old and will be forced to be marked as read, with no way to mark them as unread.</para>
     /// <para>This is generally about 30 days ago.</para>

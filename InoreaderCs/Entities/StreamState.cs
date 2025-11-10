@@ -6,6 +6,7 @@ namespace InoreaderCs.Entities;
 /// <summary>
 /// Unread counts and latest article timestamp high water marks for folders, tags, and the entire newsfeed.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(TagState), "tag")]
 [JsonDerivedType(typeof(FolderState), "folder")]
@@ -22,6 +23,7 @@ public record StreamState {
 /// <summary>
 /// Unread counts and timestamp high water mark for a folder or tag.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public abstract record LabelState: StreamState {
 
     /// <summary>
@@ -46,11 +48,13 @@ public abstract record LabelState: StreamState {
 /// <summary>
 /// Unread counts and timestamp high water mark for a folder.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record FolderState: LabelState;
 
 /// <summary>
 /// Unread counts and timestamp high water mark for a tag.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record TagState: LabelState {
 
     /// <summary>

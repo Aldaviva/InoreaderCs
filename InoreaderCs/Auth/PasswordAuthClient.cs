@@ -7,6 +7,7 @@ namespace InoreaderCs.Auth;
 /// <summary>
 /// 2-legged Inoreader authentication client that logs in with a user's email address, password, and a registered API app's ID and secret key, not OAuth2.
 /// </summary>
+/// <remarks>Documentation: <see href="https://www.inoreader.com/developers/auth"/></remarks>
 public class PasswordAuthClient: AbstractAuthClient {
 
     private readonly ILogger<PasswordAuthClient> _logger;
@@ -19,7 +20,8 @@ public class PasswordAuthClient: AbstractAuthClient {
     /// <param name="authTokenPersister">Saves and loads cached auth tokens.</param>
     /// <param name="httpClient">Optional HTTP client to use when creating an app auth token for the user.</param>
     /// <param name="loggerFactory">If you want to emit logs from this class in your logging infrastructure.</param>
-    public PasswordAuthClient(PasswordAuthParameters passwordAuthParameters, IAuthTokenPersister authTokenPersister, IUnfuckedHttpClient? httpClient, ILoggerFactory? loggerFactory):
+    /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/auth"/></remarks>
+    public PasswordAuthClient(PasswordAuthParameters passwordAuthParameters, IAuthTokenPersister authTokenPersister, IHttpClient? httpClient, ILoggerFactory? loggerFactory):
         base(authTokenPersister, httpClient) {
         _passwordAuthParameters = passwordAuthParameters;
         _logger                 = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<PasswordAuthClient>();
@@ -75,7 +77,7 @@ public class PasswordAuthClient: AbstractAuthClient {
         try {
             string responseBody = await HttpClient.Target(InoreaderClient.ApiRoot)
                 .Path("accounts/ClientLogin")
-                .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.6")
+                .Header(HttpHeaders.USER_AGENT, "Inoreader Android v7.9.6")
                 .Post<string>(requestBody).ConfigureAwait(false);
 
             Dictionary<string, string> responseMap = responseBody.Trim()
