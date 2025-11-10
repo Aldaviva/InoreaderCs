@@ -131,8 +131,8 @@ Useful options:
 - To only return articles crawled after a certain time, pass the `minTime` parameter.
 - To remove or require articles to have a specific state like read or starred, pass the `subtract` or `intersect` parameters, respectively.
 - To fetch subsequent pages from a multi-page response, pass the previous page or its `PaginationToken` as the `pagination` parameter.
-    > [!CAUTION]
-    > Even when the `pagination` parameter is sent properly, the Inoreader API servers sometimes ignore it and incorrectly return the first page again instead of the desired page. This makes it look like many of the articles are duplicates. After fetching multiple pages of articles, always filter by the unique `Article.ShortId`  to remove the erroneous duplicates, for example, using [`IEnumerable<T>.Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct).
+> [!CAUTION]
+> Even when the `pagination` parameter is sent properly, the Inoreader API servers sometimes ignore it and incorrectly return the first page again instead of the desired page. This makes it look like many of the articles are duplicates. After fetching multiple pages of articles, always filter by the unique `Article.ShortId`  to remove the erroneous duplicates, for example, using [`IEnumerable<T>.Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct).
 
 ### Check if there are new articles
 ```cs
