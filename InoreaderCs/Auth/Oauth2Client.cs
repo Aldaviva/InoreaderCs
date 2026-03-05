@@ -51,6 +51,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <param name="codeReceiverUri">The callback URL hosted by this app, from <see cref="AuthorizationReceiverCallbackUrl"/>. The app should expect a request to this URL.</param>
     /// <param name="authorizationSuccess">Completed when the authorization flow is finished, to which you can asynchronously listen to know when to tear down the web server if it's not going to be used for anything else.</param>
     /// <returns>The result from the user consenting to the OAuth2 app authorization or not. This should be parsed from the HTTP request sent from the Inoreader API to your web server at <paramref name="codeReceiverUri"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">a URI is invalid</exception>
     protected abstract Task<ConsentResult> ShowConsentPageToUser(Uri consentUri, Uri codeReceiverUri, Task authorizationSuccess);
 
     /// <inheritdoc />
@@ -117,16 +118,16 @@ public abstract class Oauth2Client: AbstractAuthClient {
 
         Uri consentUri = InoreaderOauthBase.Path("auth")
             .QueryParam(new Dictionary<string, string> {
-                { "client_id", _oauthParameters.ClientId.ToString() },
+                { "client_id", _oauthParameters.AppId.ToString() },
                 { "redirect_uri", codeReceiverCallbackUri.ToString() },
                 { "response_type", "code" },
                 { "scope", "read write" },
                 { "state", expectedCsrfToken }
             });
 
-        ConsentResult consentResult = await ShowConsentPageToUser(consentUri, codeReceiverCallbackUri, onAuthorized.Task).ConfigureAwait(false);
-
         try {
+            ConsentResult consentResult = await ShowConsentPageToUser(consentUri, codeReceiverCallbackUri, onAuthorized.Task).ConfigureAwait(false);
+
             if (consentResult.AuthorizationCode is not null && consentResult.CsrfToken is not null &&
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                 CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expectedCsrfToken), Encoding.UTF8.GetBytes(consentResult.CsrfToken))
@@ -174,8 +175,8 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <exception cref="ProcessingException"></exception>
     private async Task<Oauth2TokenResponse> RequestOAuthToken(string grantType, IEnumerable<KeyValuePair<string, string>> requestBody) {
         FormUrlEncodedContent body = new(new Dictionary<string, string>(requestBody.ToDictionary(pair => pair.Key, pair => pair.Value)) {
-            { "client_id", _oauthParameters.ClientId.ToString() },
-            { "client_secret", _oauthParameters.ClientSecret },
+            { "client_id", _oauthParameters.AppId.ToString() },
+            { "client_secret", _oauthParameters.AppKey },
             { "grant_type", grantType }
         });
 

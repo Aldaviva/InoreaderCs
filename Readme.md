@@ -3,7 +3,7 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/InoreaderCs?label=package&logo=nuget&color=informational)](https://www.nuget.org/packages/InoreaderCs) [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Aldaviva/InoreaderCs/dotnetpackage.yml?branch=master&logo=github)](https://github.com/Aldaviva/InoreaderCs/actions/workflows/dotnetpackage.yml) [![Testspace](https://img.shields.io/testspace/tests/Aldaviva/Aldaviva:InoreaderCs/master?passed_label=passing&failed_label=failing&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4NTkgODYxIj48cGF0aCBkPSJtNTk4IDUxMy05NCA5NCAyOCAyNyA5NC05NC0yOC0yN3pNMzA2IDIyNmwtOTQgOTQgMjggMjggOTQtOTQtMjgtMjh6bS00NiAyODctMjcgMjcgOTQgOTQgMjctMjctOTQtOTR6bTI5My0yODctMjcgMjggOTQgOTQgMjctMjgtOTQtOTR6TTQzMiA4NjFjNDEuMzMgMCA3Ni44My0xNC42NyAxMDYuNS00NFM1ODMgNzUyIDU4MyA3MTBjMC00MS4zMy0xNC44My03Ni44My00NC41LTEwNi41UzQ3My4zMyA1NTkgNDMyIDU1OWMtNDIgMC03Ny42NyAxNC44My0xMDcgNDQuNXMtNDQgNjUuMTctNDQgMTA2LjVjMCA0MiAxNC42NyA3Ny42NyA0NCAxMDdzNjUgNDQgMTA3IDQ0em0wLTU1OWM0MS4zMyAwIDc2LjgzLTE0LjgzIDEwNi41LTQ0LjVTNTgzIDE5Mi4zMyA1ODMgMTUxYzAtNDItMTQuODMtNzcuNjctNDQuNS0xMDdTNDczLjMzIDAgNDMyIDBjLTQyIDAtNzcuNjcgMTQuNjctMTA3IDQ0cy00NCA2NS00NCAxMDdjMCA0MS4zMyAxNC42NyA3Ni44MyA0NCAxMDYuNVMzOTAgMzAyIDQzMiAzMDJ6bTI3NiAyODJjNDIgMCA3Ny42Ny0xNC44MyAxMDctNDQuNXM0NC02NS4xNyA0NC0xMDYuNWMwLTQyLTE0LjY3LTc3LjY3LTQ0LTEwN3MtNjUtNDQtMTA3LTQ0Yy00MS4zMyAwLTc2LjY3IDE0LjY3LTEwNiA0NHMtNDQgNjUtNDQgMTA3YzAgNDEuMzMgMTQuNjcgNzYuODMgNDQgMTA2LjVTNjY2LjY3IDU4NCA3MDggNTg0em0tNTU3IDBjNDIgMCA3Ny42Ny0xNC44MyAxMDctNDQuNXM0NC02NS4xNyA0NC0xMDYuNWMwLTQyLTE0LjY3LTc3LjY3LTQ0LTEwN3MtNjUtNDQtMTA3LTQ0Yy00MS4zMyAwLTc2LjgzIDE0LjY3LTEwNi41IDQ0UzAgMzkxIDAgNDMzYzAgNDEuMzMgMTQuODMgNzYuODMgNDQuNSAxMDYuNVMxMDkuNjcgNTg0IDE1MSA1ODR6IiBmaWxsPSIjZmZmIi8%2BPC9zdmc%2B)](https://aldaviva.testspace.com/spaces/326067) [![Coveralls](https://img.shields.io/coveralls/github/Aldaviva/InoreaderCs?logo=coveralls)](https://coveralls.io/github/Aldaviva/InoreaderCs?branch=master)
 
-*.NET client for the [Inoreader HTTP API](https://www.inoreader.com/developers/)*
+*.NET client for the [Inoreader](https://www.inoreader.com/) [HTTP API](https://www.inoreader.com/developers/)*
 
 <!-- MarkdownTOC autolink="true" bracket="round" autoanchor="false" levels="1,2,3" bullets="-" -->
 
@@ -81,36 +81,46 @@ public class MyAuthTokenPersister: IAuthTokenPersister {
     public async Task SaveAuthTokens(PersistedAuthTokens authToken) {
         // save auth tokens
     }
-
 }
+
+MyAuthTokenPersister authTokenPersister = new();
 ```
 
-#### Authentication client
-If your app authenticates to Inoreader using OAuth2, subclass the `OAuth2Client` abstract class so that users can see and grant consent for OAuth2 app access to their account.
+#### Authentication strategies
+If your [registered app](https://www.inoreader.com/developers/register-app) authenticates to Inoreader using OAuth2, subclass the `OAuth2Client` abstract class so that users can see and grant consent for OAuth2 app access to their account.
 
 ```cs
-public class MyOauth2Client(Oauth2Parameters oauthParameters, IAuthTokenPersister authTokenPersister, IHttpClient? httpClient, ILoggerFactory? loggerFactory)
+public class MyOauth2Client(Oauth2Parameters oauthParameters, IAuthTokenPersister authTokenPersister, IHttpClient? httpClient = null, ILoggerFactory? loggerFactory = null)
     : Oauth2Client(oauthParameters, authTokenPersister, httpClient, loggerFactory) {
 
     protected override Uri AuthorizationReceiverCallbackUrl => /* URL of your web server's OAuth2 callback resource */;
 
     protected override async Task<ConsentResult> ShowConsentPageToUser(Uri consentUri, Uri codeReceiverUri, Task authorizationSuccess) {
-        // show consent page to user
+        // show consent page to user, for example by launching a web browser with consentUri
+        // the codeReceiverUri should be hosted by your web server
+        // authorizationSuccess will resolve when the user has finished deciding whether or not to grant consent
     }
-
 }
+
+Oauth2Parameters oauthApp = new(appId, appKey);
+using IAuthClient authClient = new MyOauth2Client(oauthApp, authTokenPersister);
 ```
 
-Otherwise, construct a `PasswordAuthClient` instance.
+Otherwise, construct a `PasswordAuthClient` instance with a [user's username and password](https://www.inoreader.com/developers/app-auth) and a [registered app's](https://www.inoreader.com/developers/register-app) app ID and secret key.
+
+```cs
+PasswordAuthParameters credentials = new(username, password, appId, appKey);
+using IAuthClient authClient = new PasswordAuthClient(credentials, authTokenPersister);
+```
 
 ### API Client
 Create a new instance of `InoreaderClient`. It uses one instance of an `IAuthClient`, so if you have multiple auth strategies, construct additional `InoreaderClient` instances.
 
 ```cs
-Oauth2Parameters oauthParameters = new(appId: 123, appKey: "abc");
+Oauth2Parameters oauthApp = new(appId: 123, appKey: "abc");
 
 using IInoreaderClient inoreader = new InoreaderClient(new InoreaderOptions {
-    AuthClient = new MyOauth2Client(oauthParameters, new MyAuthTokenPersister())
+    AuthClient = new MyOauth2Client(oauthApp, new MyAuthTokenPersister())
 });
 ```
 
@@ -140,7 +150,7 @@ DateTimeOffset mostRecentArticleTime = default;
 while (true) {
     BriefArticles mostRecentArticle = await inoreader.Newsfeed.ListArticlesBrief(maxArticles: 1, minTime: mostRecentArticleTime);
 
-    if (mostRecentArticle.Articles[0].CrawlTime is var articleTime && articleTime != mostRecentArticleTime) {
+    if (mostRecentArticle.Articles.FirstOrDefault()?.CrawlTime is {} articleTime && articleTime != mostRecentArticleTime) {
         mostRecentArticleTime = articleTime;
         Console.WriteLine("New article received");
     }
@@ -178,7 +188,7 @@ Uri feedUrl = new("https://arstechnica.com/science/feed/");
 SubscriptionCreationResult subscription = await inoreader.Subscriptions.Subscribe(feedUrl, CancellationToken.None);
 
 // alternative that immediately sets name or folder
-await inoreader.Subscriptions.Subscribe(feed, title: "Science", folder: "Technology");
+await inoreader.Subscriptions.Subscribe(feedUrl, title: "Science", folder: "Technology");
 ```
 
 ### Show the number of unread articles
@@ -188,6 +198,10 @@ int unreadCount = unreadResponse.AllArticles.UnreadCount;
 string unreadLabel = $"{unreadCount:N0}{(unreadCount == unreadResponse.MaxDisplayableCount ? "+" : "")}";
 ```
 You can also get the number of unread articles for each subscription, folder, or tag.
+```cs
+LabelUnreadCounts unreadResponse = await inoreader.Folders.GetUnreadCounts();
+Console.WriteLine(string.Join('\n', unreadResponse.UnreadCountsByLabelName.Select(folder => $"{folder.Key}\t{folder.Value.UnreadCount,4:N0}")));
+```
 
 ### List subscriptions, folders, or tags
 ```cs
@@ -198,8 +212,7 @@ IEnumerable<TagState> tags = await inoreader.Tags.List();
 
 ### Rename subscriptions, folders, or tags
 ```cs
-Uri subscription = new("https://arstechnica.com/science/feed/");
-await inoreader.Subscriptions.Rename(subscription, newName: "Science!");
+await inoreader.Subscriptions.Rename(new Uri("https://arstechnica.com/science/feed/"), newName: "Science!");
 await inoreader.Folders.Rename("Technology", newName: "New Technology");
 await inoreader.Tags.Rename("My tag", newName: "My new tag");
 ```

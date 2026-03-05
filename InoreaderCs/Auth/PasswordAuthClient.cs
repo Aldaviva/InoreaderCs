@@ -21,7 +21,7 @@ public class PasswordAuthClient: AbstractAuthClient {
     /// <param name="httpClient">Optional HTTP client to use when creating an app auth token for the user.</param>
     /// <param name="loggerFactory">If you want to emit logs from this class in your logging infrastructure.</param>
     /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/auth"/></remarks>
-    public PasswordAuthClient(PasswordAuthParameters passwordAuthParameters, IAuthTokenPersister authTokenPersister, IHttpClient? httpClient, ILoggerFactory? loggerFactory):
+    public PasswordAuthClient(PasswordAuthParameters passwordAuthParameters, IAuthTokenPersister authTokenPersister, IHttpClient? httpClient = null, ILoggerFactory? loggerFactory = null):
         base(authTokenPersister, httpClient) {
         _passwordAuthParameters = passwordAuthParameters;
         _logger                 = (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<PasswordAuthClient>();
@@ -38,7 +38,7 @@ public class PasswordAuthClient: AbstractAuthClient {
             if (CachedPersistedTokenResponses?.PasswordAuthToken is null) {
                 _logger.LogDebug("Loading saved app token...");
                 CachedPersistedTokenResponses ??= new PersistedAuthTokens();
-                if (await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false) is { } loadedAuthTokens) {
+                if (await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false) is {} loadedAuthTokens) {
                     CachedPersistedTokenResponses.LoadDefaults(loadedAuthTokens);
                 }
             }
