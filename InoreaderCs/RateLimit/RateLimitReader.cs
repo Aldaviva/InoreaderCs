@@ -13,7 +13,7 @@ internal interface IRateLimitReader: ClientResponseFilter {
  * https://www.inoreader.com/developers/rate-limiting
  * Usage resets at midnight in Bulgaria (UTC+2 or UTC+3 DST), where Innologica is based
  */
-internal class RateLimitReader: IRateLimitReader {
+internal sealed class RateLimitReader: IRateLimitReader {
 
     private const int    OfficialAndroidAppZone1Limit = 20_000_000;
     public const  string RequestPropertyKey           = nameof(RateLimitStatistics);
@@ -51,7 +51,7 @@ internal class RateLimitReader: IRateLimitReader {
 
 #pragma warning disable CS0618 // Type or member is obsolete - it's not obsolete in .NET Standard 2.0, which this library targets
 
-    public static RateLimitStatistics? Read(HttpResponseMessage response) => response.RequestMessage is { } request ? Read(request) : null;
+    public static RateLimitStatistics? Read(HttpResponseMessage response) => response.RequestMessage is {} request ? Read(request) : null;
 
     public static RateLimitStatistics? Read(HttpRequestMessage request) => request.Properties.TryGetValue(RequestPropertyKey, out object? stats) ? stats as RateLimitStatistics : null;
 

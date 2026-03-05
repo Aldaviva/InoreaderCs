@@ -1,16 +1,15 @@
-using InoreaderCs.Entities;
 using System.Diagnostics;
 
-namespace InoreaderCs;
+namespace InoreaderCs.Entities;
 
-internal class LabelNameCache {
+internal sealed class LabelNameCache {
 
     private readonly InoreaderClient _client;
     private readonly TimeSpan        _cacheDuration;
     private readonly Stopwatch       _freshness    = new();
     private readonly SemaphoreSlim   _fetchingLock = new(1);
-    private readonly ISet<string>    _folderNames  = new HashSet<string>();
-    private readonly ISet<string>    _tagNames     = new HashSet<string>();
+    private readonly HashSet<string> _folderNames  = [];
+    private readonly HashSet<string> _tagNames     = [];
 
     private event EventHandler<IEnumerable<StreamState>> TagAndFolderStatesListed;
 
@@ -34,7 +33,7 @@ internal class LabelNameCache {
                         _client.Requests.TagAndFolderStatesListed += OnTagAndFolderStatesListed;
                     }
                 }
-            } catch (OperationCanceledException) { } finally {
+            } catch (OperationCanceledException) {} finally {
                 if (!ct.IsCancellationRequested) {
                     _fetchingLock.Release();
                 }
@@ -76,7 +75,7 @@ internal class LabelNameCache {
     public void Edit(string labelName, bool isFolder, bool remove) {
         _fetchingLock.Wait();
         try {
-            ISet<string> labels = isFolder ? _folderNames : _tagNames;
+            HashSet<string> labels = isFolder ? _folderNames : _tagNames;
             if (remove) {
                 labels.Remove(labelName);
             } else {

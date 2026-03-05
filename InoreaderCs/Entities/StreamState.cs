@@ -61,7 +61,7 @@ public record TagState: LabelState {
     /// Whether or not the tag is pinned in the sidebar, which shows the tag on the Saved page's left navigation bar.
     /// </summary>
     [JsonPropertyName("pinned")]
-    [JsonConverter(typeof(NumberToBooleanConverter))]
+    [JsonConverter(typeof(NumberToBooleanReader))]
     public bool IsPinned { get; init; }
 
     /// <summary>
@@ -78,4 +78,4 @@ public record TagState: LabelState {
 
 }
 
-internal record ActiveSearchState: TagState;
+internal sealed record ActiveSearchState: TagState;

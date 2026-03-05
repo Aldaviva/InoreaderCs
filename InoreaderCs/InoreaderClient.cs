@@ -1,10 +1,13 @@
 using InoreaderCs.Auth;
+using InoreaderCs.Entities;
 using InoreaderCs.Marshal;
 using InoreaderCs.RateLimit;
 using InoreaderCs.Requests;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Unfucked.HTTP.Config;
+
+// ReSharper disable ChangeFieldTypeToSystemThreadingLock - this only works if you are targeting .NET ≥ 9, but this project also targets .NET Standard 2.0
 
 namespace InoreaderCs;
 
@@ -30,7 +33,7 @@ public class InoreaderClient: IInoreaderClient {
             new JsonStringEnumConverter(),
             DateTimeOffsetReader,
             DateTimeOffsetReader.ToNonNullable(),
-            new StringToStreamIdConverter()
+            new StringToStreamIdReader()
         }
     };
 

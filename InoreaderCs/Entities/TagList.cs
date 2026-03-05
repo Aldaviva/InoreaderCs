@@ -1,3 +1,3 @@
 namespace InoreaderCs.Entities;
 
-internal record TagList(IEnumerable<StreamState> Tags);
+internal sealed record TagList(IEnumerable<StreamState> Tags);

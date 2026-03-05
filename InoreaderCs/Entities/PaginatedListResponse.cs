@@ -38,13 +38,13 @@ public readonly record struct PaginationToken(string Continuation) {
     /// <inheritdoc />
     public override string ToString() => Continuation;
 
-    internal class Reader: JsonConverter<PaginationToken> {
+    internal sealed class Reader: JsonConverter<PaginationToken> {
 
         /// <exception cref="JsonException"></exception>
         public override PaginationToken Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-            reader.TokenType == JsonTokenType.String && reader.GetString() is { } continuation ? new PaginationToken(continuation) : throw new JsonException();
+            reader.TokenType == JsonTokenType.String && reader.GetString() is {} continuation ? new PaginationToken(continuation) : throw new JsonException();
 
-        public override void Write(Utf8JsonWriter writer, PaginationToken value, JsonSerializerOptions options) { }
+        public override void Write(Utf8JsonWriter writer, PaginationToken value, JsonSerializerOptions options) {}
 
     }
 

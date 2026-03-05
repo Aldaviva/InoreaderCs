@@ -7,7 +7,7 @@ namespace InoreaderCs.Entities;
 /// <summary>
 /// See <see href="https://www.inoreader.com/developers/stream-ids"/> and <see href="https://www.inoreader.com/developers/stream-contents#:~:text=ID%20formats.-,categories,-is%20a%20list"/>
 /// </summary>
-internal class StreamId {
+internal sealed class StreamId {
 
     private const string SystemIdPrefix = "user/-/state/com.google";
     private const string LabelPrefix    = "user/-/label/";
@@ -30,7 +30,7 @@ internal class StreamId {
     /// <summary>Articles which have been broadcast, whatever that means</summary>
     public static readonly StreamId Broadcast = new(SystemIdPrefix + "/broadcast");
 
-    /// <summary>Articles which have been liked by other users using some social feature</summary>
+    /// <summary>Articles which have been liked by other users using some social feature. Not the same as <see cref="Starred"/>, which is when you star, favorite, or save one of your own articles for later.</summary>
     public static readonly StreamId Like = new(SystemIdPrefix + "/like");
 
     /// <summary>Articles which are saved web pages or something</summary>

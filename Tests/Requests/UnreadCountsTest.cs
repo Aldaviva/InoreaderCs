@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Tests.Requests;
 
 public class UnreadCountsTest: ApiTest {
@@ -18,8 +16,7 @@ public class UnreadCountsTest: ApiTest {
 
     [Fact]
     public async Task GetNewsfeedUnreadCounts() {
-        Expression<Func<Task<HttpResponseMessage>>> request =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
+        var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
 
         NewsfeedUnreadCounts actual = await Inoreader.Newsfeed.GetUnreadCounts();
 
@@ -33,10 +30,8 @@ public class UnreadCountsTest: ApiTest {
 
     [Fact]
     public async Task GetFolderUnreadCounts() {
-        Expression<Func<Task<HttpResponseMessage>>> unreadCountRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
-        Expression<Func<Task<HttpResponseMessage>>> streamTypesRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+        var unreadCountRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
+        var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
         LabelUnreadCounts unreadCounts = await Inoreader.Folders.GetUnreadCounts();
         unreadCounts.MaxDisplayableCount.Should().Be(1000);
@@ -50,10 +45,8 @@ public class UnreadCountsTest: ApiTest {
 
     [Fact]
     public async Task GetTagUnreadCounts() {
-        Expression<Func<Task<HttpResponseMessage>>> unreadCountRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
-        Expression<Func<Task<HttpResponseMessage>>> streamTypesRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+        var unreadCountRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
+        var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
         LabelUnreadCounts unreadCounts = await Inoreader.Tags.GetUnreadCounts();
         unreadCounts.MaxDisplayableCount.Should().Be(1000);
@@ -67,8 +60,7 @@ public class UnreadCountsTest: ApiTest {
 
     [Fact]
     public async Task GetSubscriptionUnreadCounts() {
-        Expression<Func<Task<HttpResponseMessage>>> unreadCountRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
+        var unreadCountRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
 
         SubscriptionUnreadCounts unreadCounts = await Inoreader.Subscriptions.GetUnreadCounts();
         unreadCounts.MaxDisplayableCount.Should().Be(1000);

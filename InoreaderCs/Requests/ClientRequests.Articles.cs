@@ -2,7 +2,7 @@ using InoreaderCs.Entities;
 
 namespace InoreaderCs.Requests;
 
-internal partial class ClientRequests {
+internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.MarkArticles(ArticleState markState, IEnumerable<string> articleIds, CancellationToken cancellationToken) =>

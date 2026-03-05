@@ -27,4 +27,21 @@ public class DateTimeOffsetReaderTest {
         { 1761688228815123, new DateTimeOffset(2025, 10, 28, 21, 50, 28, 815, 123, TimeSpan.Zero), "microseconds" }
     };
 
+    [Fact]
+    public void Errors() {
+        var thrower = () => JsonSerializer.Deserialize<DateTimeOffset>("9999999999999999999999999999999999999999999999", JsonOptions);
+        thrower.Should().Throw<JsonException>().WithInnerException<FormatException>();
+
+        thrower = () => JsonSerializer.Deserialize<DateTimeOffset>("{}", JsonOptions);
+        thrower.Should().Throw<JsonException>().WithMessage("number=null, TokenType=StartObject");
+    }
+
+    [Fact]
+    public void DateTimeOffsetReaderDoesNotWrite() {
+        MemoryStream         dest   = new();
+        using Utf8JsonWriter writer = new(dest);
+        new DateTimeOffsetReader().Write(writer, DateTimeOffset.Now, JsonSerializerOptions.Default);
+        dest.Length.Should().Be(0);
+    }
+
 }

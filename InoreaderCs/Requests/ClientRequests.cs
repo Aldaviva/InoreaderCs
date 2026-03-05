@@ -6,7 +6,7 @@ using Unfucked.HTTP.Exceptions;
 
 namespace InoreaderCs.Requests;
 
-internal partial class ClientRequests(InoreaderClient client):
+internal sealed partial class ClientRequests(InoreaderClient client):
     IInoreaderClient.IArticleMethods,
     IInoreaderClient.IFolderMethods,
     IInoreaderClient.INewsfeedMethods,
@@ -43,7 +43,7 @@ internal partial class ClientRequests(InoreaderClient client):
             LabelNameCache.Labels labels   = await labelNamesTask.ConfigureAwait(false);
 
             foreach (Article article in articles.Articles) {
-                await article.SetCategories(labels).ConfigureAwait(false);
+                article.SetCategories(labels);
             }
 
             return articles;
@@ -77,14 +77,13 @@ internal partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task<int> MarkArticles(StreamId label, bool removeLabel, CancellationToken cancellationToken, params IEnumerable<string> articleIds) {
         try {
-            IReadOnlyList<KeyValuePair<string, string>> articleIdFormParams = articleIds.Select(id => new KeyValuePair<string, string>("i", id)).ToList();
+            List<KeyValuePair<string, string>> articleIdFormParams = articleIds.Select(id => new KeyValuePair<string, string>("i", id)).ToList();
 
             if (articleIdFormParams.Count != 0) {
-                (await ApiBase
-                        .Path("edit-tag")
-                        .Post(new FormUrlEncodedContent(articleIdFormParams.Prepend(new KeyValuePair<string, string>(removeLabel ? "r" : "a", label.Id))), cancellationToken)
-                        .ConfigureAwait(false))
-                    .Dispose();
+                await using IAsyncDisposable response = (await ApiBase
+                    .Path("edit-tag")
+                    .Post<Stream>(new FormUrlEncodedContent(articleIdFormParams.Prepend(new KeyValuePair<string, string>(removeLabel ? "r" : "a", label.Id))), cancellationToken)
+                    .ConfigureAwait(false)).AsAsyncDisposable();
             }
             return articleIdFormParams.Count;
         } catch (HttpException e) {
@@ -114,14 +113,13 @@ internal partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task MarkAllArticlesAsRead(StreamId stream, DateTimeOffset maxSeenArticleTime, CancellationToken cancellationToken) {
         try {
-            (await ApiBase
-                    .Path("mark-all-as-read")
-                    .Post(new FormUrlEncodedContent(new Dictionary<string, string> {
-                        ["s"]  = stream.Id,
-                        ["ts"] = maxSeenArticleTime.ToUnixTimeMicroseconds().ToString()
-                    }), cancellationToken)
-                    .ConfigureAwait(false))
-                .Dispose();
+            await using IAsyncDisposable response = (await ApiBase
+                .Path("mark-all-as-read")
+                .Post<Stream>(new FormUrlEncodedContent(new Dictionary<string, string> {
+                    ["s"]  = stream.Id,
+                    ["ts"] = maxSeenArticleTime.ToUnixTimeMicroseconds().ToString()
+                }), cancellationToken)
+                .ConfigureAwait(false)).AsAsyncDisposable();
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to mark all articles as read in {stream}");
         }
@@ -130,14 +128,13 @@ internal partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task RenameFolderOrTag(StreamId stream, string newName, CancellationToken cancellationToken) {
         try {
-            (await ApiBase
-                    .Path("rename-tag")
-                    .Post(new FormUrlEncodedContent(new Dictionary<string, string> {
-                        ["s"]    = stream.Id,
-                        ["dest"] = newName
-                    }), cancellationToken)
-                    .ConfigureAwait(false))
-                .Dispose();
+            await using IAsyncDisposable response = (await ApiBase
+                .Path("rename-tag")
+                .Post<Stream>(new FormUrlEncodedContent(new Dictionary<string, string> {
+                    ["s"]    = stream.Id,
+                    ["dest"] = newName
+                }), cancellationToken)
+                .ConfigureAwait(false)).AsAsyncDisposable();
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to rename folder or tag {stream} to {newName}");
         }
@@ -146,13 +143,12 @@ internal partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task DeleteFolderOrTag(StreamId stream, CancellationToken cancellationToken = default) {
         try {
-            (await ApiBase
-                    .Path("disable-tag")
-                    .Post(new FormUrlEncodedContent(new Dictionary<string, string> {
-                        ["s"] = stream.Id
-                    }), cancellationToken)
-                    .ConfigureAwait(false))
-                .Dispose();
+            await using IAsyncDisposable response = (await ApiBase
+                .Path("disable-tag")
+                .Post<Stream>(new FormUrlEncodedContent(new Dictionary<string, string> {
+                    ["s"] = stream.Id
+                }), cancellationToken)
+                .ConfigureAwait(false)).AsAsyncDisposable();
             // If the stream did not already exist, the response body is "Error=Tag not found!" instead of "OK", but I don't care because either way it successfully doesn't exist now.
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to delete folder or tag {stream}");
@@ -162,17 +158,16 @@ internal partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task ModifySubscription(StreamId stream, SubscriptionEditAction action, string? newTitle, string? newFolder, string? removeFromFolder, CancellationToken cancellationToken) {
         try {
-            (await ApiBase
-                    .Path("subscription/edit")
-                    .Post(new FormUrlEncodedContent(new Dictionary<string, string?> {
-                        ["ac"] = action.ToString().ToLowerInvariant(),
-                        ["s"]  = stream.Id,
-                        ["t"]  = newTitle,
-                        ["a"]  = newFolder != null ? StreamId.ForFolder(newFolder).Id : null,
-                        ["r"]  = removeFromFolder != null ? StreamId.ForFolder(removeFromFolder).Id : null
-                    }.Compact()), cancellationToken)
-                    .ConfigureAwait(false))
-                .Dispose();
+            await using IAsyncDisposable response = (await ApiBase
+                .Path("subscription/edit")
+                .Post<Stream>(new FormUrlEncodedContent(new Dictionary<string, string?> {
+                    ["ac"] = action.ToString().ToLowerInvariant(),
+                    ["s"]  = stream.Id,
+                    ["t"]  = newTitle,
+                    ["a"]  = newFolder != null ? StreamId.ForFolder(newFolder).Id : null,
+                    ["r"]  = removeFromFolder != null ? StreamId.ForFolder(removeFromFolder).Id : null
+                }.Compact()), cancellationToken)
+                .ConfigureAwait(false)).AsAsyncDisposable();
         } catch (HttpException e) {
             throw TransformError(e, $"Failed to modify feed {stream}");
         }
@@ -219,7 +214,7 @@ internal partial class ClientRequests(InoreaderClient client):
     private static InoreaderException TransformError(HttpException cause, string message) => cause switch {
         ForbiddenException or NotAuthorizedException              => new InoreaderException.Unauthorized("Inoreader auth failure", cause),
         ClientErrorException { StatusCode: (HttpStatusCode) 429 } => new InoreaderException.RateLimited((RateLimitStatistics) cause.RequestProperties![RateLimitReader.RequestPropertyKey]!, cause),
-        _ => new InoreaderException(message + (cause is WebApplicationException { ResponseBody: { } body } ? ": " + MessageEncoding.GetString(body.Span
+        _ => new InoreaderException(message + (cause is WebApplicationException { ResponseBody: {} body } ? ": " + MessageEncoding.GetString(body.Span
 #if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER)
                 .ToArray()
 #endif

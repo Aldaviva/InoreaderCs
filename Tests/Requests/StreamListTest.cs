@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Tests.Requests;
 
 public class StreamListTest: ApiTest {
@@ -12,8 +10,7 @@ public class StreamListTest: ApiTest {
 
     [Fact]
     public async Task ListFolders() {
-        Expression<Func<Task<HttpResponseMessage>>> request =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamListResponse);
+        var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamListResponse);
 
         IEnumerable<FolderState> actual = await Inoreader.Folders.List();
 
@@ -27,8 +24,7 @@ public class StreamListTest: ApiTest {
 
     [Fact]
     public async Task ListTags() {
-        Expression<Func<Task<HttpResponseMessage>>> request =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamListResponse);
+        var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamListResponse);
 
         IEnumerable<TagState> actual = await Inoreader.Tags.List();
 

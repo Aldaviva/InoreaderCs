@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Tests.Requests;
 
 public class StreamContentsTest: ApiTest {
@@ -18,17 +16,18 @@ public class StreamContentsTest: ApiTest {
 
     [Fact]
     public async Task ListArticlesInNewsfeed() {
-        Expression<Func<Task<HttpResponseMessage>>> streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+        var streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
             new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Fstate%2Fcom.google%2Freading-list?n=1&includeAllDirectStreamIds=true&annotations=1"), null,
             ArticlesResponse);
-        Expression<Func<Task<HttpResponseMessage>>> streamTypesRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+        var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
         DetailedArticles actual = await Inoreader.Newsfeed.ListArticlesDetailed(1, showAnnotations: true);
 
         actual.Title.Should().Be("Reading List");
         actual.UpdateTime.Should().Be(new DateTimeOffset(2025, 11, 1, 1, 46, 07, 29, 232, TimeSpan.FromHours(-7)));
         actual.PaginationToken!.Value.Continuation.Should().Be("hXN46UBaS1ZT");
+        actual.PaginationToken.Value.ToString().Should().Be("hXN46UBaS1ZT");
+        ((PaginationToken?) actual)!.Value.Continuation.Should().Be("hXN46UBaS1ZT");
 
         Article article = actual.Articles.Should().ContainSingle().Subject;
         article.Author.Should().Be("Andrew Webster");
@@ -67,10 +66,9 @@ public class StreamContentsTest: ApiTest {
 
     [Fact]
     public async Task ListArticlesInFolder() {
-        Expression<Func<Task<HttpResponseMessage>>> streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+        var streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
             new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FTechnology?n=1&includeAllDirectStreamIds=true&annotations=1"), null, ArticlesResponse);
-        Expression<Func<Task<HttpResponseMessage>>> streamTypesRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+        var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
         DetailedArticles actual = await Inoreader.Folders.ListArticlesDetailed("Technology", 1, showAnnotations: true);
         actual.Articles.Should().ContainSingle().Which.ShortId.Should().Be("46831741611");
@@ -81,10 +79,9 @@ public class StreamContentsTest: ApiTest {
 
     [Fact]
     public async Task ListArticlesInTag() {
-        Expression<Func<Task<HttpResponseMessage>>> streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+        var streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
             new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FTo%20watch?n=1&includeAllDirectStreamIds=true&annotations=1"), null, ArticlesResponse);
-        Expression<Func<Task<HttpResponseMessage>>> streamTypesRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+        var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
         DetailedArticles actual = await Inoreader.Tags.ListArticlesDetailed("To watch", 1, showAnnotations: true);
         actual.Articles.Should().ContainSingle().Which.ShortId.Should().Be("46831741611");
@@ -95,11 +92,10 @@ public class StreamContentsTest: ApiTest {
 
     [Fact]
     public async Task ListArticlesInSubscription() {
-        Expression<Func<Task<HttpResponseMessage>>> streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+        var streamContentsRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
             new Uri("https://www.inoreader.com/reader/api/0/stream/contents/feed%2Fhttps:%2F%2Fwww.theverge.com%2Frss%2Findex.xml?n=1&includeAllDirectStreamIds=true&annotations=1"), null,
             ArticlesResponse);
-        Expression<Func<Task<HttpResponseMessage>>> streamTypesRequest =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+        var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
         DetailedArticles actual = await Inoreader.Subscriptions.ListArticlesDetailed(new Uri("https://www.theverge.com/rss/index.xml"), 1, showAnnotations: true);
         actual.Articles.Should().ContainSingle().Which.ShortId.Should().Be("46831741611");

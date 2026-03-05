@@ -1,4 +1,6 @@
 using InoreaderCs.Auth;
+using System.Net.Http.Headers;
+using Unfucked.HTTP.Exceptions;
 using Unfucked.HTTP.Filters;
 
 namespace Tests.Auth;
@@ -39,6 +41,25 @@ public class AuthRequestFilterTest {
 
         filteredRequest.Headers.Authorization.Should().BeNull("wrong domain");
         filteredRequest.Headers.Should().NotContainKeys("AppId", "AppKey");
+    }
+
+    [Fact]
+    public async Task Errors() {
+        A.CallTo(() => _authClient.FetchValidUserToken()).Returns(new MalformedAuthToken());
+
+        using HttpRequestMessage req = new(HttpMethod.Get, "https://www.inoreader.com/reader/api/0/user-info");
+
+        await _filter.Invoking(async f => await f.Filter(req, new FilterContext(), CancellationToken.None)).Should().ThrowAsync<ProcessingException>();
+    }
+
+    private sealed class MalformedAuthToken: IUserAuthToken {
+
+        public AuthenticationHeaderValue AuthenticationHeaderValue => new("Bearer", "abc");
+
+        public IDictionary<string, object>? RequestHeaders { get; } = new Dictionary<string, object> {
+            ["invalid header name with spaces"] = "header value"
+        };
+
     }
 
 }

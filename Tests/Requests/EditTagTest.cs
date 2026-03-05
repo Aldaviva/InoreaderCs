@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Tests.Requests;
 
 public class EditTagTest: ApiTest {
@@ -13,8 +11,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task TagArticles() {
-        Expression<Func<Task<HttpResponseMessage>>> request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"),
-            "a=user%2F-%2Flabel%2FMy+tag&i=344691561&i=344668222", "OK");
+        var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"), "a=user%2F-%2Flabel%2FMy+tag&i=344691561&i=344668222", "OK");
 
         await Inoreader.Articles.TagArticles("My tag", articles: [
             new Article {
@@ -36,8 +33,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task UntagArticle() {
-        Expression<Func<Task<HttpResponseMessage>>> request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"),
-            "r=user%2F-%2Flabel%2FMy+tag&i=344691561", "OK");
+        var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"), "r=user%2F-%2Flabel%2FMy+tag&i=344691561", "OK");
 
         await Inoreader.Articles.UntagArticles("My tag", articles: [
             new Article {
@@ -53,8 +49,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task MarkArticleRead() {
-        Expression<Func<Task<HttpResponseMessage>>> request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"),
-            "a=user%2F-%2Fstate%2Fcom.google%2Fread&i=344691561", "OK");
+        var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"), "a=user%2F-%2Fstate%2Fcom.google%2Fread&i=344691561", "OK");
 
         await Inoreader.Articles.MarkArticles(ArticleState.Read, articles: [
             new Article {
@@ -70,8 +65,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task StarArticle() {
-        Expression<Func<Task<HttpResponseMessage>>> request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"),
-            "a=user%2F-%2Fstate%2Fcom.google%2Fstarred&i=344691561", "OK");
+        var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"), "a=user%2F-%2Fstate%2Fcom.google%2Fstarred&i=344691561", "OK");
 
         await Inoreader.Articles.MarkArticles(ArticleState.Starred, articles: [
             new Article {
@@ -87,8 +81,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task MarkArticleUnread() {
-        Expression<Func<Task<HttpResponseMessage>>> request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"),
-            "r=user%2F-%2Fstate%2Fcom.google%2Fread&i=344691561", "OK");
+        var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"), "r=user%2F-%2Fstate%2Fcom.google%2Fread&i=344691561", "OK");
 
         await Inoreader.Articles.UnmarkArticles(ArticleState.Read, articles: [
             new Article {
@@ -104,8 +97,7 @@ public class EditTagTest: ApiTest {
 
     [Fact]
     public async Task UnstarArticle() {
-        Expression<Func<Task<HttpResponseMessage>>> request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"),
-            "r=user%2F-%2Fstate%2Fcom.google%2Fstarred&i=344691561", "OK");
+        var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/edit-tag"), "r=user%2F-%2Fstate%2Fcom.google%2Fstarred&i=344691561", "OK");
 
         await Inoreader.Articles.UnmarkArticles(ArticleState.Starred, articles: [
             new Article {

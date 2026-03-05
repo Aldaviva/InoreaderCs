@@ -81,6 +81,47 @@ public class PasswordAuthClientTest: IDisposable {
             .WithInnerException<InoreaderException.Unauthorized, NotAuthorizedException>();
     }
 
+    [Fact]
+    public async Task ProcessingException() {
+        A.CallTo(() => _persister.LoadAuthTokens()).Returns<PersistedAuthTokens?>(null);
+
+        A.CallTo(() => _httpHandler.TestableSendAsync(An<HttpRequestMessage>.That.Matches(req =>
+            req.Method == HttpMethod.Post &&
+            req.RequestUri == new Uri("https://www.inoreader.com/accounts/ClientLogin")
+        ), A<CancellationToken>._)).Throws((HttpRequestMessage req, CancellationToken _) => new ProcessingException(new IOException("test error"), HttpExceptionParams.FromRequest(req)));
+
+        await _auth.Invoking(a => a.FetchValidUserToken()).Should().ThrowAsync<ProcessingException>();
+    }
+
+    [Fact]
+    public void OverrideHttpClient() {
+        PasswordAuthClient auth = new(_password, _persister, null, null);
+
+        UnfuckedHttpClient defaultHttpClient = (UnfuckedHttpClient) auth.HttpClient;
+
+        auth.HttpClient = _http;
+
+        var thrower = () => defaultHttpClient.Timeout = TimeSpan.FromMinutes(1);
+        thrower.Should().Throw<ObjectDisposedException>();
+
+        auth.Dispose();
+
+        ((UnfuckedHttpClient) _http).Timeout = TimeSpan.FromMinutes(1);
+    }
+
+    [Fact]
+    public void DefaultToHttpClientFrom() {
+        PasswordAuthClient       auth = new(_password, _persister, null, null);
+        using UnfuckedHttpClient http = new();
+
+        using InoreaderClient inoreader = new(new InoreaderOptions {
+            AuthClient = auth,
+            HttpClient = http
+        });
+
+        auth.HttpClient.Should().BeSameAs(http);
+    }
+
     public void Dispose() {
         _auth.Dispose();
         _http.Dispose();

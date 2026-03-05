@@ -13,7 +13,7 @@ namespace System.Runtime.CompilerServices {
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [ExcludeFromCodeCoverage]
-    internal class IsExternalInit;
+    internal sealed class IsExternalInit;
 
     // https://stackoverflow.com/a/74447498/979493
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property, Inherited = false)]

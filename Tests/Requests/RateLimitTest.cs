@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Mime;
 using System.Text;
 using Unfucked.HTTP.Exceptions;
+using Unfucked.HTTP.Filters;
 
 namespace Tests.Requests;
 
@@ -48,37 +49,66 @@ public class RateLimitTest: ApiTest {
 
     [Fact]
     public async Task RateLimitEvent() {
+        Captured<HttpRequestMessage> reqCaptor = A.Captured<HttpRequestMessage>();
+
+        HttpResponseMessage? response = null;
         A.CallTo(() => HttpHandler.TestableSendAsync(
-            An<HttpRequestMessage>.That.Matches(request => request.RequestUri == new Uri("https://www.inoreader.com/reader/api/0/user-info") && request.Method == HttpMethod.Get),
-            A<CancellationToken>._)).ReturnsLazily(async (HttpRequestMessage request, CancellationToken ct) => new HttpResponseMessage {
-            RequestMessage = request,
-            StatusCode     = HttpStatusCode.OK,
-            Headers = {
-                { "x-reader-zone1-usage", "2500" },
-                { "x-reader-zone1-limit", "5000" },
-                { "x-reader-zone2-usage", "500" },
-                { "x-reader-zone2-limit", "1000" },
-                { "x-reader-limits-reset-after", "43200" }
-            },
-            Content = new StringContent(
-                // language=json
-                """{ "userId": "1006195123", "userName": "aldaviva", "userProfileId": "1006195123", "userEmail": "user@aldaviva.com", "isBloggerUser": false, "signupTimeSec": 1517740194, "isMultiLoginEnabled": false }""",
-                Encoding.UTF8, MediaTypeNames.Application.Json)
+            reqCaptor.That.Matches(request => request.RequestUri == new Uri("https://www.inoreader.com/reader/api/0/user-info") && request.Method == HttpMethod.Get),
+            A<CancellationToken>._)).ReturnsLazily((HttpRequestMessage request, CancellationToken ct) => {
+            response = new HttpResponseMessage {
+                RequestMessage = request,
+                StatusCode     = HttpStatusCode.OK,
+                Headers = {
+                    { "x-reader-zone1-usage", "2500" },
+                    { "x-reader-zone1-limit", "5000" },
+                    { "x-reader-zone2-usage", "500" },
+                    { "x-reader-zone2-limit", "1000" },
+                    { "x-reader-limits-reset-after", "43200" }
+                },
+                Content = new StringContent(
+                    // language=json
+                    """{ "userId": "1006195123", "userName": "aldaviva", "userProfileId": "1006195123", "userEmail": "user@aldaviva.com", "isBloggerUser": false, "signupTimeSec": 1517740194, "isMultiLoginEnabled": false }""",
+                    Encoding.UTF8, MediaTypeNames.Application.Json)
+            };
+            return response;
         });
 
         using IMonitor<IInoreaderClient> eventListener = Inoreader.Monitor();
 
         _ = await Inoreader.Users.GetSelf();
 
-        eventListener.Should().Raise(nameof(IInoreaderClient.RateLimitStatisticsReceived)).WithArgs<RateLimitStatistics>(stats =>
-            stats.Zone1Used == 2500 &&
-            stats.Zone1Limit == 5000 &&
-            stats.Zone2Used == 500 &&
-            stats.Zone2Limit == 1000 &&
-            stats.TimePeriodElapsed == TimeSpan.FromHours(12) &&
-            stats.TimeRemainingBeforeReset == TimeSpan.FromHours(12) &&
-            Math.Abs(stats.TimePeriodPercentElapsed - 0.5) < 0.001 &&
-            Math.Abs(stats.UtilizationRate - 1) < 0.001);
+        eventListener.Should().Raise(nameof(IInoreaderClient.RateLimitStatisticsReceived)).WithArgs<RateLimitStatistics>(stats => MatchStats(stats));
+
+        RateLimitReader.Read(reqCaptor.GetLastValue()).Should().NotBeNull().And.Match<RateLimitStatistics>(stats => MatchStats(stats));
+
+        RateLimitReader.Read(response!).Should().NotBeNull().And.Match<RateLimitStatistics>(stats => MatchStats(stats));
+    }
+
+    private static bool MatchStats(RateLimitStatistics stats) =>
+        stats.Zone1Used == 2500 &&
+        stats.Zone1Limit == 5000 &&
+        stats.Zone2Used == 500 &&
+        stats.Zone2Limit == 1000 &&
+        stats.TimePeriodElapsed == TimeSpan.FromHours(12) &&
+        stats.TimeRemainingBeforeReset == TimeSpan.FromHours(12) &&
+        Math.Abs(stats.TimePeriodPercentElapsed - 0.5) < 0.001 &&
+        Math.Abs(stats.UtilizationRate - 1) < 0.001;
+
+    [Fact]
+    public async Task Errors() {
+        RateLimitReader rateLimitReader = new();
+        using HttpResponseMessage response = new() {
+            StatusCode = HttpStatusCode.OK,
+            Headers = {
+                { "x-reader-zone1-usage", "hargle" },
+                { "x-reader-zone1-limit", "blargle" },
+                { "x-reader-zone2-usage", "wharrgarbl" },
+                { "x-reader-zone2-limit", "1000" },
+                { "x-reader-limits-reset-after", "43200" }
+            }
+        };
+
+        await rateLimitReader.Invoking(async r => await r.Filter(response, new FilterContext(), CancellationToken.None)).Should().ThrowAsync<ProcessingException>();
     }
 
 }

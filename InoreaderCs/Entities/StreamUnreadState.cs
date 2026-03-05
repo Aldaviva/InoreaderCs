@@ -35,6 +35,6 @@ public record SubscriptionUnreadCounts(IDictionary<Uri, StreamUnreadState> Subsc
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
 public record NewsfeedUnreadCounts(StreamUnreadState AllArticles, int StarredArticleCount, int MaxDisplayableCount);
 
-internal record UnreadCountResponses(int Max, IEnumerable<UnreadCountResponse> UnreadCounts);
+internal sealed record UnreadCountResponses(int Max, IEnumerable<UnreadCountResponse> UnreadCounts);
 
-internal record UnreadCountResponse(StreamId Id, int Count, [property: JsonPropertyName("newestItemTimestampUsec")] DateTimeOffset? NewestArticleTime);
+internal sealed record UnreadCountResponse(StreamId Id, int Count, [property: JsonPropertyName("newestItemTimestampUsec")] DateTimeOffset? NewestArticleTime);

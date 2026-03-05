@@ -2,7 +2,7 @@ using InoreaderCs.Entities;
 
 namespace InoreaderCs.Requests;
 
-internal partial class ClientRequests {
+internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     async Task<IEnumerable<FolderState>> IInoreaderClient.IFolderMethods.List(CancellationToken cancellationToken) =>

@@ -47,13 +47,13 @@ dotnet add package InoreaderCs
 
 Like [IsaacSchemm/InoreaderFs](https://github.com/IsaacSchemm/InoreaderFs), but not fucked up:
 
-- Correctly send the `ot` query parameter to `stream/items/ids` in microsecond format, not seconds, so it isn't ignored.
+- Correctly sends the `ot` query parameter to `stream/items/ids` in microsecond format, not seconds, so it isn't ignored.
 - Has a built-in OAuth2 client with smart refresh logic as well as a password-based auth client, both of which make auth requests automatically and support pluggable persistence strategies.
-- Observe rate-limiting statistics.
+- Observes and exposes rate-limiting statistics.
 - Uses modern, interchangeable, customizable `HttpClient` instead of ancient, disgusting `HttpWebRequest`.
 - Allows you to set custom HTTP request headers, such as `User-Agent`.
-- Easily gets article's read and starred state, short ID, description, and original feed name and URL.
-- Instances are configurable because they are not static classes, so you don't need to supply authentication to literally every request, you can just set it up once, for example in an IoC context, and not have to pass it around your entire codebase.
+- Easily gets articles' read and starred states, short IDs, descriptions, and original feed names and URLs.
+- Instances are configurable because they are not static classes, so you don't need to supply authentication to literally every request. You can just set it up once, for example in an IoC context, and not have to pass it around your entire codebase.
 - Interfaces allow mocking and interchangeability, instead of everything being sealed static classes.
 - Hierarchical interface structure makes it easier to find the API method you want and understand what it applies to.
 - Facade pattern hides the complexity of the Inoreader API's very overloaded methods with lots of conditionally valid parameters.
@@ -187,6 +187,7 @@ NewsfeedUnreadCounts unreadResponse = await inoreader.Newsfeed.GetUnreadCounts()
 int unreadCount = unreadResponse.AllArticles.UnreadCount;
 string unreadLabel = $"{unreadCount:N0}{(unreadCount == unreadResponse.MaxDisplayableCount ? "+" : "")}";
 ```
+You can also get the number of unread articles for each subscription, folder, or tag.
 
 ### List subscriptions, folders, or tags
 ```cs

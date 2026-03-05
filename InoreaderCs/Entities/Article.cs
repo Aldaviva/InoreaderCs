@@ -21,6 +21,12 @@ public abstract record BaseArticle {
     [JsonPropertyName("timestampUsec")]
     public required DateTimeOffset CrawlTime { get; init; }
 
+    /// <inheritdoc />
+    public virtual bool Equals(BaseArticle? other) => other is not null && (ReferenceEquals(this, other) || CrawlTime.Equals(other.CrawlTime));
+
+    /// <inheritdoc />
+    public override int GetHashCode() => CrawlTime.GetHashCode();
+
 }
 
 /// <summary>
@@ -57,11 +63,11 @@ public record Article: BaseArticle {
     [JsonIgnore]
     public IImmutableSet<string> Tags { get; private set; } = ImmutableHashSet<string>.Empty;
 
-    internal async Task SetCategories(LabelNameCache.Labels labels) {
+    internal void SetCategories(LabelNameCache.Labels labels) {
         HashSet<string> folders = [];
         HashSet<string> tags    = [];
         foreach (StreamId category in Categories) {
-            if (category.LabelName is { } labelName) {
+            if (category.LabelName is {} labelName) {
                 if (labels.Folders.Contains(labelName)) {
                     folders.Add(labelName);
                 } else { // tag or unknown, possibly due to stale tag list cache, so assume new tag
@@ -149,16 +155,16 @@ public record Article: BaseArticle {
     /// </summary>
     public bool IsRead => Categories.Contains(StreamId.Read);
 
-    /// <inheritdoc cref="Equals(object)" />
-    public virtual bool Equals(Article? other) => other is not null && (ReferenceEquals(this, other) || CrawlTime.Equals(other.CrawlTime));
+    /// <inheritdoc />
+    public virtual bool Equals(Article? other) => base.Equals(other);
 
-    /// <inheritdoc cref="GetHashCode" />
-    public override int GetHashCode() => CrawlTime.GetHashCode();
+    /// <inheritdoc />
+    public override int GetHashCode() => base.GetHashCode();
 
-    private record Origin(StreamId StreamId, string Title, Uri HtmlUrl);
+    private sealed record Origin(StreamId StreamId, string Title, Uri HtmlUrl);
 
-    private record SummaryContainer(string Content);
+    private sealed record SummaryContainer(string Content);
 
-    private record Link(Uri Href, MediaTypeHeaderValue? Type = null);
+    private sealed record Link(Uri Href, MediaTypeHeaderValue? Type = null);
 
 }

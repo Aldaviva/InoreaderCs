@@ -4,7 +4,7 @@ using Unfucked.HTTP.Filters;
 
 namespace InoreaderCs.Auth;
 
-internal class AuthRequestFilter(IAuthClient authClient): ClientRequestFilter {
+internal sealed class AuthRequestFilter(IAuthClient authClient): ClientRequestFilter {
 
     /// <exception cref="ProcessingException"></exception>
     /// <exception cref="InoreaderException.Unauthorized"></exception>

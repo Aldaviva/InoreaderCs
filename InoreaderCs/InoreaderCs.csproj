@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-        <Version>0.0.1-beta.6</Version>
+        <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
+        <Version>0.0.1-beta.7</Version>
         <Authors>Ben Hutchison</Authors>
-        <Copyright>© 2025 $(Authors)</Copyright>
+        <Copyright>© 2026 $(Authors)</Copyright>
         <Company>$(Authors)</Company>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>
-        <NoWarn>$(NoWarn);8524;IDE0057</NoWarn>
+        <NoWarn>$(NoWarn);IDE0057</NoWarn>
         <PackageProjectUrl>https://github.com/Aldaviva/InoreaderCs</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Aldaviva/InoreaderCs.git</RepositoryUrl>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -25,9 +25,6 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
-        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-        <!-- System.Net.Http.Json 9 and dependencies are only tested on .NET ≥ 8, but we need it because that is the lowest version that provides JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object -->
-        <!-- This also means that single-file framework-dependent roll-forward .NET Core apps must target .NET ≥ 9, because .NET < 9 don't have a new enough provided System.Text.Json, and bundling our own copy of a newer version (like 9) will break forwards compatibility if the runtime provides an even newer version (like 10). -->
     </PropertyGroup>
 
     <ItemGroup>
@@ -39,10 +36,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-        <PackageReference Include="System.Net.Http.Json" Version="9.0.11" /> <!-- 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties -->
-        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.22" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" PrivateAssets="All" />
+        <!-- System.Net.Http.Json 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object. -->
+        <PackageReference Include="System.Net.Http.Json" Version="9.0.13" />
+        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.24" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' != 'Debug'">

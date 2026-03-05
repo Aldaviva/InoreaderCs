@@ -36,4 +36,57 @@ internal static class Extensions {
     /// <returns></returns>
     public static JsonConverter<T> ToNonNullable<T>(this JsonConverter<T?> nullableConverter) where T: struct => new NonNullableStructReader<T>(nullableConverter);
 
+    /// <summary>
+    /// Streams in .NET Standard 2.0 are not async disposable
+    /// </summary>
+    public static IAsyncDisposable AsAsyncDisposable(this Stream stream) {
+#if NETSTANDARD2_0
+        return new AsyncDisposableStream(stream);
+#else
+        return stream;
+#endif
+    }
+
+#if NETSTANDARD2_0
+    private sealed class AsyncDisposableStream(Stream inner): Stream, IAsyncDisposable {
+
+        #region Delegated
+
+        public override bool CanRead => inner.CanRead;
+        public override bool CanSeek => inner.CanSeek;
+        public override bool CanWrite => inner.CanWrite;
+        public override long Length => inner.Length;
+
+        public override long Position {
+            get => inner.Position;
+            set => inner.Position = value;
+        }
+
+        public override void Flush() => inner.Flush();
+
+        public override int Read(byte[] buffer, int offset, int count) => inner.Read(buffer, offset, count);
+
+        public override long Seek(long offset, SeekOrigin origin) => inner.Seek(offset, origin);
+
+        public override void SetLength(long value) => inner.SetLength(value);
+
+        public override void Write(byte[] buffer, int offset, int count) => inner.Write(buffer, offset, count);
+
+        #endregion
+
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                inner.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        public ValueTask DisposeAsync() {
+            Dispose(true);
+            return new ValueTask();
+        }
+
+    }
+#endif
+
 }

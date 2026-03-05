@@ -1,9 +1,9 @@
 namespace InoreaderCs.Entities;
 
-internal record SubscriptionListResponse {
+internal sealed record SubscriptionListResponse {
 
     public required IReadOnlyList<Subscription> Subscriptions { get; init; }
 
 }
 
-internal record MinimalFolder(StreamId Id, string Label);
+internal sealed record MinimalFolder(StreamId Id, string Label);

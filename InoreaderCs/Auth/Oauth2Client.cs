@@ -67,7 +67,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
             if (CachedPersistedTokenResponses?.AccessToken is null) {
                 _logger.LogDebug("Loading saved auth token...");
                 CachedPersistedTokenResponses ??= new PersistedAuthTokens();
-                if (await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false) is { } loadedAuthTokens) {
+                if (await AuthTokenPersister.LoadAuthTokens().ConfigureAwait(false) is {} loadedAuthTokens) {
                     CachedPersistedTokenResponses.LoadDefaults(loadedAuthTokens);
                 }
             }
@@ -78,7 +78,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 CachedPersistedTokenResponses.Load(response);
                 _logger.LogInformation("Successfully authorized with a new auth token.");
                 shouldSave = true;
-            } else if (CachedPersistedTokenResponses.Expiration?.Subtract(EarlyRefreshPeriod) < DateTimeOffset.Now && CachedPersistedTokenResponses.RefreshToken is { } refreshToken) {
+            } else if (CachedPersistedTokenResponses.Expiration?.Subtract(EarlyRefreshPeriod) < DateTimeOffset.Now && CachedPersistedTokenResponses.RefreshToken is {} refreshToken) {
                 try {
                     _logger.LogDebug("Saved auth token is too old (expired {expiration:F}), refreshing it...", CachedPersistedTokenResponses.Expiration);
                     CachedPersistedTokenResponses.Load(await RefreshAuthToken(refreshToken).ConfigureAwait(false));
@@ -188,7 +188,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
                 throw new InoreaderException.Unauthorized($"Failed to get auth token: {(int) e.StatusCode} {ParseError(e.ResponseBody)?["error_description"]?.GetValue<string>()}", e);
             } catch (JsonException e2) {
                 throw new ProcessingException(e2, new HttpExceptionParams(e.Verb, e.RequestUrl, e.ResponseHeaders, e.ResponseBody, e.RequestProperties));
-            } catch (FormatException e2) {
+            } catch (InvalidOperationException e2) {
                 throw new ProcessingException(e2, new HttpExceptionParams(e.Verb, e.RequestUrl, e.ResponseHeaders, e.ResponseBody, e.RequestProperties));
             }
         } catch (ProcessingException e) {

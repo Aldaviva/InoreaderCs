@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 namespace Tests.Requests;
 
 public class FeedsTest: ApiTest {
@@ -12,8 +10,7 @@ public class FeedsTest: ApiTest {
 
     [Fact]
     public async Task FeedsList() {
-        Expression<Func<Task<HttpResponseMessage>>> request =
-            RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/subscription/list"), null, FeedListResponse);
+        var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/subscription/list"), null, FeedListResponse);
 
         IEnumerable<Subscription> actual = await Inoreader.Subscriptions.List();
 
