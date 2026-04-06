@@ -41,7 +41,7 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" PrivateAssets="All" />
         <!-- System.Net.Http.Json 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object. -->
         <PackageReference Include="System.Net.Http.Json" Version="9.0.13" />
-        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.24" />
+        <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.27" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' != 'Debug'">
