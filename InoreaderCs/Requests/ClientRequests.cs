@@ -77,7 +77,7 @@ internal sealed partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task<int> MarkArticles(StreamId label, bool removeLabel, CancellationToken cancellationToken, params IEnumerable<string> articleIds) {
         try {
-            List<KeyValuePair<string, string>> articleIdFormParams = articleIds.Select(id => new KeyValuePair<string, string>("i", id)).ToList();
+            List<KeyValuePair<string, string>> articleIdFormParams = articleIds.Select(static id => new KeyValuePair<string, string>("i", id)).ToList();
 
             if (articleIdFormParams.Count != 0) {
                 await using IAsyncDisposable response = (await ApiBase
@@ -202,12 +202,12 @@ internal sealed partial class ClientRequests(InoreaderClient client):
 
         // ReSharper disable once RedundantEnumerableCastCall - it's changing nullability, so it's not redundant, and it prevents warnings
         return new LabelUnreadCounts(unreadCounts.UnreadCounts
-                .Select(response => (response, labelNameOrNull: response.Id.LabelName))
-                .Where(responseWithLabel => responseWithLabel.labelNameOrNull is not null)
+                .Select(static response => (response, labelNameOrNull: response.Id.LabelName))
+                .Where(static responseWithLabel => responseWithLabel.labelNameOrNull is not null)
                 .Cast<(UnreadCountResponse response, string labelName)>()
                 .Where(responseWithLabel => tagsInsteadOfFolders != folderNames.Contains(responseWithLabel.labelName))
-                .ToDictionary(responseWithLabel => responseWithLabel.labelName,
-                    responseWithLabel => new StreamUnreadState(responseWithLabel.response.Count, responseWithLabel.response.NewestArticleTime)),
+                .ToDictionary(static responseWithLabel => responseWithLabel.labelName,
+                    static responseWithLabel => new StreamUnreadState(responseWithLabel.response.Count, responseWithLabel.response.NewestArticleTime)),
             unreadCounts.Max);
     }
 

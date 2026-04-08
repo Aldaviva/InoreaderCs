@@ -40,7 +40,7 @@
 ## Installation
 
 ```ps1
-dotnet add package InoreaderCs
+dotnet package add InoreaderCs
 ```
 
 ## Features

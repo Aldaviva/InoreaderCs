@@ -6,7 +6,7 @@ namespace InoreaderCs.Entities;
 /// Response container envelope for listing articles.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/stream-contents"/></remarks>
-public record DetailedArticles: PaginatedListResponse {
+public sealed record DetailedArticles: PaginatedListResponse {
 
     /// <summary>
     /// The name of the stream that was requested, such as <c>Reading List</c>.

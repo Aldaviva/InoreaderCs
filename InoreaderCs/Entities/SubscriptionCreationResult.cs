@@ -6,7 +6,7 @@ namespace InoreaderCs.Entities;
 /// The response received by the client when a new subscription to a feed is added.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/add-subscription"/></remarks>
-public record SubscriptionCreationResult {
+public sealed record SubscriptionCreationResult {
 
     [JsonInclude]
     private int NumResults { get; init; }

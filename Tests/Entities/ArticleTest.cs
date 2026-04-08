@@ -33,4 +33,9 @@ public class ArticleTest {
         a1.GetHashCode().Should().NotBe(b.GetHashCode());
     }
 
+    [Fact]
+    public void ArticleMustBeSubclassable() {
+        typeof(Article).Should().NotBeSealed();
+    }
+
 }

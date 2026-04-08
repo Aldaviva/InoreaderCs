@@ -8,7 +8,7 @@ namespace InoreaderCs.Auth;
 public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister, IHttpClient? httpClient): IAuthClient {
 
     internal IHttpClient? OverriddenHttpClient { get; private set; } = httpClient;
-    private readonly Lazy<IHttpClient> _defaultHttpClient = new(() => new UnfuckedHttpClient(), LazyThreadSafetyMode.PublicationOnly);
+    private readonly Lazy<IHttpClient> _defaultHttpClient = new(static () => new UnfuckedHttpClient(), LazyThreadSafetyMode.PublicationOnly);
 
     /// <summary>
     /// HTTP client used when requesting auth tokens.

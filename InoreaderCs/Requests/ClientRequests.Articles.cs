@@ -10,7 +10,7 @@ internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.MarkArticles(ArticleState markState, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
-        ((IInoreaderClient.IArticleMethods) this).MarkArticles(markState, articles.Select(article => article.ShortId), cancellationToken);
+        ((IInoreaderClient.IArticleMethods) this).MarkArticles(markState, articles.Select(static article => article.ShortId), cancellationToken);
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState unmarkState, IEnumerable<string> articleIds, CancellationToken cancellationToken) =>
@@ -18,7 +18,7 @@ internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState unmarkState, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
-        ((IInoreaderClient.IArticleMethods) this).UnmarkArticles(unmarkState, articles.Select(article => article.ShortId), cancellationToken);
+        ((IInoreaderClient.IArticleMethods) this).UnmarkArticles(unmarkState, articles.Select(static article => article.ShortId), cancellationToken);
 
     /// <inheritdoc />
     async Task IInoreaderClient.IArticleMethods.TagArticles(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken) {
@@ -30,7 +30,7 @@ internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.TagArticles(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
-        ((IInoreaderClient.IArticleMethods) this).TagArticles(tag, articles.Select(article => article.ShortId), cancellationToken);
+        ((IInoreaderClient.IArticleMethods) this).TagArticles(tag, articles.Select(static article => article.ShortId), cancellationToken);
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.UntagArticles(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken) =>
@@ -38,6 +38,6 @@ internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     Task IInoreaderClient.IArticleMethods.UntagArticles(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken) =>
-        ((IInoreaderClient.IArticleMethods) this).UntagArticles(tag, articles.Select(article => article.ShortId), cancellationToken);
+        ((IInoreaderClient.IArticleMethods) this).UntagArticles(tag, articles.Select(static article => article.ShortId), cancellationToken);
 
 }

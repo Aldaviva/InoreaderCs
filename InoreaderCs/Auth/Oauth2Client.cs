@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Collections;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -132,7 +133,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                 CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expectedCsrfToken), Encoding.UTF8.GetBytes(consentResult.CsrfToken))
 #else
-                Encoding.UTF8.GetBytes(expectedCsrfToken).Zip(Encoding.UTF8.GetBytes(consentResult.CsrfToken), (a, b) => a == b).Aggregate(true, (p, n) => p && n)
+                Encoding.UTF8.GetBytes(expectedCsrfToken).Zip(Encoding.UTF8.GetBytes(consentResult.CsrfToken), static (a, b) => a == b).Aggregate(true, static (p, n) => p && n)
 #endif
                ) {
 
@@ -166,7 +167,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <exception cref="ProcessingException"></exception>
     /// <exception cref="InoreaderException.Unauthorized"></exception>
     private Task<Oauth2TokenResponse> RefreshAuthToken(string refreshToken) =>
-        RequestOAuthToken("refresh_token", Singleton.Dictionary("refresh_token", refreshToken));
+        RequestOAuthToken("refresh_token", IDictionary.Singleton("refresh_token", refreshToken));
 
     /// <summary>
     /// Exchange some credentials (like an authorization code or refresh token) for a new access token and refresh token.
@@ -174,7 +175,7 @@ public abstract class Oauth2Client: AbstractAuthClient {
     /// <exception cref="InoreaderException.Unauthorized"></exception>
     /// <exception cref="ProcessingException"></exception>
     private async Task<Oauth2TokenResponse> RequestOAuthToken(string grantType, IEnumerable<KeyValuePair<string, string>> requestBody) {
-        FormUrlEncodedContent body = new(new Dictionary<string, string>(requestBody.ToDictionary(pair => pair.Key, pair => pair.Value)) {
+        FormUrlEncodedContent body = new(new Dictionary<string, string>(requestBody.ToDictionary(static pair => pair.Key, static pair => pair.Value)) {
             { "client_id", _oauthParameters.AppId.ToString() },
             { "client_secret", _oauthParameters.AppKey },
             { "grant_type", grantType }

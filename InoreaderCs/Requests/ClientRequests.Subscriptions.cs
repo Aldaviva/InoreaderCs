@@ -76,11 +76,11 @@ internal sealed partial class ClientRequests {
 
         // ReSharper disable once RedundantEnumerableCastCall - it's changing nullability, so it's not redundant, and it prevents warnings
         return new SubscriptionUnreadCounts(unreadCounts.UnreadCounts
-                .Select(response => (response, feedUriOrNull: response.Id.FeedUri))
-                .Where(responseWithLabel => responseWithLabel.feedUriOrNull is not null)
+                .Select(static response => (response, feedUriOrNull: response.Id.FeedUri))
+                .Where(static responseWithLabel => responseWithLabel.feedUriOrNull is not null)
                 .Cast<(UnreadCountResponse response, Uri feedUri)>()
-                .ToDictionary(responseWithLabel => responseWithLabel.feedUri,
-                    responseWithLabel => new StreamUnreadState(responseWithLabel.response.Count, responseWithLabel.response.NewestArticleTime)),
+                .ToDictionary(static responseWithLabel => responseWithLabel.feedUri,
+                    static responseWithLabel => new StreamUnreadState(responseWithLabel.response.Count, responseWithLabel.response.NewestArticleTime)),
             unreadCounts.Max);
     }
 

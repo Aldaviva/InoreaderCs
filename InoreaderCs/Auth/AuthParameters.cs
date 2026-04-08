@@ -5,7 +5,7 @@ namespace InoreaderCs.Auth;
 /// </summary>
 /// <param name="AppId">The OAuth2 app's unique client ID.</param>
 /// <param name="AppKey">The OAuth2 app's client secret key.</param>
-public record Oauth2Parameters(int AppId, string AppKey);
+public sealed record Oauth2Parameters(int AppId, string AppKey);
 
 /// <summary>
 /// User and client app inputs to the password authorization flow used by <see cref="PasswordAuthClient"/>.
@@ -14,4 +14,4 @@ public record Oauth2Parameters(int AppId, string AppKey);
 /// <param name="UserPassword">The Inoreader user's password.</param>
 /// <param name="AppId">The app's unique client ID.</param>
 /// <param name="AppKey">The app's client secret key.</param>
-public record PasswordAuthParameters(string UserEmailAddress, string UserPassword, int AppId, string AppKey);
+public sealed record PasswordAuthParameters(string UserEmailAddress, string UserPassword, int AppId, string AppKey);

@@ -10,7 +10,7 @@ namespace InoreaderCs.RateLimit;
 /// <param name="Zone2Limit">Total quota of write requests this app can make in a 24 hour period (not the number remaining in the day).</param>
 /// <param name="TimeRemainingBeforeReset">The amount of time between the response and the usage being reset, which occurs at midnight in <c>Europe/Sofia</c> every day.</param>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/rate-limiting"/></remarks>
-public record RateLimitStatistics(int Zone1Used, int Zone2Used, int Zone1Limit, int Zone2Limit, TimeSpan TimeRemainingBeforeReset) {
+public sealed record RateLimitStatistics(int Zone1Used, int Zone2Used, int Zone1Limit, int Zone2Limit, TimeSpan TimeRemainingBeforeReset) {
 
     private static readonly TimeSpan RateLimitPeriod = TimeSpan.FromHours(24);
 

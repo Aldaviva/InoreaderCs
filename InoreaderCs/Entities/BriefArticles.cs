@@ -6,7 +6,7 @@ namespace InoreaderCs.Entities;
 /// Response envelope container for <see cref="IInoreaderClient.INewsfeedMethods.ListArticlesBrief"/>.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/item-ids"/></remarks>
-public record BriefArticles: PaginatedListResponse {
+public sealed record BriefArticles: PaginatedListResponse {
 
     /// <summary>
     /// Zero or more minimal articles.
@@ -20,11 +20,11 @@ public record BriefArticles: PaginatedListResponse {
 /// One news article, item, entry, or post from a feed. Contains only a minimal projection of properties from the full <see cref="Article"/> to save bandwidth, and acts as a pointer or reference to articles by only including the <see cref="ShortId"/>, <see cref="BaseArticle.CrawlTime"/>, and <see cref="DirectStreamIds"/>.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/item-ids"/></remarks>
-public record BriefArticle: BaseArticle {
+public sealed record BriefArticle: BaseArticle {
 
     /// <inheritdoc cref="BriefArticle" />
     public BriefArticle() {
-        _foldersAndTags = new Lazy<ISet<string>>(() => new HashSet<string>(DirectStreamIds.Select(id => id.LabelName!)), LazyThreadSafetyMode.PublicationOnly);
+        _foldersAndTags = new Lazy<ISet<string>>(() => new HashSet<string>(DirectStreamIds.Select(static id => id.LabelName!)), LazyThreadSafetyMode.PublicationOnly);
     }
 
     /// <inheritdoc />

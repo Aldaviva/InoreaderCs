@@ -6,11 +6,11 @@ namespace InoreaderCs.Entities;
 /// A followed feed.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/subscription-list"/></remarks>
-public record Subscription {
+public sealed record Subscription {
 
     /// <inheritdoc cref="Subscription" />
     public Subscription() {
-        _folders = new Lazy<ISet<string>>(() => new HashSet<string>(Categories.Select(folder => folder.Label)), LazyThreadSafetyMode.PublicationOnly);
+        _folders = new Lazy<ISet<string>>(() => new HashSet<string>(Categories.Select(static folder => folder.Label)), LazyThreadSafetyMode.PublicationOnly);
     }
 
     // public required StreamId Id { get; init; }

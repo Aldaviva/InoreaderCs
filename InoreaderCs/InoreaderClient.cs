@@ -17,6 +17,7 @@ namespace InoreaderCs;
 /// <para>Once you have an instance, you can send API requests by calling methods like <see cref="Newsfeed"/>.<c>ListArticlesDetailed</c>.</para>
 /// </summary>
 /// <remarks>See <see href="https://www.inoreader.com/developers/"/></remarks>
+// ReSharper disable once ClassCanBeSealed.Global - Used for testing (LabelNameCacheTest)
 public class InoreaderClient: IInoreaderClient {
 
     internal static readonly Uri ApiRoot = new("https://www.inoreader.com/");

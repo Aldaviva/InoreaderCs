@@ -8,7 +8,7 @@ namespace InoreaderCs.Auth;
 /// 2-legged Inoreader authentication client that logs in with a user's email address, password, and a registered API app's ID and secret key, not OAuth2.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/auth"/></remarks>
-public class PasswordAuthClient: AbstractAuthClient {
+public sealed class PasswordAuthClient: AbstractAuthClient {
 
     private readonly ILogger<PasswordAuthClient> _logger;
     private readonly PasswordAuthParameters      _passwordAuthParameters;
@@ -77,13 +77,13 @@ public class PasswordAuthClient: AbstractAuthClient {
         try {
             string responseBody = await HttpClient.Target(InoreaderClient.ApiRoot)
                 .Path("accounts/ClientLogin")
-                .Header(HttpHeaders.USER_AGENT, "Inoreader Android v7.9.6")
+                .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.6")
                 .Post<string>(requestBody).ConfigureAwait(false);
 
             Dictionary<string, string> responseMap = responseBody.Trim()
                 .Split('\n')
-                .Select(line => line.Split(['='], 2))
-                .ToDictionary(split => split[0], split => split[1]);
+                .Select(static line => line.Split(['='], 2))
+                .ToDictionary(static split => split[0], static split => split[1]);
 
             return responseMap["Auth"];
         } catch (WebApplicationException e) {

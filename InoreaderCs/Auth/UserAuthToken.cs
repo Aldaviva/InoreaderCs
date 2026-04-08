@@ -23,7 +23,7 @@ public interface IUserAuthToken {
 /// An OAuth2 user authentication token for the Inoreader HTTP API.
 /// </summary>
 /// <param name="userToken">The OAuth2 access token.</param>
-public class Oauth2UserToken(string userToken): IUserAuthToken {
+public sealed class Oauth2UserToken(string userToken): IUserAuthToken {
 
     /// <inheritdoc />
     public AuthenticationHeaderValue AuthenticationHeaderValue => new("Bearer", userToken);
@@ -40,7 +40,7 @@ public class Oauth2UserToken(string userToken): IUserAuthToken {
 /// <param name="userToken">The user auth token.</param>
 /// <param name="appId">The registered ID of an Inoreader client app.</param>
 /// <param name="appKey">The registered secret of an Inoreader client app.</param>
-public class UserPasswordToken(string userToken, int appId, string appKey): IUserAuthToken {
+public sealed class UserPasswordToken(string userToken, int appId, string appKey): IUserAuthToken {
 
     /// <inheritdoc />
     public AuthenticationHeaderValue AuthenticationHeaderValue => new("GoogleLogin", "auth=" + userToken);

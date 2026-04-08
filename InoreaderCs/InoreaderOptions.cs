@@ -5,7 +5,7 @@ namespace InoreaderCs;
 /// <summary>
 /// Parameters used in the construction of new <see cref="InoreaderClient"/> instances.
 /// </summary>
-public record InoreaderOptions {
+public sealed record InoreaderOptions {
 
     /// <summary>Provides authentication, using either OAuth2 (<see cref="Oauth2Client"/>) or a user's password (<see cref="PasswordAuthClient"/>). Required.</summary>
     public required IAuthClient AuthClient { get; set; }

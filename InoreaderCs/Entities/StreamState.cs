@@ -49,7 +49,7 @@ public abstract record LabelState: StreamState {
 /// Unread counts and timestamp high water mark for a folder.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/unread-counts"/></remarks>
-public record FolderState: LabelState;
+public sealed record FolderState: LabelState;
 
 /// <summary>
 /// Unread counts and timestamp high water mark for a tag.

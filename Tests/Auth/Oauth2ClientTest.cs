@@ -55,7 +55,7 @@ public class Oauth2ClientTest: IDisposable {
     public async Task Miss() {
         A.CallTo(() => _persister.LoadAuthTokens()).Returns<PersistedAuthTokens?>(null);
 
-        ShowConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult("ghi", consentUri.GetQuery()["state"], null, null));
+        ShowConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult("ghi", consentUri.QueryParams["state"], null, null));
 
         var authorizationRequest = _requestMocker.MockJsonHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/oauth2/token"),
             "code=ghi&redirect_uri=http%3A%2F%2Flocalhost%2Foauth2%2Fcallback&scope=&client_id=123&client_secret=abc&grant_type=authorization_code",
@@ -139,7 +139,7 @@ public class Oauth2ClientTest: IDisposable {
             Expiration   = DateTimeOffset.Now.AddMinutes(-5)
         });
 
-        ShowConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult("ghi", consentUri.GetQuery()["state"], null, null));
+        ShowConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult("ghi", consentUri.QueryParams["state"], null, null));
 
         var failedRefreshRequest = _requestMocker.MockJsonHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/oauth2/token"),
             "refresh_token=mno&client_id=123&client_secret=abc&grant_type=refresh_token", """{ "error_description": "your refresh token expired dawg" }""", HttpStatusCode.Unauthorized);
@@ -173,7 +173,7 @@ public class Oauth2ClientTest: IDisposable {
 
     [Fact]
     public async Task Errors() {
-        ShowConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult("ghi", consentUri.GetQuery()["state"], null, null));
+        ShowConsentPageToUser.ReturnsLazily((Uri consentUri, Uri codeReceiverCallbackUri, Task authorizationSuccess) => new ConsentResult("ghi", consentUri.QueryParams["state"], null, null));
 
         A.CallTo(() => _persister.LoadAuthTokens()).Returns<PersistedAuthTokens?>(null);
 

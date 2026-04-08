@@ -6,7 +6,7 @@ namespace InoreaderCs.Entities;
 /// A custom user annotation or note added to an article.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/stream-contents"/></remarks>
-public record Annotation {
+public sealed record Annotation {
 
     /// <summary>
     /// Unique ID of this annotation.

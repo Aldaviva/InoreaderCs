@@ -33,6 +33,7 @@ public abstract record BaseArticle {
 /// <para>One news article, item, entry, or post from a feed. Contains all properties of the article.</para>
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/stream-contents#:~:text=Description%20of%20the%20items%20list%3A"/></remarks>
+// ReSharper disable once ClassCanBeSealed.Global - FeedAssistant subclasses this to add additional properties
 public record Article: BaseArticle {
 
     /// <summary>
@@ -49,7 +50,7 @@ public record Article: BaseArticle {
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring("tag:google.com,2005:reader/item/".Length), 16));
 
     [JsonInclude]
-    private ISet<StreamId> Categories { get; init; } = new HashSet<StreamId>();
+    private HashSet<StreamId> Categories { get; init; } = [];
 
     /// <summary>
     /// Zero or more folders that this article feed's subscription is organized into. If the <c>showFolders</c> argument to <seealso cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/> is set to <c>false</c>, this will be the empty set.
