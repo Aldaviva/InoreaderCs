@@ -46,7 +46,7 @@
     
     <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
         <!-- System.Net.Http.Json 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object. -->
-        <PackageReference Include="System.Text.Json" Version="10.0.6" />
+        <PackageReference Include="System.Text.Json" Version="10.0.7" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' or '$(Configuration)' != 'Debug'">
