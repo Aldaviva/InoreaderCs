@@ -6,15 +6,27 @@ internal sealed partial class ClientRequests {
 
     /// <inheritdoc />
     Task<DetailedArticles> IInoreaderClient.INewsfeedMethods.ListArticlesDetailed(int maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,
-                                                                                  PaginationToken? pagination,
-                                                                                  bool sortAscending, bool showFolders, bool showAnnotations, CancellationToken cancellationToken) =>
+                                                                                  PaginationToken? pagination, bool sortAscending, bool showFolders, bool showAnnotations,
+                                                                                  CancellationToken cancellationToken) =>
         ListArticlesDetailed(StreamId.ReadingList, maxArticles, minTime, StreamId.ForState(subtract), StreamId.ForState(intersect), pagination, sortAscending, showFolders,
             showAnnotations, cancellationToken);
+
+    /// <inheritdoc />
+    Task<DetailedArticles> IInoreaderClient.INewsfeedMethods.ListAllArticlesDetailed(int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect, bool sortAscending,
+                                                                                     bool showFolders, bool showAnnotations, CancellationToken cancellationToken) =>
+        ListAllArticles<DetailedArticles, Article>((remainingArticles, page, ct) => ((IInoreaderClient.INewsfeedMethods) this)
+            .ListArticlesDetailed(remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, showAnnotations, ct), maxArticles, cancellationToken);
 
     /// <inheritdoc />
     Task<BriefArticles> IInoreaderClient.INewsfeedMethods.ListArticlesBrief(int maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect, PaginationToken? pagination,
                                                                             bool sortAscending, bool showFolders, CancellationToken cancellationToken) =>
         ListArticlesBrief(StreamId.ReadingList, maxArticles, minTime, StreamId.ForState(subtract), StreamId.ForState(intersect), pagination, sortAscending, showFolders, cancellationToken);
+
+    /// <inheritdoc />
+    Task<BriefArticles> IInoreaderClient.INewsfeedMethods.ListAllArticlesBrief(int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect, bool sortAscending,
+                                                                               bool showFolders, CancellationToken cancellationToken) =>
+        ListAllArticles<BriefArticles, BriefArticle>((remainingArticles, page, ct) => ((IInoreaderClient.INewsfeedMethods) this)
+            .ListArticlesBrief(remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, ct), maxArticles, cancellationToken);
 
     /// <inheritdoc />
     async Task<NewsfeedUnreadCounts> IInoreaderClient.INewsfeedMethods.GetUnreadCounts(CancellationToken cancellationToken) {

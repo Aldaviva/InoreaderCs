@@ -25,6 +25,16 @@ public abstract record PaginatedListResponse {
 
 }
 
+/// <inheritdoc cref="PaginatedListResponse" />
+public abstract record PaginatedListResponse<T>: PaginatedListResponse where T: BaseArticle {
+
+    /// <summary>
+    /// Zero or more articles.
+    /// </summary>
+    public abstract IReadOnlyList<T> Articles { get; init; }
+
+}
+
 /// <summary>
 /// <para>String that represents the handle to the pagination cursor, to be passed into a future request to get the subsequent page.</para>
 /// <para>Be aware that sometimes the API server ignores this value and returns the first page multiple times, so you may want to apply some uniqueness filtering on the client side.</para>

@@ -73,6 +73,30 @@ internal sealed partial class ClientRequests(InoreaderClient client):
         }
     }
 
+    private static async Task<TList> ListAllArticles<TList, TItem>(Func<int, PaginationToken?, CancellationToken, Task<TList>> fetchPage, int? maxArticles, CancellationToken cancellationToken)
+        where TItem: BaseArticle where TList: PaginatedListResponse<TItem> {
+        IEnumerable<TItem> allArticles     = [];
+        int                articleCount    = 0;
+        PaginationToken?   paginationToken = null;
+        TList?             firstPage       = null;
+
+        do {
+            int   remainingArticles = (maxArticles ?? int.MaxValue) - articleCount;
+            TList page              = await fetchPage(remainingArticles, paginationToken, cancellationToken).ConfigureAwait(false);
+            firstPage       ??= page;
+            allArticles     =   allArticles.Concat(page.Articles);
+            articleCount    +=  page.Articles.Count;
+            paginationToken =   page.PaginationToken;
+        } while ((maxArticles is null || articleCount < maxArticles) && paginationToken is not null);
+
+        /*
+         * Inoreader's API server sometimes ignores the pagination parameter and returns the same page multiple times instead of the next page.
+         * These duplicate pages of articles cause FeedAssistant to mark them as read when they should be left unread.
+         * To fix this, ignore duplicate downloaded articles by their primary key, which is by definition unique.
+         */
+        return firstPage with { Articles = allArticles.Distinct(ArticlePrimaryKeyComparer<TItem>.Instance).ToList() };
+    }
+
     /// <returns>Length of <paramref name="articleIds"/></returns>
     /// <exception cref="InoreaderException"></exception>
     private async Task<int> MarkArticles(StreamId label, bool removeLabel, CancellationToken cancellationToken, params IEnumerable<string> articleIds) {

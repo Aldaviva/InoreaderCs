@@ -16,7 +16,7 @@ public class PasswordAuthClientTest: IDisposable {
 
     public PasswordAuthClientTest() {
         _http = UnfuckedHttpClient.Create(_httpHandler);
-        _auth = new PasswordAuthClient(_password, _persister, _http, null);
+        _auth = new PasswordAuthClient(_password, _persister, _http);
     }
 
     [Fact]
@@ -36,25 +36,23 @@ public class PasswordAuthClientTest: IDisposable {
     public async Task Miss() {
         A.CallTo(() => _persister.LoadAuthTokens()).Returns<PersistedAuthTokens?>(null);
 
-        A.CallTo(() => _httpHandler.TestableSendAsync(An<HttpRequestMessage>.That.Matches(req =>
-            req.Method == HttpMethod.Post &&
-            req.RequestUri == new Uri("https://www.inoreader.com/accounts/ClientLogin") &&
-            req.Headers.UserAgent.ToString() == "Inoreader Android v7.9.6" &&
-            req.Content.ReadAsString() == "Email=user%40aldaviva.com&Passwd=abc123&AppId=456&AppKey=789" &&
-            req.Content!.Headers.ContentLanguage.Single() == "en_US"
-        ), A<CancellationToken>._)).Returns(new HttpResponseMessage {
-            Content = new StringContent(
-                """
-                SID=null
-                LSID=null
-                Auth=asdf
-                Username=user
-                Email=user@aldaviva.com
-                Picture=https://www.inoreader.com/cdn/profile_picture/1006195123/5ytcddmU6y6x?s=128
-                NewUser=0
-                """,
-                Encoding.UTF8, MediaTypeNames.Text.Html)
-        });
+        string? actualRequestBody = null;
+        A.CallTo(() => _httpHandler.TestableSendAsync(
+                An<HttpRequestMessage>.That.Matches(req => req.Method == HttpMethod.Post && req.RequestUri == new Uri("https://www.inoreader.com/accounts/ClientLogin")), A<CancellationToken>._))
+            .Invokes((HttpRequestMessage req, CancellationToken _) => { actualRequestBody = req.Content.ReadAsString(); })
+            .Returns(new HttpResponseMessage {
+                Content = new StringContent(
+                    """
+                    SID=null
+                    LSID=null
+                    Auth=asdf
+                    Username=user
+                    Email=user@aldaviva.com
+                    Picture=https://www.inoreader.com/cdn/profile_picture/1006195123/5ytcddmU6y6x?s=128
+                    NewUser=0
+                    """,
+                    Encoding.UTF8, MediaTypeNames.Text.Html)
+            });
 
         IUserAuthToken actual = await _auth.FetchValidUserToken();
         actual.AuthenticationHeaderValue.Scheme.Should().Be("GoogleLogin");
@@ -64,6 +62,12 @@ public class PasswordAuthClientTest: IDisposable {
             { "AppKey", "789" }
         });
 
+        A.CallTo(() => _httpHandler.TestableSendAsync(An<HttpRequestMessage>.That.Matches(req =>
+            req.Method == HttpMethod.Post &&
+            req.RequestUri == new Uri("https://www.inoreader.com/accounts/ClientLogin") &&
+            req.Headers.UserAgent.ToString() == "Inoreader Android v7.9.11" &&
+            req.Content!.Headers.ContentLanguage.Single() == "en_US"), A<CancellationToken>._)).MustHaveHappened();
+        actualRequestBody.Should().Be("Email=user%40aldaviva.com&Passwd=abc123&AppId=456&AppKey=789");
         A.CallTo(() => _persister.SaveAuthTokens(A<PersistedAuthTokens>.That.Matches(match => match.PasswordAuthToken == "asdf"))).MustHaveHappenedOnceExactly();
     }
 
@@ -95,7 +99,7 @@ public class PasswordAuthClientTest: IDisposable {
 
     [Fact]
     public void OverrideHttpClient() {
-        PasswordAuthClient auth = new(_password, _persister, null, null);
+        PasswordAuthClient auth = new(_password, _persister);
 
         UnfuckedHttpClient defaultHttpClient = (UnfuckedHttpClient) auth.HttpClient;
 
@@ -111,7 +115,7 @@ public class PasswordAuthClientTest: IDisposable {
 
     [Fact]
     public void DefaultToHttpClientFrom() {
-        PasswordAuthClient       auth = new(_password, _persister, null, null);
+        PasswordAuthClient       auth = new(_password, _persister);
         using UnfuckedHttpClient http = new();
 
         using InoreaderClient inoreader = new(new InoreaderOptions {

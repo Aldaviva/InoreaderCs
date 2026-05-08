@@ -77,7 +77,7 @@ public sealed class PasswordAuthClient: AbstractAuthClient {
         try {
             string responseBody = await HttpClient.Target(InoreaderClient.ApiRoot)
                 .Path("accounts/ClientLogin")
-                .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.6")
+                .Header(HttpHeaders.UserAgent, "Inoreader Android v7.9.11")
                 .Post<string>(requestBody).ConfigureAwait(false);
 
             Dictionary<string, string> responseMap = responseBody.Trim()

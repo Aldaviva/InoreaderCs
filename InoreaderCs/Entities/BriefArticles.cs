@@ -6,13 +6,13 @@ namespace InoreaderCs.Entities;
 /// Response envelope container for <see cref="IInoreaderClient.INewsfeedMethods.ListArticlesBrief"/>.
 /// </summary>
 /// <remarks>Documentation: <see href="https://www.inoreader.com/developers/item-ids"/></remarks>
-public sealed record BriefArticles: PaginatedListResponse {
+public sealed record BriefArticles: PaginatedListResponse<BriefArticle> {
 
     /// <summary>
     /// Zero or more minimal articles.
     /// </summary>
     [JsonPropertyName("itemRefs")]
-    public IReadOnlyList<BriefArticle> Articles { get; init; } = [];
+    public override IReadOnlyList<BriefArticle> Articles { get; init; } = [];
 
 }
 
@@ -25,6 +25,11 @@ public sealed record BriefArticle: BaseArticle {
     /// <inheritdoc cref="BriefArticle" />
     public BriefArticle() {
         _foldersAndTags = new Lazy<ISet<string>>(() => new HashSet<string>(DirectStreamIds.Select(static id => id.LabelName!)), LazyThreadSafetyMode.PublicationOnly);
+    }
+
+    /// <inheritdoc cref="BriefArticle" />
+    public BriefArticle(string shortId): this() {
+        Id = shortId;
     }
 
     /// <inheritdoc />
@@ -43,5 +48,14 @@ public sealed record BriefArticle: BaseArticle {
     /// <para>Tags are always included. Folders are only included when the parameter <c>showFolders</c> is <c>true</c>.</para>
     /// </summary>
     public ISet<string> FoldersAndTags => _foldersAndTags.Value;
+
+}
+
+internal sealed class ArticlePrimaryKeyComparer<T>: IEqualityComparer<T> where T: BaseArticle {
+
+    public static readonly ArticlePrimaryKeyComparer<T> Instance = new();
+
+    public bool Equals(T? x, T? y) => ReferenceEquals(x, y) || (x is not null && y is not null && x.GetType() == y.GetType() && x.ShortId == y.ShortId);
+    public int GetHashCode(T x) => x.ShortId.GetHashCode();
 
 }

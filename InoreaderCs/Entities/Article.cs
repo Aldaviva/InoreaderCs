@@ -36,6 +36,8 @@ public abstract record BaseArticle {
 // ReSharper disable once ClassCanBeSealed.Global - FeedAssistant subclasses this to add additional properties
 public record Article: BaseArticle {
 
+    private static readonly int LongIdPrefixLength = "tag:google.com,2005:reader/item/".Length;
+
     /// <summary>
     /// <para>Full Google-Reader–compatible unique ID as a <see href="https://en.wikipedia.org/wiki/Tag_URI_scheme" /> for this article, ending with a hexadecimal number.</para>
     /// <para>Example: <c>tag:google.com,2005:reader/item/0000000af0175be2</c></para>
@@ -47,7 +49,7 @@ public record Article: BaseArticle {
 
     /// <inheritdoc />
     // ExceptionAdjustment: M:System.Convert.ToInt64(System.String,System.Int32) -T:System.FormatException
-    public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring("tag:google.com,2005:reader/item/".Length), 16));
+    public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring(LongIdPrefixLength), 16));
 
     [JsonInclude]
     private HashSet<StreamId> Categories { get; init; } = [];

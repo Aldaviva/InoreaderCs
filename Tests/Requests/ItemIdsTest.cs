@@ -64,4 +64,18 @@ public class ItemIdsTest: ApiTest {
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
 
+    [Fact]
+    public void ArticlePrimaryKeyCompareEquality() {
+        var          comparer = ArticlePrimaryKeyComparer<BriefArticle>.Instance;
+        BriefArticle article1 = new("abc") { CrawlTime = DateTimeOffset.Now };
+        BriefArticle article2 = new("abc") { CrawlTime = DateTimeOffset.Now };
+        BriefArticle article3 = new("def") { CrawlTime = DateTimeOffset.Now };
+
+        comparer.Equals(article1, article2).Should().BeTrue();
+        comparer.Equals(article1, article3).Should().BeFalse();
+
+        comparer.GetHashCode(article1).Should().Be(comparer.GetHashCode(article2));
+        comparer.GetHashCode(article1).Should().NotBe(comparer.GetHashCode(article3));
+    }
+
 }

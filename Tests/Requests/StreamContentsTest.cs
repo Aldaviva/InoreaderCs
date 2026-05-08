@@ -104,4 +104,260 @@ public class StreamContentsTest: ApiTest {
         A.CallTo(streamTypesRequest).MustHaveHappenedOnceExactly();
     }
 
+    [Fact]
+    public async Task ListAllPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Fstate%2Fcom.google%2Freading-list?n=200&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487167", "timestampUsec": "1760450487166567", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaab", "title": "Article 1", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232",
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Fstate%2Fcom.google%2Freading-list?n=200&c=abc&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487168", "timestampUsec": "1760450487168000", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaac", "title": "Article 2", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232"
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        DetailedArticles actual = await Inoreader.Newsfeed.ListAllArticlesDetailed();
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
+        actual.Articles[1].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaac");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllFolderPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FMy%20Folder?n=200&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487167", "timestampUsec": "1760450487166567", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaab", "title": "Article 1", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232",
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FMy%20Folder?n=200&c=abc&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487168", "timestampUsec": "1760450487168000", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaac", "title": "Article 2", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232"
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        DetailedArticles actual = await Inoreader.Folders.ListAllArticlesDetailed("My Folder");
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
+        actual.Articles[1].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaac");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllTagPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FMy%20Tag?n=200&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487167", "timestampUsec": "1760450487166567", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaab", "title": "Article 1", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232",
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FMy%20Tag?n=200&c=abc&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487168", "timestampUsec": "1760450487168000", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaac", "title": "Article 2", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232"
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        DetailedArticles actual = await Inoreader.Tags.ListAllArticlesDetailed("My Tag");
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
+        actual.Articles[1].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaac");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllSubscriptionPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/feed%2Fhttps:%2F%2Fexample.com%2Ffeed.xml?n=200&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487167", "timestampUsec": "1760450487166567", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaab", "title": "Article 1", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232",
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/contents/feed%2Fhttps:%2F%2Fexample.com%2Ffeed.xml?n=200&c=abc&includeAllDirectStreamIds=true&annotations=0"), null, """
+            {
+                "items": [
+                    { "crawlTimeMsec": "1760450487168", "timestampUsec": "1760450487168000", "id": "tag:google.com,2005:reader\/item\/0000000ae763aaac", "title": "Article 2", "author": "Author" }
+                ],
+                "title": "Reading List",
+                "updatedUsec": "1761986767029232"
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        DetailedArticles actual = await Inoreader.Subscriptions.ListAllArticlesDetailed(new Uri("https://example.com/feed.xml"));
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
+        actual.Articles[1].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaac");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllBriefPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&s=user/-/state/com.google/reading-list&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "123", "timestampUsec": "1760450487166567" }
+                ],
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&c=abc&s=user/-/state/com.google/reading-list&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "124", "timestampUsec": "1760450487166568" }
+                ]
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        BriefArticles actual = await Inoreader.Newsfeed.ListAllArticlesBrief();
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].ShortId.Should().Be("123");
+        actual.Articles[1].ShortId.Should().Be("124");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllBriefFolderPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&s=user/-/label/My%20Folder&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "123", "timestampUsec": "1760450487166567" }
+                ],
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&c=abc&s=user/-/label/My%20Folder&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "124", "timestampUsec": "1760450487166568" }
+                ]
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        BriefArticles actual = await Inoreader.Folders.ListAllArticlesBrief("My Folder");
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].ShortId.Should().Be("123");
+        actual.Articles[1].ShortId.Should().Be("124");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllBriefTagPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&s=user/-/label/My%20Tag&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "123", "timestampUsec": "1760450487166567" }
+                ],
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&c=abc&s=user/-/label/My%20Tag&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "124", "timestampUsec": "1760450487166568" }
+                ]
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        BriefArticles actual = await Inoreader.Tags.ListAllArticlesBrief("My Tag");
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].ShortId.Should().Be("123");
+        actual.Articles[1].ShortId.Should().Be("124");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
+    [Fact]
+    public async Task ListAllBriefSubscriptionPages() {
+        var streamContentsRequest1 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&s=feed/https://example.com/feed.xml&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "123", "timestampUsec": "1760450487166567" }
+                ],
+                "continuation": "abc"
+            }
+            """);
+        var streamContentsRequest2 = RequestMocker.MockJsonHttpRequest(HttpMethod.Get,
+            new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1000&c=abc&s=feed/https://example.com/feed.xml&includeAllDirectStreamIds=true"), null, """
+            {
+                "itemRefs": [
+                    { "id": "124", "timestampUsec": "1760450487166568" }
+                ]
+            }
+            """);
+        RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
+
+        BriefArticles actual = await Inoreader.Subscriptions.ListAllArticlesBrief(new Uri("https://example.com/feed.xml"));
+
+        actual.Articles.Should().HaveCount(2);
+        actual.Articles[0].ShortId.Should().Be("123");
+        actual.Articles[1].ShortId.Should().Be("124");
+
+        A.CallTo(streamContentsRequest1).MustHaveHappened().Then(A.CallTo(streamContentsRequest2).MustHaveHappened());
+    }
+
 }

@@ -128,7 +128,7 @@ using IInoreaderClient inoreader = new InoreaderClient(new InoreaderOptions {
 
 ### List articles
 ```cs
-DetailedArticles articleList = await inoreader.Newsfeed.ListArticlesDetailed();
+DetailedArticles articleList = await inoreader.Newsfeed.ListAllArticlesDetailed();
 foreach (Article article in articleList.Articles) {
     Console.WriteLine(article.Title);
 }
@@ -137,12 +137,16 @@ foreach (Article article in articleList.Articles) {
 Useful options:
 
 - To only fetch articles from a specific folder, tag, or subscription/feed, replace `Newsfeed` (which refers to all articles in the entire account) with `Folders`, `Tags`, or `Subscriptions`, respectively.
-- To change the page size, pass the `maxArticles` parameter.
+- To change the page size, pass the `maxArticles` parameter, or leave it `null` to fetch all pages at once.
 - To only return articles crawled after a certain time, pass the `minTime` parameter.
 - To remove or require articles to have a specific state like read or starred, pass the `subtract` or `intersect` parameters, respectively.
-- To fetch subsequent pages from a multi-page response, pass the previous page or its `PaginationToken` as the `pagination` parameter.
+    - Only return unread: `subtract: ArticleState.Read`
+    - Only return starred: `intersect: ArticleState.Starred`
+- To fetch individual pages instead of all pages at once, call `ListArticlesDetailed` repeatedly, passing the previous page or its `PaginationToken` as the `pagination` parameter to subsequent requests until that returned `PaginationToken` is `null`.
 > [!CAUTION]
-> Even when the `pagination` parameter is sent properly, the Inoreader API servers sometimes ignore it and incorrectly return the first page again instead of the desired page. This makes it look like many of the articles are duplicates. After fetching multiple pages of articles, always filter by the unique `Article.ShortId`  to remove the erroneous duplicates, for example, using [`IEnumerable<T>.Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct).
+> When using manual pagination with `ListArticlesDetailed`, even when the `pagination` parameter is sent properly, the Inoreader API servers sometimes ignore it and incorrectly return the first page again instead of the desired page. This makes it look like many of the articles are duplicates.
+>
+> After fetching multiple pages of articles, always filter by the unique `Article.ShortId`  to remove the erroneous duplicates, for example, using [`IEnumerable<T>.Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct). This API server defect will also be avoided when using `ListAllArticlesDetailed` instead of `ListArticlesDetailed`.
 
 ### Check if there are new articles
 ```cs

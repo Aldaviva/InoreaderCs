@@ -26,9 +26,22 @@ internal sealed partial class ClientRequests {
             cancellationToken);
 
     /// <inheritdoc />
+    Task<DetailedArticles> IInoreaderClient.ISubscriptionMethods.ListAllArticlesDetailed(Uri feedLocation, int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract,
+                                                                                         ArticleState? intersect, bool sortAscending, bool showFolders, bool showAnnotations,
+                                                                                         CancellationToken cancellationToken) =>
+        ListAllArticles<DetailedArticles, Article>((remainingArticles, page, ct) => ((IInoreaderClient.ISubscriptionMethods) this)
+            .ListArticlesDetailed(feedLocation, remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, showAnnotations, ct), maxArticles, cancellationToken);
+
+    /// <inheritdoc />
     Task<BriefArticles> IInoreaderClient.ISubscriptionMethods.ListArticlesBrief(Uri feedLocation, int maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,
                                                                                 PaginationToken? pagination, bool sortAscending, bool showFolders, CancellationToken cancellationToken) =>
         ListArticlesBrief(StreamId.ForFeed(feedLocation), maxArticles, minTime, StreamId.ForState(subtract), StreamId.ForState(intersect), pagination, sortAscending, showFolders, cancellationToken);
+
+    /// <inheritdoc />
+    Task<BriefArticles> IInoreaderClient.ISubscriptionMethods.ListAllArticlesBrief(Uri feedLocation, int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,
+                                                                                   bool sortAscending, bool showFolders, CancellationToken cancellationToken) =>
+        ListAllArticles<BriefArticles, BriefArticle>((remainingArticles, page, ct) => ((IInoreaderClient.ISubscriptionMethods) this)
+            .ListArticlesBrief(feedLocation, remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, ct), maxArticles, cancellationToken);
 
     /// <inheritdoc />
     Task IInoreaderClient.ISubscriptionMethods.Rename(Uri feedLocation, string newTitle, CancellationToken cancellationToken) =>
