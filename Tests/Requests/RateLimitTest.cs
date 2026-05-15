@@ -75,7 +75,7 @@ public class RateLimitTest: ApiTest {
 
         using IMonitor<IInoreaderClient> eventListener = Inoreader.Monitor();
 
-        _ = await Inoreader.Users.GetSelf();
+        _ = await Inoreader.Users.GetSelf(TestContext.Current.CancellationToken);
 
         eventListener.Should().Raise(nameof(IInoreaderClient.RateLimitStatisticsReceived)).WithArgs<RateLimitStatistics>(stats => MatchStats(stats));
 

@@ -7,7 +7,7 @@ public class UsersTest: ApiTest {
         var request = RequestMocker.MockJsonHttpRequest(verb: HttpMethod.Get, url: new Uri("https://www.inoreader.com/reader/api/0/user-info"), expectedRequestBody: null, jsonResponse:
             """{ "userId": "1006195123", "userName": "aldaviva", "userProfileId": "1006195123", "userEmail": "user@aldaviva.com", "isBloggerUser": false, "signupTimeSec": 1517740194, "isMultiLoginEnabled": false }""");
 
-        User actual = await Inoreader.Users.GetSelf();
+        User actual = await Inoreader.Users.GetSelf(TestContext.Current.CancellationToken);
 
         actual.Id.Should().Be(1006195123);
         actual.ProfileId.Should().Be(1006195123);

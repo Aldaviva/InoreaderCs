@@ -28,4 +28,6 @@ public class InoreaderException(string message, Exception? cause): ApplicationEx
 
     }
 
+    internal sealed class UnknownLabel(string label): InoreaderException("Unknown label " + label, null);
+
 }

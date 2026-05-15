@@ -12,7 +12,7 @@ public class StreamListTest: ApiTest {
     public async Task ListFolders() {
         var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamListResponse);
 
-        IEnumerable<FolderState> actual = await Inoreader.Folders.List();
+        IEnumerable<FolderState> actual = await Inoreader.Folders.List(cancellationToken: TestContext.Current.CancellationToken);
 
         FolderState folder = actual.Should().ContainSingle().Subject;
         folder.Name.Should().Be("Comics");
@@ -26,7 +26,7 @@ public class StreamListTest: ApiTest {
     public async Task ListTags() {
         var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamListResponse);
 
-        IEnumerable<TagState> actual = await Inoreader.Tags.List();
+        IEnumerable<TagState> actual = await Inoreader.Tags.List(cancellationToken: TestContext.Current.CancellationToken);
 
         TagState tag = actual.Should().ContainSingle().Subject;
         tag.Name.Should().Be("Telco news");

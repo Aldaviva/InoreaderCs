@@ -12,7 +12,7 @@ public class LabelNameCacheTest {
     [Fact]
     public async Task AlreadyCanceled() {
         CancellationToken     ct     = new(true);
-        LabelNameCache.Labels actual = await _cache.GetLabelNames(ct);
+        LabelNameCache.Labels actual = await _cache.GetLabelNames(false, ct);
         actual.Folders.Should().BeEmpty();
         actual.Tags.Should().BeEmpty();
     }

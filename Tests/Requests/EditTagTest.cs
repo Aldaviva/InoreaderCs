@@ -26,7 +26,7 @@ public class EditTagTest: ApiTest {
                 Author    = string.Empty,
                 CrawlTime = DateTimeOffset.Now
             }
-        ]);
+        ], TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -42,7 +42,7 @@ public class EditTagTest: ApiTest {
                 Author    = string.Empty,
                 CrawlTime = DateTimeOffset.Now
             }
-        ]);
+        ], TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -58,7 +58,7 @@ public class EditTagTest: ApiTest {
                 Author    = string.Empty,
                 CrawlTime = DateTimeOffset.Now
             }
-        ]);
+        ], TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -74,7 +74,7 @@ public class EditTagTest: ApiTest {
                 Author    = string.Empty,
                 CrawlTime = DateTimeOffset.Now
             }
-        ]);
+        ], TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -90,7 +90,7 @@ public class EditTagTest: ApiTest {
                 Author    = string.Empty,
                 CrawlTime = DateTimeOffset.Now
             }
-        ]);
+        ], TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -106,7 +106,7 @@ public class EditTagTest: ApiTest {
                 Author    = string.Empty,
                 CrawlTime = DateTimeOffset.Now
             }
-        ]);
+        ], TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }

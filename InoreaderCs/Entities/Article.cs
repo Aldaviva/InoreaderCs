@@ -52,7 +52,7 @@ public record Article: BaseArticle {
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring(LongIdPrefixLength), 16));
 
     [JsonInclude]
-    private HashSet<StreamId> Categories { get; init; } = [];
+    private ImmutableHashSet<StreamId> Categories { get; init; } = [];
 
     /// <summary>
     /// Zero or more folders that this article feed's subscription is organized into. If the <c>showFolders</c> argument to <seealso cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/> is set to <c>false</c>, this will be the empty set.
@@ -66,16 +66,17 @@ public record Article: BaseArticle {
     [JsonIgnore]
     public IImmutableSet<string> Tags { get; private set; } = ImmutableHashSet<string>.Empty;
 
+    /// <exception cref="InoreaderException.UnknownLabel">article has a tag or folder newer than and not found in the cached <paramref name="labels"/></exception>
     internal void SetCategories(LabelNameCache.Labels labels) {
         HashSet<string> folders = [];
         HashSet<string> tags    = [];
-        foreach (StreamId category in Categories) {
-            if (category.LabelName is {} labelName) {
-                if (labels.Folders.Contains(labelName)) {
-                    folders.Add(labelName);
-                } else { // tag or unknown, possibly due to stale tag list cache, so assume new tag
-                    tags.Add(labelName);
-                }
+        foreach (string labelName in Categories.Select(static streamId => streamId.LabelName).Compact()) {
+            if (labels.Folders.Contains(labelName)) {
+                folders.Add(labelName);
+            } else if (labels.Tags.Contains(labelName)) {
+                tags.Add(labelName);
+            } else {
+                throw new InoreaderException.UnknownLabel(labelName);
             }
         }
         Folders = folders.ToImmutableHashSet();
@@ -131,7 +132,7 @@ public record Article: BaseArticle {
 
     /// <summary>
     /// <para>The URL of the feed that this article is from, which points to an RSS or Atom XML document.</para>
-    /// <para>For the article's web page URL, see <see cref="PageUrl"/>. For the feed's web page URL, see <see cref="FeedPageUrl"/>.</para>
+    /// <para>For the individual article's web page URL, see <see cref="PageUrl"/>. For the feed's web page URL, see <see cref="FeedPageUrl"/>.</para>
     /// </summary>
     public Uri FeedUrl => Feed.StreamId.FeedUri!;
 
@@ -141,8 +142,8 @@ public record Article: BaseArticle {
     public string FeedName => Feed.Title;
 
     /// <summary>
-    /// <para>The URL of the web page of the feed that this article is from.</para>
-    /// <para>For the RSS URL, see <see cref="FeedUrl"/>. For the article's web page URL, see <see cref="PageUrl"/>.</para>
+    /// <para>The web page URL of the article's feed.</para>
+    /// <para>For the feed's RSS URL, see <see cref="FeedUrl"/>. For the individual article's web page URL, see <see cref="PageUrl"/>.</para>
     /// </summary>
     public Uri FeedPageUrl => Feed.HtmlUrl;
 

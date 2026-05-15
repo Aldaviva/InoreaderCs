@@ -8,7 +8,7 @@ public class ItemIdsTest: ApiTest {
             new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1&s=user/-/state/com.google/reading-list&includeAllDirectStreamIds=true"), null,
             """{ "items": [], "itemRefs": [{ "id": "47047259872", "directStreamIds": ["user\/1006195123\/label\/Technology"], "timestampUsec": "1761990925646284" }], "continuation": "2QD6qtUABtAE" }""");
 
-        BriefArticles actual = await Inoreader.Newsfeed.ListArticlesBrief(1);
+        BriefArticles actual = await Inoreader.Newsfeed.ListArticlesBrief(1, cancellationToken: TestContext.Current.CancellationToken);
 
         BriefArticle article = actual.Articles.Should().ContainSingle().Subject;
         article.ShortId.Should().Be("47047259872");
@@ -25,7 +25,8 @@ public class ItemIdsTest: ApiTest {
             new Uri("https://www.inoreader.com/reader/api/0/stream/items/ids?n=1&ot=1761990925646284&s=user/-/state/com.google/reading-list&includeAllDirectStreamIds=true"), null,
             """{ "items": [], "direction": "rtl" }""");
 
-        BriefArticles actual = await Inoreader.Newsfeed.ListArticlesBrief(1, new DateTimeOffset(2025, 11, 1, 2, 55, 25, 646, 284, TimeSpan.FromHours(-7)));
+        BriefArticles actual = await Inoreader.Newsfeed.ListArticlesBrief(1, new DateTimeOffset(2025, 11, 1, 2, 55, 25, 646, 284, TimeSpan.FromHours(-7)),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().BeEmpty();
 
@@ -38,7 +39,7 @@ public class ItemIdsTest: ApiTest {
             null,
             """{ "items": [], "itemRefs": [{ "id": "47047259872", "directStreamIds": ["user\/1006195123\/label\/Technology"], "timestampUsec": "1761990925646284" }], "continuation": "2QD6qtUABtAE" }""");
 
-        BriefArticles actual = await Inoreader.Folders.ListArticlesBrief("Technology", 1);
+        BriefArticles actual = await Inoreader.Folders.ListArticlesBrief("Technology", 1, cancellationToken: TestContext.Current.CancellationToken);
 
         BriefArticle article = actual.Articles.Should().ContainSingle().Subject;
         article.ShortId.Should().Be("47047259872");
@@ -54,7 +55,7 @@ public class ItemIdsTest: ApiTest {
             null,
             """{ "items": [], "itemRefs": [{ "id": "47047259872", "directStreamIds": ["user\/1006195123\/label\/Technology", "user\/1006195123\/label\/My tag"], "timestampUsec": "1761990925646284" }], "continuation": "2QD6qtUABtAE" }""");
 
-        BriefArticles actual = await Inoreader.Tags.ListArticlesBrief("My tag", 1);
+        BriefArticles actual = await Inoreader.Tags.ListArticlesBrief("My tag", 1, cancellationToken: TestContext.Current.CancellationToken);
 
         BriefArticle article = actual.Articles.Should().ContainSingle().Subject;
         article.ShortId.Should().Be("47047259872");

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 
 namespace InoreaderCs.Entities;
@@ -21,11 +22,11 @@ internal sealed class LabelNameCache {
         TagAndFolderStatesListed                 += OnTagAndFolderStatesListedUnsynchronized;
     }
 
-    public async Task<Labels> GetLabelNames(CancellationToken ct = default) {
-        if (IsStale()) {
+    public async Task<Labels> GetLabelNames(bool force = false, CancellationToken ct = default) {
+        if (force || IsStale()) {
             try {
                 await _fetchingLock.WaitAsync(ct).ConfigureAwait(false);
-                if (IsStale()) {
+                if (force || IsStale()) {
                     _client.Requests.TagAndFolderStatesListed -= OnTagAndFolderStatesListed;
                     try {
                         TagAndFolderStatesListed(this, await FetchStreamStates(ct).ConfigureAwait(false));
@@ -94,6 +95,11 @@ internal sealed class LabelNameCache {
         }
     }
 
-    public readonly record struct Labels(ISet<string> Folders, ISet<string> Tags);
+    internal readonly record struct Labels(ISet<string> Folders, ISet<string> Tags) {
+
+        public ISet<string> Folders { get; } = Folders.ToImmutableHashSet();
+        public ISet<string> Tags { get; } = Tags.ToImmutableHashSet();
+
+    }
 
 }

@@ -12,7 +12,7 @@ public class FeedsTest: ApiTest {
     public async Task FeedsList() {
         var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/subscription/list"), null, FeedListResponse);
 
-        IEnumerable<Subscription> actual = await Inoreader.Subscriptions.List();
+        IEnumerable<Subscription> actual = await Inoreader.Subscriptions.List(TestContext.Current.CancellationToken);
 
         Subscription head = actual.Should().ContainSingle().Subject;
         head.Title.Should().Be("Ars Technica");

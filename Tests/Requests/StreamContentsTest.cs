@@ -21,7 +21,7 @@ public class StreamContentsTest: ApiTest {
             ArticlesResponse);
         var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Newsfeed.ListArticlesDetailed(1, showAnnotations: true);
+        DetailedArticles actual = await Inoreader.Newsfeed.ListArticlesDetailed(1, showAnnotations: true, cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Title.Should().Be("Reading List");
         actual.UpdateTime.Should().Be(new DateTimeOffset(2025, 11, 1, 1, 46, 07, 29, 232, TimeSpan.FromHours(-7)));
@@ -70,7 +70,7 @@ public class StreamContentsTest: ApiTest {
             new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FTechnology?n=1&includeAllDirectStreamIds=true&annotations=1"), null, ArticlesResponse);
         var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Folders.ListArticlesDetailed("Technology", 1, showAnnotations: true);
+        DetailedArticles actual = await Inoreader.Folders.ListArticlesDetailed("Technology", 1, showAnnotations: true, cancellationToken: TestContext.Current.CancellationToken);
         actual.Articles.Should().ContainSingle().Which.ShortId.Should().Be("46831741611");
 
         A.CallTo(streamContentsRequest).MustHaveHappenedOnceExactly();
@@ -83,7 +83,7 @@ public class StreamContentsTest: ApiTest {
             new Uri("https://www.inoreader.com/reader/api/0/stream/contents/user%2F-%2Flabel%2FTo%20watch?n=1&includeAllDirectStreamIds=true&annotations=1"), null, ArticlesResponse);
         var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Tags.ListArticlesDetailed("To watch", 1, showAnnotations: true);
+        DetailedArticles actual = await Inoreader.Tags.ListArticlesDetailed("To watch", 1, showAnnotations: true, cancellationToken: TestContext.Current.CancellationToken);
         actual.Articles.Should().ContainSingle().Which.ShortId.Should().Be("46831741611");
 
         A.CallTo(streamContentsRequest).MustHaveHappenedOnceExactly();
@@ -97,7 +97,8 @@ public class StreamContentsTest: ApiTest {
             ArticlesResponse);
         var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Subscriptions.ListArticlesDetailed(new Uri("https://www.theverge.com/rss/index.xml"), 1, showAnnotations: true);
+        DetailedArticles actual = await Inoreader.Subscriptions.ListArticlesDetailed(new Uri("https://www.theverge.com/rss/index.xml"), 1, showAnnotations: true,
+            cancellationToken: TestContext.Current.CancellationToken);
         actual.Articles.Should().ContainSingle().Which.ShortId.Should().Be("46831741611");
 
         A.CallTo(streamContentsRequest).MustHaveHappenedOnceExactly();
@@ -129,7 +130,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Newsfeed.ListAllArticlesDetailed();
+        DetailedArticles actual = await Inoreader.Newsfeed.ListAllArticlesDetailed(cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
@@ -163,7 +164,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Folders.ListAllArticlesDetailed("My Folder");
+        DetailedArticles actual = await Inoreader.Folders.ListAllArticlesDetailed("My Folder", cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
@@ -197,7 +198,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Tags.ListAllArticlesDetailed("My Tag");
+        DetailedArticles actual = await Inoreader.Tags.ListAllArticlesDetailed("My Tag", cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
@@ -231,7 +232,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        DetailedArticles actual = await Inoreader.Subscriptions.ListAllArticlesDetailed(new Uri("https://example.com/feed.xml"));
+        DetailedArticles actual = await Inoreader.Subscriptions.ListAllArticlesDetailed(new Uri("https://example.com/feed.xml"), cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].LongId.Should().Be("tag:google.com,2005:reader/item/0000000ae763aaab");
@@ -261,7 +262,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        BriefArticles actual = await Inoreader.Newsfeed.ListAllArticlesBrief();
+        BriefArticles actual = await Inoreader.Newsfeed.ListAllArticlesBrief(cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].ShortId.Should().Be("123");
@@ -291,7 +292,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        BriefArticles actual = await Inoreader.Folders.ListAllArticlesBrief("My Folder");
+        BriefArticles actual = await Inoreader.Folders.ListAllArticlesBrief("My Folder", cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].ShortId.Should().Be("123");
@@ -321,7 +322,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        BriefArticles actual = await Inoreader.Tags.ListAllArticlesBrief("My Tag");
+        BriefArticles actual = await Inoreader.Tags.ListAllArticlesBrief("My Tag", cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].ShortId.Should().Be("123");
@@ -351,7 +352,7 @@ public class StreamContentsTest: ApiTest {
             """);
         RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        BriefArticles actual = await Inoreader.Subscriptions.ListAllArticlesBrief(new Uri("https://example.com/feed.xml"));
+        BriefArticles actual = await Inoreader.Subscriptions.ListAllArticlesBrief(new Uri("https://example.com/feed.xml"), cancellationToken: TestContext.Current.CancellationToken);
 
         actual.Articles.Should().HaveCount(2);
         actual.Articles[0].ShortId.Should().Be("123");

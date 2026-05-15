@@ -18,7 +18,7 @@ public class UnreadCountsTest: ApiTest {
     public async Task GetNewsfeedUnreadCounts() {
         var request = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
 
-        NewsfeedUnreadCounts actual = await Inoreader.Newsfeed.GetUnreadCounts();
+        NewsfeedUnreadCounts actual = await Inoreader.Newsfeed.GetUnreadCounts(cancellationToken: TestContext.Current.CancellationToken);
 
         actual.AllArticles.UnreadCount.Should().Be(917);
         actual.AllArticles.NewestArticleTime.Should().Be(new DateTimeOffset(2025, 10, 31, 22, 25, 03, 493, 932, TimeSpan.FromHours(-7)));
@@ -33,7 +33,7 @@ public class UnreadCountsTest: ApiTest {
         var unreadCountRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
         var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        LabelUnreadCounts unreadCounts = await Inoreader.Folders.GetUnreadCounts();
+        LabelUnreadCounts unreadCounts = await Inoreader.Folders.GetUnreadCounts(cancellationToken: TestContext.Current.CancellationToken);
         unreadCounts.MaxDisplayableCount.Should().Be(1000);
         unreadCounts.UnreadCountsByLabelName.Should().HaveCount(1);
         unreadCounts.UnreadCountsByLabelName["Comics"].UnreadCount.Should().Be(3);
@@ -48,7 +48,7 @@ public class UnreadCountsTest: ApiTest {
         var unreadCountRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
         var streamTypesRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/tag/list?types=1&counts=1"), null, StreamTypesResponseJson);
 
-        LabelUnreadCounts unreadCounts = await Inoreader.Tags.GetUnreadCounts();
+        LabelUnreadCounts unreadCounts = await Inoreader.Tags.GetUnreadCounts(TestContext.Current.CancellationToken);
         unreadCounts.MaxDisplayableCount.Should().Be(1000);
         unreadCounts.UnreadCountsByLabelName.Should().HaveCount(1);
         unreadCounts.UnreadCountsByLabelName["Telco news"].UnreadCount.Should().Be(1);
@@ -62,7 +62,7 @@ public class UnreadCountsTest: ApiTest {
     public async Task GetSubscriptionUnreadCounts() {
         var unreadCountRequest = RequestMocker.MockJsonHttpRequest(HttpMethod.Get, new Uri("https://www.inoreader.com/reader/api/0/unread-count"), null, UnreadCountResponseJson);
 
-        SubscriptionUnreadCounts unreadCounts = await Inoreader.Subscriptions.GetUnreadCounts();
+        SubscriptionUnreadCounts unreadCounts = await Inoreader.Subscriptions.GetUnreadCounts(TestContext.Current.CancellationToken);
         unreadCounts.MaxDisplayableCount.Should().Be(1000);
         Uri feedUri = new("https://feeds.arstechnica.com/arstechnica/index");
         unreadCounts.Subscriptions.Should().HaveCount(1);

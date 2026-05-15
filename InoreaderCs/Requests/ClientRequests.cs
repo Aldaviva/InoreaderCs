@@ -37,13 +37,21 @@ internal sealed partial class ClientRequests(InoreaderClient client):
                 .QueryParam("annotations", Convert.ToInt32(showAnnotations)) // docs are wrong, "true" is ignored
                 .Get<DetailedArticles>(cancellationToken);
 
-            Task<LabelNameCache.Labels> labelNamesTask = client.LabelNameCache.GetLabelNames(cancellationToken);
+            Task<LabelNameCache.Labels> labelNamesTask     = client.LabelNameCache.GetLabelNames(ct: cancellationToken);
+            bool                        reloadedLabelNames = false;
 
             DetailedArticles      articles = await articlesTask.ConfigureAwait(false);
             LabelNameCache.Labels labels   = await labelNamesTask.ConfigureAwait(false);
 
             foreach (Article article in articles.Articles) {
-                article.SetCategories(labels);
+                try {
+                    article.SetCategories(labels);
+                } catch (InoreaderException.UnknownLabel) when (!reloadedLabelNames) {
+                    // If the cache of label names and types is outdated and missing this label, this method gets exactly one free do-over to re-request the label names, uncached.
+                    labels             = await client.LabelNameCache.GetLabelNames(true, cancellationToken).ConfigureAwait(false);
+                    reloadedLabelNames = true;
+                    article.SetCategories(labels);
+                }
             }
 
             return articles;
@@ -219,7 +227,7 @@ internal sealed partial class ClientRequests(InoreaderClient client):
     /// <exception cref="InoreaderException"></exception>
     private async Task<LabelUnreadCounts> GetLabelUnreadCounts(bool tagsInsteadOfFolders, CancellationToken cancellationToken) {
         Task<UnreadCountResponses>  unreadCountsTask = GetUnreadCounts(cancellationToken);
-        Task<LabelNameCache.Labels> labelNamesTask   = client.LabelNameCache.GetLabelNames(cancellationToken);
+        Task<LabelNameCache.Labels> labelNamesTask   = client.LabelNameCache.GetLabelNames(ct: cancellationToken);
 
         UnreadCountResponses unreadCounts = await unreadCountsTask.ConfigureAwait(false);
         ISet<string>         folderNames  = (await labelNamesTask.ConfigureAwait(false)).Folders;

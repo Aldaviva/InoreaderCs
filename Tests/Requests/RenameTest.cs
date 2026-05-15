@@ -6,7 +6,7 @@ public class RenameTest: ApiTest {
     public async Task RenameTag() {
         var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/rename-tag"), "s=user%2F-%2Flabel%2FOld+tag&dest=New+tag", "OK");
 
-        await Inoreader.Tags.Rename("Old tag", "New tag");
+        await Inoreader.Tags.Rename("Old tag", "New tag", TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -15,7 +15,7 @@ public class RenameTest: ApiTest {
     public async Task RenameFolder() {
         var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/rename-tag"), "s=user%2F-%2Flabel%2FOld+folder&dest=New+folder", "OK");
 
-        await Inoreader.Folders.Rename("Old folder", "New folder");
+        await Inoreader.Folders.Rename("Old folder", "New folder", TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }

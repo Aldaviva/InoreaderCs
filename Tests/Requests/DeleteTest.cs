@@ -6,7 +6,7 @@ public class DeleteTest: ApiTest {
     public async Task DeleteTag() {
         var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/disable-tag"), "s=user%2F-%2Flabel%2FTag+to+delete", "OK");
 
-        await Inoreader.Tags.Delete("Tag to delete");
+        await Inoreader.Tags.Delete("Tag to delete", TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -15,7 +15,7 @@ public class DeleteTest: ApiTest {
     public async Task DeleteNonExistentTag() {
         var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/disable-tag"), "s=user%2F-%2Flabel%2FTag+to+delete", "Error=Tag not found!");
 
-        await Inoreader.Tags.Delete("Tag to delete");
+        await Inoreader.Tags.Delete("Tag to delete", TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
@@ -24,7 +24,7 @@ public class DeleteTest: ApiTest {
     public async Task DeleteFolder() {
         var request = RequestMocker.MockHtmlHttpRequest(HttpMethod.Post, new Uri("https://www.inoreader.com/reader/api/0/disable-tag"), "s=user%2F-%2Flabel%2FFolder+to+delete", "OK");
 
-        await Inoreader.Folders.Delete("Folder to delete");
+        await Inoreader.Folders.Delete("Folder to delete", TestContext.Current.CancellationToken);
 
         A.CallTo(request).MustHaveHappenedOnceExactly();
     }
