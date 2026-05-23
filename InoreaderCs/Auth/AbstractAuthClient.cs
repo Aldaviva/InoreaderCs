@@ -13,8 +13,6 @@ public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister,
     /// <summary>
     /// HTTP client used when requesting auth tokens.
     /// </summary>
-    // ExceptionAdjustment: P:System.Lazy`1.Value get -T:System.MemberAccessException
-    // ExceptionAdjustment: P:System.Lazy`1.Value get -T:System.MissingMemberException
     public IHttpClient HttpClient {
         get => OverriddenHttpClient ?? _defaultHttpClient.Value;
         set {
@@ -27,7 +25,15 @@ public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister,
     /// <summary>
     /// Used to not request multiple tokens at the same time, especially during parallel requests or if you have multiple auth clients that persist to the same file. If omitted, uses a default instance.
     /// </summary>
-    public SemaphoreSlim Synchronizer { protected get; init; } = new(1);
+    public SemaphoreSlim Synchronizer {
+        protected get;
+        init {
+            field                = value;
+            _disposeSynchronizer = false;
+        }
+    } = new(1);
+
+    private readonly bool _disposeSynchronizer = true;
 
     /// <summary>
     /// Used to save granted authentication tokens to disk so they don't have to be requested every time the app starts.
@@ -45,7 +51,9 @@ public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister,
     /// <inheritdoc cref="Dispose()" />
     protected virtual void Dispose(bool disposing) {
         if (disposing) {
-            Synchronizer.Dispose();
+            if (_disposeSynchronizer) {
+                Synchronizer.Dispose();
+            }
             _defaultHttpClient.TryDisposeValue();
         }
     }

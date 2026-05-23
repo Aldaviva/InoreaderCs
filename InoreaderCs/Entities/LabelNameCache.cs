@@ -5,12 +5,12 @@ namespace InoreaderCs.Entities;
 
 internal sealed class LabelNameCache: IDisposable {
 
-    private readonly InoreaderClient      _client;
-    private readonly TimeSpan             _cacheDuration;
-    private readonly Stopwatch            _freshness   = new();
-    private readonly ReaderWriterLockSlim _lock        = new();
-    private readonly HashSet<string>      _folderNames = [];
-    private readonly HashSet<string>      _tagNames    = [];
+    private readonly InoreaderClient _client;
+    private readonly TimeSpan        _cacheDuration;
+    private readonly Stopwatch       _freshness   = new();
+    private readonly SemaphoreSlim   _lock        = new(1);
+    private readonly HashSet<string> _folderNames = [];
+    private readonly HashSet<string> _tagNames    = [];
 
     private event EventHandler<IEnumerable<StreamState>> TagAndFolderStatesListed;
 
@@ -22,42 +22,36 @@ internal sealed class LabelNameCache: IDisposable {
         TagAndFolderStatesListed                 += OnTagAndFolderStatesListedUnsynchronized;
     }
 
+    /// <exception cref="OperationCanceledException"><paramref name="ct"/> is canceled</exception>
     public async Task<Labels> GetLabelNames(bool force = false, CancellationToken ct = default) {
-        if (force || IsStale()) {
-            _lock.EnterWriteLock();
-            try {
-                if (force || IsStale()) {
-                    _client.Requests.TagAndFolderStatesListed -= OnTagAndFolderStatesListed;
-                    try {
-                        TagAndFolderStatesListed(this, await FetchStreamStates(ct).ConfigureAwait(false));
-                    } catch (InoreaderException) {
-                        // ignore
-                    } finally {
-                        _client.Requests.TagAndFolderStatesListed += OnTagAndFolderStatesListed;
-                    }
-                }
-                return new Labels(_folderNames, _tagNames);
-            } finally {
-                _lock.ExitWriteLock();
-            }
-        }
-
-        _lock.EnterReadLock();
         try {
+            await _lock.WaitAsync(ct).ConfigureAwait(false);
+
+            if (force || !_freshness.IsRunning || _freshness.Elapsed > _cacheDuration) {
+                _client.Requests.TagAndFolderStatesListed -= OnTagAndFolderStatesListed;
+                try {
+                    TagAndFolderStatesListed(this, await FetchStreamStates(ct).ConfigureAwait(false));
+                } catch (InoreaderException) {
+                    // ignore
+                } finally {
+                    _client.Requests.TagAndFolderStatesListed += OnTagAndFolderStatesListed;
+                }
+            }
+
             return new Labels(_folderNames, _tagNames);
         } finally {
-            _lock.ExitReadLock();
+            if (!ct.IsCancellationRequested) {
+                _lock.Release();
+            }
         }
-
-        bool IsStale() => !_freshness.IsRunning || _freshness.Elapsed > _cacheDuration;
     }
 
     private void OnTagAndFolderStatesListed(object? sender, IEnumerable<StreamState> labelStates) {
-        _lock.EnterWriteLock();
+        _lock.Wait();
         try {
             TagAndFolderStatesListed(this, labelStates);
         } finally {
-            _lock.ExitWriteLock();
+            _lock.Release();
         }
     }
 
@@ -80,7 +74,7 @@ internal sealed class LabelNameCache: IDisposable {
     }
 
     public void Edit(string labelName, bool isFolder, bool remove) {
-        _lock.EnterWriteLock();
+        _lock.Wait();
         try {
             HashSet<string> labels = isFolder ? _folderNames : _tagNames;
             if (remove) {
@@ -89,7 +83,7 @@ internal sealed class LabelNameCache: IDisposable {
                 labels.Add(labelName);
             }
         } finally {
-            _lock.ExitWriteLock();
+            _lock.Release();
         }
     }
 
