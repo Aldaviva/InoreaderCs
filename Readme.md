@@ -59,6 +59,7 @@ Like [IsaacSchemm/InoreaderFs](https://github.com/IsaacSchemm/InoreaderFs), but 
 - Observes and exposes rate-limiting statistics.
 - Easily gets articles' read and starred states, short IDs, descriptions, and original feed names and URLs.
 - Avoids the insane concept of stream IDs and all their complexity of parsing, translating, handling, and using them, because developers today shouldn't have to deal with weird Google decisions from 2001 that Inoreader bent over backwards to be compatible with for no real benefit — there is no Google Reader client that anyone pointed at Inoreader as a drop-in replacement backend.
+- Automatically caches and invalidates names of tags and folders for a configurable duration, so that when fetching articles and checking which labels they belong to, you don't have to waste time and rate limit quota fetching whether each label is a tag or folder, which is impossble to tell strictly from the article list itself.
 - Allows you to set custom HTTP request headers, such as `User-Agent`.
 - Uses modern, interchangeable, customizable `HttpClient` instead of ancient, disgusting, inflexible `HttpWebRequest`.
 - Correctly sends the `ot` query parameter to `stream/items/ids` in microsecond format, not seconds, so it isn't ignored.

@@ -29,7 +29,7 @@ public class InoreaderClient: IInoreaderClient {
     /// </summary>
     protected static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) {
         PropertyNamingPolicy              = JsonNamingPolicy.CamelCase,
-        AllowOutOfOrderMetadataProperties = true,
+        AllowOutOfOrderMetadataProperties = true, // requires System.Text.Json ≥ 9
         Converters = {
             new JsonStringEnumConverter(),
             DateTimeOffsetReader,

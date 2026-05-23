@@ -17,7 +17,7 @@ public sealed record InoreaderOptions {
     public bool? DisposeHttpClient { get; set; }
 
     /// <summary>
-    /// How long to cache, after the last full update, the list of all labels in the user account and whether each one is a folder or tag. After this duration, this list will be automatically requested again from the API server the next time a method that needs it is called (such as <see cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/>). The cache is also corrected when tags and folders are created using this client, but this correction does not extend the freshness timer or postpone a full update from the server.
+    /// How long to cache, after the last full update, the list of all labels in the user account and whether each one is a folder or tag. After this duration, this list will be automatically requested again from the API server the next time a method that needs it is called (such as <see cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/>). The cache is also corrected when tags and folders are created using this client, but this correction does not extend the freshness timer or postpone a full update from the server. Defaults to 1 hour.
     /// </summary>
     public TimeSpan LabelNameCacheDuration { get; set; } = TimeSpan.FromHours(1);
 
