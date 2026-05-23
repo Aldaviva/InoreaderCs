@@ -12,15 +12,15 @@ public sealed record SubscriptionCreationResult {
     private int NumResults { get; init; }
 
     /// <summary>
-    /// <c>true</c> if either the subscription was successful, or if the feed was a duplicate that already had an existing subscription so it was ignored, or <c>false</c> if there was an error adding the subscription, such as an invalid RSS XML document.
+    /// <c>true</c> if either the subscription was successful, or if the feed was a duplicate that already had an existing subscription so it was ignored, or <c>false</c> if there was an error adding the subscription, such as an invalid RSS XML document or ≥ 400 HTTP status code for the feed response.
     /// </summary>
     public bool IsSuccesfullySubscribed => NumResults != 0;
 
     /// <summary>
-    /// The title of the feed, taken from its channel's <c>&lt;title&gt; element.</c>
+    /// The title of the feed, taken from its channel's <c>&lt;title&gt;</c> element, or <c>null</c> if <see cref="IsSuccesfullySubscribed"/> is <c>false</c>.
     /// </summary>
     [JsonPropertyName("streamName")]
-    public required string FeedName { get; init; }
+    public string? FeedName { get; init; }
 
     // public required string StreamId { get; init; }
 

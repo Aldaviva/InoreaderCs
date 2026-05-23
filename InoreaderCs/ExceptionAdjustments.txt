@@ -8,4 +8,8 @@
 P:System.Lazy`1.Value get -T:System.MemberAccessException
 P:System.Lazy`1.Value get -T:System.MissingMemberException
 M:System.Text.Json.Serialization.JsonConverter`1.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions) +T:System.Text.Json.JsonException
+M:System.Threading.ReaderWriterLockSlim.EnterReadLock -T:System.Threading.LockRecursionException
+M:System.Threading.ReaderWriterLockSlim.EnterWriteLock -T:System.Threading.LockRecursionException
+M:System.Threading.ReaderWriterLockSlim.ExitReadLock -T:System.Threading.SynchronizationLockException
+M:System.Threading.ReaderWriterLockSlim.ExitWriteLock -T:System.Threading.SynchronizationLockException
 M:System.Threading.SemaphoreSlim.Release -T:System.Threading.SemaphoreFullException

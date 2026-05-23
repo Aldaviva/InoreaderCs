@@ -107,6 +107,7 @@ public class InoreaderClient: IInoreaderClient {
     /// <inheritdoc cref="Dispose()" />
     protected virtual void Dispose(bool disposing) {
         if (disposing && _disposeHttpClient) {
+            LabelNameCache.Dispose();
             _httpClient.Dispose();
         }
     }

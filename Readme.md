@@ -3,7 +3,7 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/InoreaderCs?label=package&logo=nuget&color=informational)](https://www.nuget.org/packages/InoreaderCs) [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Aldaviva/InoreaderCs/dotnetpackage.yml?branch=master&logo=github)](https://github.com/Aldaviva/InoreaderCs/actions/workflows/dotnetpackage.yml) [![Testspace](https://img.shields.io/testspace/tests/Aldaviva/Aldaviva:InoreaderCs/master?passed_label=passing&failed_label=failing&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4NTkgODYxIj48cGF0aCBkPSJtNTk4IDUxMy05NCA5NCAyOCAyNyA5NC05NC0yOC0yN3pNMzA2IDIyNmwtOTQgOTQgMjggMjggOTQtOTQtMjgtMjh6bS00NiAyODctMjcgMjcgOTQgOTQgMjctMjctOTQtOTR6bTI5My0yODctMjcgMjggOTQgOTQgMjctMjgtOTQtOTR6TTQzMiA4NjFjNDEuMzMgMCA3Ni44My0xNC42NyAxMDYuNS00NFM1ODMgNzUyIDU4MyA3MTBjMC00MS4zMy0xNC44My03Ni44My00NC41LTEwNi41UzQ3My4zMyA1NTkgNDMyIDU1OWMtNDIgMC03Ny42NyAxNC44My0xMDcgNDQuNXMtNDQgNjUuMTctNDQgMTA2LjVjMCA0MiAxNC42NyA3Ny42NyA0NCAxMDdzNjUgNDQgMTA3IDQ0em0wLTU1OWM0MS4zMyAwIDc2LjgzLTE0LjgzIDEwNi41LTQ0LjVTNTgzIDE5Mi4zMyA1ODMgMTUxYzAtNDItMTQuODMtNzcuNjctNDQuNS0xMDdTNDczLjMzIDAgNDMyIDBjLTQyIDAtNzcuNjcgMTQuNjctMTA3IDQ0cy00NCA2NS00NCAxMDdjMCA0MS4zMyAxNC42NyA3Ni44MyA0NCAxMDYuNVMzOTAgMzAyIDQzMiAzMDJ6bTI3NiAyODJjNDIgMCA3Ny42Ny0xNC44MyAxMDctNDQuNXM0NC02NS4xNyA0NC0xMDYuNWMwLTQyLTE0LjY3LTc3LjY3LTQ0LTEwN3MtNjUtNDQtMTA3LTQ0Yy00MS4zMyAwLTc2LjY3IDE0LjY3LTEwNiA0NHMtNDQgNjUtNDQgMTA3YzAgNDEuMzMgMTQuNjcgNzYuODMgNDQgMTA2LjVTNjY2LjY3IDU4NCA3MDggNTg0em0tNTU3IDBjNDIgMCA3Ny42Ny0xNC44MyAxMDctNDQuNXM0NC02NS4xNyA0NC0xMDYuNWMwLTQyLTE0LjY3LTc3LjY3LTQ0LTEwN3MtNjUtNDQtMTA3LTQ0Yy00MS4zMyAwLTc2LjgzIDE0LjY3LTEwNi41IDQ0UzAgMzkxIDAgNDMzYzAgNDEuMzMgMTQuODMgNzYuODMgNDQuNSAxMDYuNVMxMDkuNjcgNTg0IDE1MSA1ODR6IiBmaWxsPSIjZmZmIi8%2BPC9zdmc%2B)](https://aldaviva.testspace.com/spaces/326067) [![Coveralls](https://img.shields.io/coveralls/github/Aldaviva/InoreaderCs?logo=coveralls)](https://coveralls.io/github/Aldaviva/InoreaderCs?branch=master)
 
-*.NET client for the [Inoreader](https://www.inoreader.com/) [HTTP API](https://www.inoreader.com/developers/)*
+*.NET client for the [Inoreader](https://www.inoreader.com/) HTTP [API](https://www.inoreader.com/developers/)*
 
 <!-- MarkdownTOC autolink="true" bracket="round" autoanchor="false" levels="1,2,3" bullets="-" -->
 
@@ -47,22 +47,23 @@ dotnet package add InoreaderCs
 
 Like [IsaacSchemm/InoreaderFs](https://github.com/IsaacSchemm/InoreaderFs), but not fucked up:
 
-- Correctly sends the `ot` query parameter to `stream/items/ids` in microsecond format, not seconds, so it isn't ignored.
-- Has a built-in OAuth2 client with smart refresh logic as well as a password-based auth client, both of which make auth requests automatically and support pluggable persistence strategies.
-- Observes and exposes rate-limiting statistics.
-- Uses modern, interchangeable, customizable `HttpClient` instead of ancient, disgusting `HttpWebRequest`.
-- Allows you to set custom HTTP request headers, such as `User-Agent`.
-- Easily gets articles' read and starred states, short IDs, descriptions, and original feed names and URLs.
-- Instances are configurable because they are not static classes, so you don't need to supply authentication to literally every request. You can just set it up once, for example in an IoC context, and not have to pass it around your entire codebase.
-- Interfaces allow mocking and interchangeability, instead of everything being sealed static classes.
-- Hierarchical interface structure makes it easier to find the API method you want and understand what it applies to.
-- Facade pattern hides the complexity of the Inoreader API's very overloaded methods with lots of conditionally valid parameters.
-- Avoids the insane concept of stream IDs and all their complexity of parsing, translating, handling, and using them, because developers today shouldn't have to deal with weird Google decisions from 2001 that Inoreader bent over backwards to be compatible with for no real benefit because there is no Google Reader client that anyone pointed at Inoreader as a drop-in replacement backend.
+- Automated tests.
 - Full documentation of methods and entities.
 - Exceptions have information about what went wrong.
-- Updated in the last 6 years by someone who uses Inoreader and this library heavily every day.
-- Automated tests.
-- Includes correct, strongly-typed arguments in API methods like `subscription/edit`, which are incorrect in the official documentation and unehlpful, weakly-typed strings in InoreaderFs.
+- Includes correct, strongly-typed arguments in API methods like `subscription/edit`, which are incorrect in the official documentation and unhelpful, weakly-typed strings in InoreaderFs.
+- Has a built-in OAuth2 client with smart refresh logic as well as a password-based auth client, both of which make auth requests automatically and support pluggable persistence strategies.
+- Hierarchical interface structure makes it easier to find the API method you want and understand what it applies to.
+- Facade pattern hides the complexity of the Inoreader API's very overloaded methods with all their conditionally valid parameters.
+- Interfaces allow mocking and interchangeability, instead of everything being sealed static classes.
+- Instances are configurable because they are not static classes, so you don't need to supply authentication to literally every request. You can just set it up once, for example in an IOC context, and not have to pass it around your entire codebase.
+- Observes and exposes rate-limiting statistics.
+- Easily gets articles' read and starred states, short IDs, descriptions, and original feed names and URLs.
+- Avoids the insane concept of stream IDs and all their complexity of parsing, translating, handling, and using them, because developers today shouldn't have to deal with weird Google decisions from 2001 that Inoreader bent over backwards to be compatible with for no real benefit — there is no Google Reader client that anyone pointed at Inoreader as a drop-in replacement backend.
+- Allows you to set custom HTTP request headers, such as `User-Agent`.
+- Uses modern, interchangeable, customizable `HttpClient` instead of ancient, disgusting, inflexible `HttpWebRequest`.
+- Correctly sends the `ot` query parameter to `stream/items/ids` in microsecond format, not seconds, so it isn't ignored.
+- Automatic workarounds for Inoreader API server [defects](#list-articles) that can otherwise result in nasty bugs and data loss.
+- Updated in the last 6 years by an Inoreader power user who uses this library heavily every day.
 
 ## Configuration
 
@@ -87,6 +88,7 @@ MyAuthTokenPersister authTokenPersister = new();
 ```
 
 #### Authentication strategies
+##### OAuth2
 If your [registered app](https://www.inoreader.com/developers/register-app) authenticates to Inoreader using OAuth2, subclass the `OAuth2Client` abstract class so that users can see and grant consent for OAuth2 app access to their account.
 
 ```cs
@@ -106,6 +108,7 @@ Oauth2Parameters oauthApp = new(appId, appKey);
 using IAuthClient authClient = new MyOauth2Client(oauthApp, authTokenPersister);
 ```
 
+##### Password
 Otherwise, construct a `PasswordAuthClient` instance with a [user's username and password](https://www.inoreader.com/developers/app-auth) and a [registered app's](https://www.inoreader.com/developers/register-app) app ID and secret key.
 
 ```cs
@@ -134,8 +137,7 @@ foreach (Article article in articleList.Articles) {
 }
 ```
 
-Useful options:
-
+#### Useful options
 - To only fetch articles from a specific folder, tag, or subscription/feed, replace `Newsfeed` (which refers to all articles in the entire account) with `Folders`, `Tags`, or `Subscriptions`, respectively.
 - To change the page size, pass the `maxArticles` parameter, or leave it `null` to fetch all pages at once.
 - To only return articles crawled after a certain time, pass the `minTime` parameter.
@@ -146,7 +148,9 @@ Useful options:
 > [!CAUTION]
 > When using manual pagination with `ListArticlesDetailed`, even when the `pagination` parameter is sent properly, the Inoreader API servers sometimes ignore it and incorrectly return the first page again instead of the desired page. This makes it look like many of the articles are duplicates.
 >
-> After fetching multiple pages of articles, always filter by the unique `Article.ShortId`  to remove the erroneous duplicates, for example, using [`IEnumerable<T>.Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct). This API server defect will also be avoided when using `ListAllArticlesDetailed` instead of `ListArticlesDetailed`.
+> After fetching multiple pages of articles, always filter by the unique `Article.ShortId` to remove the erroneous duplicates, for example, using [`Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct).
+>
+> Alternatively, call `ListAllArticlesDetailed` instead of `ListArticlesDetailed` to fetch all pages, which includes built-in filtering to work around this Inoreader defect.
 
 ### Check if there are new articles
 ```cs

@@ -2,7 +2,7 @@ namespace InoreaderCs.RateLimit;
 
 /// <summary>
 /// <para>Quota and usage of the Inoreader API rate limit returned in a response.</para>
-/// <para>All usage resets every day at midnight in <c>Europe/Sofia</c>. This is affected by Daylight Saving Time, so when Bulgaria enters Eastern European Summer Time in on March 30, you will have to spread out your same number of limited requests over 25 hours, but when Bulgaria enters Eastern European Time on October 26, you will only have 23 hours to use up your same number of requests. For more details, see <see href="https://www.timeanddate.com/time/zone/bulgaria"/>.</para>
+/// <para>All usage resets every day at midnight in <c>Europe/Sofia</c>. This is affected by Daylight Saving Time, so when Bulgaria enters Eastern European Summer Time on the last Sunday in March, you will have to spread out your same number of limited requests over 25 hours, but when Bulgaria enters Eastern European Time on the last Sunday in October, you will only have 23 hours to use up your same number of requests. For more details, see <see href="https://www.timeanddate.com/time/zone/bulgaria"/>.</para>
 /// </summary>
 /// <param name="Zone1Used">Number of read requests sent by this app.</param>
 /// <param name="Zone2Used">Number of write requests sent by this app.</param>

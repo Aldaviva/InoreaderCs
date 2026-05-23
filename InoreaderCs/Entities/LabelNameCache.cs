@@ -3,14 +3,14 @@ using System.Diagnostics;
 
 namespace InoreaderCs.Entities;
 
-internal sealed class LabelNameCache {
+internal sealed class LabelNameCache: IDisposable {
 
-    private readonly InoreaderClient _client;
-    private readonly TimeSpan        _cacheDuration;
-    private readonly Stopwatch       _freshness    = new();
-    private readonly SemaphoreSlim   _fetchingLock = new(1);
-    private readonly HashSet<string> _folderNames  = [];
-    private readonly HashSet<string> _tagNames     = [];
+    private readonly InoreaderClient      _client;
+    private readonly TimeSpan             _cacheDuration;
+    private readonly Stopwatch            _freshness   = new();
+    private readonly ReaderWriterLockSlim _lock        = new();
+    private readonly HashSet<string>      _folderNames = [];
+    private readonly HashSet<string>      _tagNames    = [];
 
     private event EventHandler<IEnumerable<StreamState>> TagAndFolderStatesListed;
 
@@ -24,34 +24,40 @@ internal sealed class LabelNameCache {
 
     public async Task<Labels> GetLabelNames(bool force = false, CancellationToken ct = default) {
         if (force || IsStale()) {
+            _lock.EnterWriteLock();
             try {
-                await _fetchingLock.WaitAsync(ct).ConfigureAwait(false);
                 if (force || IsStale()) {
                     _client.Requests.TagAndFolderStatesListed -= OnTagAndFolderStatesListed;
                     try {
                         TagAndFolderStatesListed(this, await FetchStreamStates(ct).ConfigureAwait(false));
+                    } catch (InoreaderException) {
+                        // ignore
                     } finally {
                         _client.Requests.TagAndFolderStatesListed += OnTagAndFolderStatesListed;
                     }
                 }
-            } catch (OperationCanceledException) {} finally {
-                if (!ct.IsCancellationRequested) {
-                    _fetchingLock.Release();
-                }
+                return new Labels(_folderNames, _tagNames);
+            } finally {
+                _lock.ExitWriteLock();
             }
         }
 
-        return new Labels(_folderNames, _tagNames);
+        _lock.EnterReadLock();
+        try {
+            return new Labels(_folderNames, _tagNames);
+        } finally {
+            _lock.ExitReadLock();
+        }
 
         bool IsStale() => !_freshness.IsRunning || _freshness.Elapsed > _cacheDuration;
     }
 
     private void OnTagAndFolderStatesListed(object? sender, IEnumerable<StreamState> labelStates) {
-        _fetchingLock.Wait();
+        _lock.EnterWriteLock();
         try {
             TagAndFolderStatesListed(this, labelStates);
         } finally {
-            _fetchingLock.Release();
+            _lock.ExitWriteLock();
         }
     }
 
@@ -74,7 +80,7 @@ internal sealed class LabelNameCache {
     }
 
     public void Edit(string labelName, bool isFolder, bool remove) {
-        _fetchingLock.Wait();
+        _lock.EnterWriteLock();
         try {
             HashSet<string> labels = isFolder ? _folderNames : _tagNames;
             if (remove) {
@@ -83,23 +89,23 @@ internal sealed class LabelNameCache {
                 labels.Add(labelName);
             }
         } finally {
-            _fetchingLock.Release();
+            _lock.ExitWriteLock();
         }
     }
 
-    private async Task<IEnumerable<StreamState>> FetchStreamStates(CancellationToken ct = default) {
-        try {
-            return await _client.Requests.ListTagAndFolderStates(ct).ConfigureAwait(false);
-        } catch (InoreaderException) {
-            return [];
-        }
-    }
+    /// <exception cref="InoreaderException"></exception>
+    private async Task<IEnumerable<StreamState>> FetchStreamStates(CancellationToken ct = default) =>
+        await _client.Requests.ListTagAndFolderStates(ct).ConfigureAwait(false);
 
     internal readonly record struct Labels(ISet<string> Folders, ISet<string> Tags) {
 
         public ISet<string> Folders { get; } = Folders.ToImmutableHashSet();
         public ISet<string> Tags { get; } = Tags.ToImmutableHashSet();
 
+    }
+
+    public void Dispose() {
+        _lock.Dispose();
     }
 
 }
