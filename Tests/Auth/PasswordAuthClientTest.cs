@@ -126,6 +126,20 @@ public class PasswordAuthClientTest: IDisposable {
         auth.HttpClient.Should().BeSameAs(http);
     }
 
+    [Fact]
+    public void DisposeSemaphoreOnlyWhenOverridden() {
+        SemaphoreSlim      synchronizer = new(1);
+        PasswordAuthClient authClient   = new(_password, _persister) { Synchronizer = synchronizer };
+        authClient.Dispose();
+        synchronizer.Invoking(s => s.Wait()).Should().NotThrow<ObjectDisposedException>("semaphore should not have been disposed since the auth client didn't construct it");
+        synchronizer.Dispose();
+
+        authClient   = new PasswordAuthClient(_password, _persister);
+        synchronizer = authClient.Synchronizer;
+        authClient.Dispose();
+        synchronizer.Invoking(s => s.Wait()).Should().Throw<ObjectDisposedException>("semaphore should have been disposed since the auth client constructed it");
+    }
+
     public void Dispose() {
         _auth.Dispose();
         _http.Dispose();

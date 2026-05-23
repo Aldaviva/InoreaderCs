@@ -26,7 +26,7 @@ public abstract class AbstractAuthClient(IAuthTokenPersister authTokenPersister,
     /// Used to not request multiple tokens at the same time, especially during parallel requests or if you have multiple auth clients that persist to the same file. If omitted, uses a default instance.
     /// </summary>
     public SemaphoreSlim Synchronizer {
-        protected get;
+        protected internal get;
         init {
             field                = value;
             _disposeSynchronizer = false;
