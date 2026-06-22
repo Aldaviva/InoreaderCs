@@ -62,7 +62,7 @@ public class InoreaderClient: IInoreaderClient {
 
         ApiBase = _httpClient
             .Target(ApiRoot)
-            .Register(new AuthRequestFilter(options.AuthClient))
+            .Register(new AuthRequestFilter(options.AuthClient), ClientConfig.FirstFilterPosition)
             .Register(_rateLimitReader)
             .Property(PropertyKey.JsonSerializerOptions, JsonOptions)
             .Path("reader/api/0")
