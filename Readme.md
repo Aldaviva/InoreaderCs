@@ -31,7 +31,7 @@
 <!-- /MarkdownTOC -->
 
 ## Prerequisites
-- Any .NET runtime that is compatible with [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0)
+- Any .NET runtime that is compatible with [.NET Standard 2.0](https://learn.microsoft.com/dotnet/standard/net-standard?tabs=net-standard-2-0)
     - .NET 5 or later
     - .NET Core 2.0 or later
     - .NET Framework 4.6.2 or later
@@ -149,7 +149,7 @@ foreach (Article article in articleList.Articles) {
 > [!CAUTION]
 > When using manual pagination with `ListArticlesDetailed`, even when the `pagination` parameter is sent properly, the Inoreader API servers sometimes ignore it and incorrectly return the first page again instead of the desired page. This makes it look like many of the articles are duplicates.
 >
-> After fetching multiple pages of articles, always filter by the unique `Article.ShortId` to remove the erroneous duplicates, for example, using [`Distinct`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.distinct).
+> After fetching multiple pages of articles, always filter by the unique `Article.ShortId` to remove the erroneous duplicates, for example, using [`Distinct`](https://learn.microsoft.com/dotnet/api/system.linq.enumerable.distinct).
 >
 > Alternatively, call `ListAllArticlesDetailed` instead of `ListArticlesDetailed` to fetch all pages, which includes built-in filtering to work around this Inoreader defect.
 
