@@ -1,12 +1,9 @@
-#if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-using System.Diagnostics.CodeAnalysis;
-#endif
-
 namespace InoreaderCs.Entities;
 
 /// <summary>
 /// See <see href="https://www.inoreader.com/developers/stream-ids"/> and <see href="https://www.inoreader.com/developers/stream-contents#:~:text=ID%20formats.-,categories,-is%20a%20list"/>
 /// </summary>
+// [JsonConverter(typeof(Converter))]
 internal sealed class StreamId {
 
     private const string SystemIdPrefix = "user/-/state/com.google";
@@ -105,8 +102,6 @@ internal sealed class StreamId {
         }
     }
 
-    // public bool IsLabel => Id.StartsWith(LabelPrefix);
-
     private static Uri FeedStreamIdToUri(string feedStreamId) {
         return new Uri(feedStreamId.Substring("feed/".Length), UriKind.Absolute);
     }
@@ -131,5 +126,16 @@ internal sealed class StreamId {
 
     /// <returns>The stream ID, such as <c>user/-/state/com.google/read</c>.</returns>
     public override string ToString() => Id;
+
+    /*private sealed class Converter: JsonConverter<StreamId> {
+
+        // ReSharper disable once MemberHidesStaticFromOuterClass - who cares?
+        public override StreamId? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+            reader.GetString() is {} serialized ? Parse(serialized) : null;
+
+        public override void Write(Utf8JsonWriter writer, StreamId value, JsonSerializerOptions options) =>
+            writer.WriteStringValue(value.ToString());
+
+    }*/
 
 }

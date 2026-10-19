@@ -44,7 +44,8 @@ public sealed record BriefArticle: BaseArticle {
     private readonly Lazy<ISet<string>> _foldersAndTags;
 
     /// <summary>
-    /// <para>Zero or more folder and tag <see cref="StreamId"/>s that this article belongs to.</para>
+    /// <para>Zero or more folder and tag names that this article belongs to.</para>
+    /// <para>The values are the names of the folder or tag (like <c>Science</c>), not the full stream IDs (like <c>user/0000000000/label/Science</c>).</para>
     /// <para>Tags are always included. Folders are only included when the parameter <c>showFolders</c> is <c>true</c>.</para>
     /// </summary>
     public ISet<string> FoldersAndTags => _foldersAndTags.Value;

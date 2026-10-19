@@ -26,7 +26,7 @@ public class ExceptionsTest: ApiTest {
         A.CallTo(() => HttpHandler.TestableSendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).ReturnsLazily(() => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
 
         await Inoreader.Invoking(i => i.Newsfeed.ListArticlesDetailed()).Should().ThrowAsync<InoreaderException>();
-        await Inoreader.Invoking(i => i.Articles.MarkArticles(ArticleState.Read, ["abc"])).Should().ThrowAsync<InoreaderException>();
+        await Inoreader.Invoking(i => i.Articles.Mark(ArticleState.Read, ["abc"])).Should().ThrowAsync<InoreaderException>();
         await Inoreader.Invoking(i => i.Newsfeed.MarkAllArticlesAsRead(DateTimeOffset.Now)).Should().ThrowAsync<InoreaderException>();
         await Inoreader.Invoking(i => i.Folders.Rename("a", "b")).Should().ThrowAsync<InoreaderException>();
         await Inoreader.Invoking(i => i.Folders.Delete("a")).Should().ThrowAsync<InoreaderException>();

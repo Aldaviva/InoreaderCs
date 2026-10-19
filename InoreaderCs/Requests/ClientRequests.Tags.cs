@@ -27,10 +27,10 @@ internal sealed partial class ClientRequests {
         ListArticlesBrief(StreamId.ForFolder(withTag), maxArticles, minTime, StreamId.ForState(subtract), StreamId.ForState(intersect), pagination, sortAscending, showFolders, cancellationToken);
 
     /// <inheritdoc />
-    Task<BriefArticles> IInoreaderClient.ITagMethods.ListAllArticlesBrief(string withTag, int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,
-                                                                          bool sortAscending, bool showFolders, CancellationToken cancellationToken) =>
-        ListAllArticles<BriefArticles, BriefArticle>((remainingArticles, page, ct) => ((IInoreaderClient.ITagMethods) this)
-            .ListArticlesBrief(withTag, remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, ct), maxArticles, cancellationToken);
+    async Task<IReadOnlyList<BriefArticle>> IInoreaderClient.ITagMethods.ListAllArticlesBrief(string withTag, int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract,
+                                                                                              ArticleState? intersect, bool sortAscending, bool showFolders, CancellationToken cancellationToken) =>
+        (await ListAllArticles<BriefArticles, BriefArticle>((remainingArticles, page, ct) => ((IInoreaderClient.ITagMethods) this)
+            .ListArticlesBrief(withTag, remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, ct), maxArticles, cancellationToken).ConfigureAwait(false)).Articles;
 
     /// <inheritdoc />
     Task<LabelUnreadCounts> IInoreaderClient.ITagMethods.GetUnreadCounts(CancellationToken cancellationToken) =>

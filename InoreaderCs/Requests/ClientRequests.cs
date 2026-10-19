@@ -16,6 +16,7 @@ internal sealed partial class ClientRequests(InoreaderClient client):
 
     private static readonly Encoding MessageEncoding = new UTF8Encoding(false, true);
 
+    /// <inheritdoc cref="InoreaderClient.ApiBase" />
     private IWebTarget ApiBase => client.ApiBase;
 
     internal event EventHandler<IEnumerable<StreamState>>? TagAndFolderStatesListed;
@@ -37,7 +38,7 @@ internal sealed partial class ClientRequests(InoreaderClient client):
                 .QueryParam("annotations", Convert.ToInt32(showAnnotations)) // docs are wrong, "true" is ignored
                 .Get<DetailedArticles>(cancellationToken);
 
-            Task<LabelNameCache.Labels> labelNamesTask     = client.LabelNameCache.GetLabelNames(ct: cancellationToken);
+            Task<LabelNameCache.Labels> labelNamesTask     = client.LabelNameCache.GetLabelNames(false, cancellationToken);
             bool                        reloadedLabelNames = false;
 
             DetailedArticles      articles = await articlesTask.ConfigureAwait(false);
@@ -86,15 +87,14 @@ internal sealed partial class ClientRequests(InoreaderClient client):
         IEnumerable<TItem> allArticles     = [];
         int                articleCount    = 0;
         PaginationToken?   paginationToken = null;
-        TList?             firstPage       = null;
+        TList?             lastPage;
 
         do {
-            int   remainingArticles = (maxArticles ?? int.MaxValue) - articleCount;
-            TList page              = await fetchPage(remainingArticles, paginationToken, cancellationToken).ConfigureAwait(false);
-            firstPage       ??= page;
-            allArticles     =   allArticles.Concat(page.Articles);
-            articleCount    +=  page.Articles.Count;
-            paginationToken =   page.PaginationToken;
+            int remainingArticles = (maxArticles ?? int.MaxValue) - articleCount;
+            lastPage        =  await fetchPage(remainingArticles, paginationToken, cancellationToken).ConfigureAwait(false);
+            allArticles     =  allArticles.Concat(lastPage.Articles);
+            articleCount    += lastPage.Articles.Count;
+            paginationToken =  lastPage.PaginationToken;
         } while ((maxArticles is null || articleCount < maxArticles) && paginationToken is not null);
 
         /*
@@ -102,7 +102,7 @@ internal sealed partial class ClientRequests(InoreaderClient client):
          * These duplicate pages of articles cause FeedAssistant to mark them as read when they should be left unread.
          * To fix this, ignore duplicate downloaded articles by their primary key, which is by definition unique.
          */
-        return firstPage with { Articles = allArticles.Distinct(ArticlePrimaryKeyComparer<TItem>.Instance).ToList() };
+        return lastPage with { Articles = allArticles.Distinct(ArticlePrimaryKeyComparer<TItem>.Instance).ToList(), PaginationToken = null };
     }
 
     /// <returns>Length of <paramref name="articleIds"/></returns>

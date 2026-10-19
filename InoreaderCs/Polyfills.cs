@@ -2,7 +2,6 @@
 // If ILRepack complains about this class being a duplicate, see https://github.com/Aldaviva/Fail2Ban4Win/blob/91709d6a666f5f8977cb39c324bc5453ee5f3eec/Fail2Ban4Win/ILRepack.targets#L13
 
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable CheckNamespace - this is the exact namespace required by this type to fix broken record compilation for .NET Standard 2.0
 namespace System.Runtime.CompilerServices {

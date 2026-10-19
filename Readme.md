@@ -15,6 +15,7 @@
     - [API Client](#api-client)
 - [Usage](#usage)
     - [List articles](#list-articles)
+    - [Get an article](#get-an-article)
     - [Check if there are new articles](#check-if-there-are-new-articles)
     - [Mark an article read or unread](#mark-an-article-read-or-unread)
     - [Star or unstar an article](#star-or-unstar-an-article)
@@ -152,6 +153,12 @@ foreach (Article article in articleList.Articles) {
 > After fetching multiple pages of articles, always filter by the unique `Article.ShortId` to remove the erroneous duplicates, for example, using [`Distinct`](https://learn.microsoft.com/dotnet/api/system.linq.enumerable.distinct).
 >
 > Alternatively, call `ListAllArticlesDetailed` instead of `ListArticlesDetailed` to fetch all pages, which includes built-in filtering to work around this Inoreader defect.
+
+### Get an article
+```cs
+string articleId = "344691561";
+Article? article = await inoreader.Articles.Get(articleId);
+```
 
 ### Check if there are new articles
 ```cs

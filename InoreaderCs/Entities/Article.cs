@@ -48,22 +48,23 @@ public record Article: BaseArticle {
     public required string LongId { get; init; }
 
     /// <inheritdoc />
+    // This property type is string instead of ulong so it can be used interchangeably with LongId in method parameters.
     // ExceptionAdjustment: M:System.Convert.ToInt64(System.String,System.Int32) -T:System.FormatException
     public override string ShortId => Convert.ToString(Convert.ToInt64(LongId.Substring(LongIdPrefixLength), 16));
 
-    [JsonInclude]
+    [JsonInclude, JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
     private ImmutableHashSet<StreamId> Categories { get; init; } = [];
 
     /// <summary>
     /// Zero or more folders that this article feed's subscription is organized into. If the <c>showFolders</c> argument to <seealso cref="IInoreaderClient.INewsfeedMethods.ListArticlesDetailed"/> is set to <c>false</c>, this will be the empty set.
     /// </summary>
-    [JsonIgnore]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public IImmutableSet<string> Folders { get; private set; } = ImmutableHashSet<string>.Empty;
 
     /// <summary>
     /// Zero or more tags that have been added to this article.
     /// </summary>
-    [JsonIgnore]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public IImmutableSet<string> Tags { get; private set; } = ImmutableHashSet<string>.Empty;
 
     /// <exception cref="InoreaderException.UnknownLabel">article has a tag or folder newer than and not found in the cached <paramref name="labels"/></exception>
@@ -106,7 +107,7 @@ public record Article: BaseArticle {
     [JsonPropertyName("updated")]
     public DateTimeOffset? UpdateTime { get; init; }
 
-    [JsonInclude]
+    [JsonInclude, JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
     private IReadOnlyList<Link> Canonical { get; init; } = null!;
 
     /// <summary>
@@ -114,7 +115,7 @@ public record Article: BaseArticle {
     /// </summary>
     public Uri PageUrl => Canonical[0].Href;
 
-    [JsonInclude]
+    [JsonInclude, JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
     private SummaryContainer Summary { get; init; } = null!;
 
     /// <summary>
@@ -127,7 +128,7 @@ public record Article: BaseArticle {
     /// </summary>
     public required string Author { get; init; }
 
-    [JsonInclude] [JsonPropertyName("origin")]
+    [JsonInclude, JsonPropertyName("origin"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
     private Origin Feed { get; init; } = null!;
 
     /// <summary>
@@ -149,13 +150,13 @@ public record Article: BaseArticle {
 
     /// <summary>
     /// <para><c>true</c> if the user added a star to this article, also known as Read Later or Saved, or <c>false</c> if the article is not starred.</para>
-    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.IArticleMethods.MarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Starred"/>.</para>
+    /// <para>Stars can be added and removed from articles using <see cref="IInoreaderClient.IArticleMethods.Mark(ArticleState,IEnumerable{Article},CancellationToken)"/> and <see cref="IInoreaderClient.IArticleMethods.Unmark(ArticleState,IEnumerable{Article},CancellationToken)"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Starred"/>.</para>
     /// </summary>
     public bool IsStarred => Categories.Contains(StreamId.Starred);
 
     /// <summary>
     /// <c>true</c> if either the user read the article or the article is more than 30 days old, or <c>if it is unread and less than 30 days old.</c>
-    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.IArticleMethods.MarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> and <see cref="IInoreaderClient.IArticleMethods.UnmarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
+    /// <para>Articles can be marked read or unread using <see cref="IInoreaderClient.IArticleMethods.Mark(ArticleState,IEnumerable{Article},CancellationToken)"/> and <see cref="IInoreaderClient.IArticleMethods.Unmark(ArticleState,IEnumerable{Article},CancellationToken)"/> with the <c>markState</c> parameter set to <see cref="ArticleState.Read"/>, although articles more than 30 days old cannot be marked unread.</para>
     /// </summary>
     public bool IsRead => Categories.Contains(StreamId.Read);
 

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
-        <Version>1.1.4</Version>
+        <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+        <Version>2.0.0</Version>
         <Authors>Ben Hutchison</Authors>
         <Copyright>© 2026 $(Authors)</Copyright>
         <Company>$(Authors)</Company>
@@ -44,8 +44,9 @@
         <PackageReference Include="Unfucked.HTTP" Version="0.0.1-beta.36" NoWarn="NU5104" />
     </ItemGroup>
     
-    <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
-        <!-- System.Net.Http.Json 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object. -->
+    <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
+        <!-- System.Text.Json 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object. -->
+        <!-- System.Text.Json 10 introduced JsonIgnoreCondition.WhenWriting, which we use to hide proxy properties in entity classes when deserializing and then serializing. -->
         <PackageReference Include="System.Text.Json" Version="10.0.13" />
     </ItemGroup>
 

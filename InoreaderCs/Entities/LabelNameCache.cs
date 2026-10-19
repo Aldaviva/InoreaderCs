@@ -22,7 +22,6 @@ internal sealed class LabelNameCache: IDisposable {
         TagAndFolderStatesListed                 += OnTagAndFolderStatesListedUnsynchronized;
     }
 
-    /// <exception cref="OperationCanceledException"><paramref name="ct"/> is canceled</exception>
     public async Task<Labels> GetLabelNames(bool force = false, CancellationToken ct = default) {
         try {
             await _lock.WaitAsync(ct).ConfigureAwait(false);

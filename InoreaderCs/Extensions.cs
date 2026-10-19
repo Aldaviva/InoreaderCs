@@ -36,6 +36,16 @@ internal static class Extensions {
     /// <returns></returns>
     public static JsonConverter<T> ToNonNullable<T>(this JsonConverter<T?> nullableConverter) where T: struct => new NonNullableStructReader<T>(nullableConverter);
 
+    /*extension(Math) {
+
+        public static T Max<T>(T val1, T val2) where T: IComparable<T> =>
+            val1.CompareTo(val2) >= 0 ? val1 : val2;
+
+        public static T Min<T>(T val1, T val2) where T: IComparable<T> =>
+            val1.CompareTo(val2) <= 0 ? val1 : val2;
+
+    }*/
+
     /// <summary>
     /// Streams in .NET Standard 2.0 are not async disposable
     /// </summary>

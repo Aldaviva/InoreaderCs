@@ -18,7 +18,7 @@ public interface IInoreaderClient: IDisposable {
     // IUnfuckedHttpClient HttpClient { get; }
 
     /// <summary>
-    /// <para>Target for Inoreader API with preconfigured URL (<c>https://www.inoreader.com/reader/api/0/user-info</c>), content type, authentication, rate-limit metrics, and JSON deserialization settings.</para>
+    /// <para>Target for Inoreader API with preconfigured URL (<c>https://www.inoreader.com/reader/api/0</c>), content type, authentication, rate-limit metrics, and JSON deserialization settings.</para>
     /// <para>To add your own request or response filtering, register a <see cref="ClientRequestFilter"/> or <see cref="ClientResponseFilter"/> on this using <see cref="Configurable{IWebTarget}.Register"/>, then set this <see cref="ApiBase"/> property to the new immutable copy that <c>Register</c> returns. It's immutable, so if you don't set the new value the change will be ignored. Example:</para>
     /// <para><code>inoreaderClient.ApiBase = inoreaderClient.ApiBase.Register(myFilter);</code></para>
     /// </summary>
@@ -69,12 +69,13 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List all articles in a given folder.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>For example, to list the most recent unread articles, you can set <paramref name="subtract"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To list starred articles, you can set <paramref name="intersect"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If you only need the IDs, timestamps, tags, or folders of the articles rather than all of their contents, you can save bandwidth by calling <see cref="ListArticlesBrief"/> instead.</para>
         /// </summary>
         /// <param name="inFolder">Name of the folder to list articles from, such as <c>My Folder</c>.</param>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the folder.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the folder. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
@@ -109,21 +110,22 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List only the IDs, crawl times, and labels of all articles in a given folder.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>This method is more lightweight than <see cref="ListArticlesDetailed"/>, and should be used whenever it is sufficient, so that server load and bandwidth are minimized.</para>
         /// </summary>
         /// <param name="inFolder">Name of the folder to list articles from, such as <c>My Folder</c>.</param>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the folder.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the folder. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
+        /// <returns>List containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task<BriefArticles> ListAllArticlesBrief(string inFolder, int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
-                                                 bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<BriefArticle>> ListAllArticlesBrief(string inFolder, int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
+                                                               bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Count how many articles are unread in each folder.
@@ -205,12 +207,13 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List all articles with a given tag.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>For example, to list the most recent unread articles, you can set <paramref name="subtract"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To list starred articles, you can set <paramref name="intersect"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If you only need the IDs, timestamps, tags, or folders of the articles rather than all of their contents, you can save bandwidth by calling <see cref="ListArticlesBrief"/> instead.</para>
         /// </summary>
         /// <param name="withTag">Name of the tag to list articles from, such as <c>My Tag</c>.</param>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles with the tag.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles with the tag. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
@@ -245,21 +248,22 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List only the IDs, crawl times, and labels of all articles with a given tag.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>This method is more lightweight than <see cref="ListArticlesDetailed"/>, and should be used whenever it is sufficient, so that server load and bandwidth are minimized.</para>
         /// </summary>
         /// <param name="withTag">Name of the tag to list articles from, such as <c>My Tag</c>.</param>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles with the tag.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles with the tag. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
+        /// <returns>List containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task<BriefArticles> ListAllArticlesBrief(string withTag, int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
-                                                 bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<BriefArticle>> ListAllArticlesBrief(string withTag, int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
+                                                               bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Count how many articles are unread in each tag.
@@ -330,11 +334,12 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List all articles in the user's entire newsfeed.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>For example, to list the most recent unread articles, you can set <paramref name="subtract"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To list starred articles, you can set <paramref name="intersect"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If you only need the IDs, timestamps, tags, or folders of the articles rather than all of their contents, you can save bandwidth by calling <see cref="ListArticlesBrief"/> instead.</para>
         /// </summary>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
@@ -369,20 +374,22 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List only the IDs, crawl times, and labels of all articles in the user's entire newsfeed.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>This method is more lightweight than <see cref="ListArticlesDetailed"/>, and should be used whenever it is sufficient, so that server load and bandwidth are minimized.</para>
         /// </summary>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
+        /// <returns>List containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task<BriefArticles> ListAllArticlesBrief(int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null, bool sortAscending = false,
-                                                 bool showFolders = true, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<BriefArticle>> ListAllArticlesBrief(int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
+                                                               bool sortAscending = false,
+                                                               bool showFolders = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Count how many articles are unread in the entire newsfeed. Also returns the quantity of articles that are both unread and starred in the newsfeed.
@@ -443,12 +450,13 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List all articles in a given feed subscription.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>For example, to list the most recent unread articles, you can set <paramref name="subtract"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To list starred articles, you can set <paramref name="intersect"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If you only need the IDs, timestamps, tags, or folders of the articles rather than all of their contents, you can save bandwidth by calling <see cref="ListArticlesBrief"/> instead.</para>
         /// </summary>
         /// <param name="feedLocation">URL of the RSS or Atom XML document for the feed.</param>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the feed.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the feed. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
@@ -483,21 +491,22 @@ public interface IInoreaderClient: IDisposable {
 
         /// <summary>
         /// <para>List only the IDs, crawl times, and labels of all articles in a given feed subscription.</para>
+        /// <para>This will automatically loop through multiple pages until either all articles are retrieved or <paramref name="maxArticles"/> is reached, so you don't have to deal with pagination yourself.</para>
         /// <para>This method is more lightweight than <see cref="ListArticlesDetailed"/>, and should be used whenever it is sufficient, so that server load and bandwidth are minimized.</para>
         /// </summary>
         /// <param name="feedLocation">URL of the RSS or Atom XML document for the feed.</param>
-        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the feed.</param>
+        /// <param name="maxArticles">Maximum number of articles to return, or <c>null</c> to return all articles in the feed. This is not the pagination size, because this method fetches all pages at maximum size.</param>
         /// <param name="minTime">Lower bound on the <see cref="BaseArticle.CrawlTime"/> of articles to return, or no limit if omitted. When <paramref name="sortAscending"/> is <c>true</c>, this is limited to at most 30 days ago.</param>
         /// <param name="subtract">Exclude articles which also have this state, for example, <see cref="ArticleState.Read"/> to only return unread articles, or <c>null</c> to not exclude any articles for having any state.</param>
         /// <param name="intersect">Only return articles which also have this state, for example, <see cref="ArticleState.Starred"/> to only return starred articles, or <c>null</c> to not exclude any articles for not having any state.</param>
         /// <param name="sortAscending"><c>true</c> to sort articles in the response list ascending by <see cref="BaseArticle.CrawlTime"/>, or <c>false</c> to sort them descending.</param>
         /// <param name="showFolders"><c>true</c> for the response <see cref="Article.Folders"/> to be populated with the folders the article feed's subscription has been organized into, or <c>false</c> for it to be the empty set.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
-        /// <returns>Response envelope containing zero or more <see cref="BriefArticle"/> objects.</returns>
+        /// <returns>List containing zero or more <see cref="BriefArticle"/> objects.</returns>
         /// <seealso href="https://www.inoreader.com/developers/item-ids" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task<BriefArticles> ListAllArticlesBrief(Uri feedLocation, int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
-                                                 bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<BriefArticle>> ListAllArticlesBrief(Uri feedLocation, int? maxArticles = null, DateTimeOffset? minTime = null, ArticleState? subtract = null, ArticleState? intersect = null,
+                                                               bool sortAscending = false, bool showFolders = true, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Rename an existing feed subscription.</para>
@@ -586,113 +595,127 @@ public interface IInoreaderClient: IDisposable {
     /// </summary>
     public interface IArticleMethods {
 
+        /// <summary>Retrieve one article by its <see cref="BriefArticle"/> stub instance.</summary>
+        /// <param name="briefArticle">Brief projection of article to fetch, such as those returned by <see cref="INewsfeedMethods.ListArticlesBrief"/>.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <returns>The article with the same ID as <paramref name="briefArticle"/>, or <c>null</c> if no article with that ID could be found.</returns>
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task<Article?> Get(BriefArticle briefArticle, CancellationToken cancellationToken = default);
+
+        /// <summary>Retrieve one article by its ID.</summary>
+        /// <param name="articleId">Short or long ID of the article to fetch, which is a number such as <c>344691561</c>. Corresponds to <see cref="BaseArticle.ShortId"/> and <see cref="Article.LongId"/>.</param>
+        /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
+        /// <returns>The article with a short or long ID of <paramref name="articleId"/>, or <c>null</c> if no article with that ID could be found.</returns>
+        /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
+        Task<Article?> Get(string articleId, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// <para>Add an <see cref="ArticleState"/> to one or more <paramref name="articles"/>.</para>
         /// <para>For example, to mark an article as read, you can set <paramref name="markState"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To star an article, you can set <paramref name="markState"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If an article already has the specified <paramref name="markState"/>, it is preserve and ignored, instead of throwing an error.</para>
-        /// <para>To tag an article, see <see cref="TagArticles(string,IEnumerable{Article},CancellationToken)"/>.</para>
+        /// <para>To tag an article, see <see cref="Tag(string,IEnumerable{Article},CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="markState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to add to the <paramref name="articles"/>.</param>
         /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task MarkArticles(ArticleState markState, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
+        Task Mark(ArticleState markState, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Add an <see cref="ArticleState"/> to one or more <paramref name="articlesIds"/>.</para>
         /// <para>For example, to mark an article as read, you can set <paramref name="markState"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To star an article, you can set <paramref name="markState"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If an article already has the specified <paramref name="markState"/>, it is preserve and ignored, instead of throwing an error.</para>
-        /// <para>To tag an article, see <see cref="TagArticles(string,IEnumerable{string},CancellationToken)"/>.</para>
+        /// <para>To tag an article, see <see cref="Tag(string,System.Collections.Generic.IEnumerable{string},System.Threading.CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="markState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to add to the <paramref name="articlesIds"/>.</param>
         /// <param name="articlesIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task MarkArticles(ArticleState markState, IEnumerable<string> articlesIds, CancellationToken cancellationToken = default);
+        Task Mark(ArticleState markState, IEnumerable<string> articlesIds, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Remove an <see cref="ArticleState"/> from one or more <paramref name="articles"/>.</para>
         /// <para>For example, to mark an article as unread, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To unstar an article, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If an article already doesn't have the specified <paramref name="unmarkState"/>, it is ignored, instead of throwing an error.</para>
-        /// <para>To untag an article, see <see cref="UntagArticles(string,IEnumerable{Article},CancellationToken)"/>.</para>
+        /// <para>To untag an article, see <see cref="Untag(string,IEnumerable{Article},CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="unmarkState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to remove from each article.</param>
         /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task UnmarkArticles(ArticleState unmarkState, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
+        Task Unmark(ArticleState unmarkState, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Remove an <see cref="ArticleState"/> from one or more <paramref name="articlesIds"/>.</para>
         /// <para>For example, to mark an article as unread, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Read"/>.</para>
         /// <para>To unstar an article, you can set <paramref name="unmarkState"/> to <see cref="ArticleState.Starred"/>.</para>
         /// <para>If an article already doesn't have the specified <paramref name="unmarkState"/>, it is ignored, instead of throwing an error.</para>
-        /// <para>To untag an article, see <see cref="UntagArticles(string,IEnumerable{string},CancellationToken)"/>.</para>
+        /// <para>To untag an article, see <see cref="Untag(string,System.Collections.Generic.IEnumerable{string},System.Threading.CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="unmarkState">A system state, like <see cref="ArticleState.Read"/> or <see cref="ArticleState.Starred"/>, to remove from each article.</param>
         /// <param name="articlesIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task UnmarkArticles(ArticleState unmarkState, IEnumerable<string> articlesIds, CancellationToken cancellationToken = default);
+        Task Unmark(ArticleState unmarkState, IEnumerable<string> articlesIds, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Add a <paramref name="tag"/> to one or more <paramref name="articles"/>.</para>
         /// <para>For example, to tag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
         /// <para>If an article already has the specified <paramref name="tag"/>, it is preserve and ignored, instead of throwing an error.</para>
-        /// <para>To mark an article as starred or read, see <see cref="MarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/>.</para>
+        /// <para>To mark an article as starred or read, see <see cref="Mark(ArticleState,IEnumerable{Article},CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to add to each article.</param>
         /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task TagArticles(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
+        Task Tag(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Add a <paramref name="tag"/> to one or more <paramref name="articleIds"/>.</para>
         /// <para>For example, to tag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
         /// <para>If an article already has the specified <paramref name="tag"/>, it is preserve and ignored, instead of throwing an error.</para>
-        /// <para>To mark an article as starred or read, see <see cref="MarkArticles(ArticleState,IEnumerable{string},CancellationToken)"/>.</para>
+        /// <para>To mark an article as starred or read, see <see cref="Mark(InoreaderCs.Entities.ArticleState,System.Collections.Generic.IEnumerable{string},System.Threading.CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to add to each article.</param>
         /// <param name="articleIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task TagArticles(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken = default);
+        Task Tag(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Remove a tag from one or more <paramref name="articles"/>.</para>
         /// <para>For example, to untag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
         /// <para>If an article already doesn't have the specified <paramref name="tag"/>, it is ignored, instead of throwing an error.</para>
-        /// <para>To unmark an article as starred or read, see <see cref="UnmarkArticles(ArticleState,IEnumerable{Article},CancellationToken)"/>.</para>
+        /// <para>To unmark an article as starred or read, see <see cref="Unmark(ArticleState,IEnumerable{Article},CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to remove from each article.</param>
         /// <param name="articles">One or more <see cref="Article"/>s to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task UntagArticles(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
+        Task Untag(string tag, IEnumerable<Article> articles, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <para>Remove a tag from one or more <paramref name="articleIds"/>.</para>
         /// <para>For example, to untag an article with the custom user tag "Important," you can set <paramref name="tag"/> to <c>Important</c>.</para>
         /// <para>If an article already doesn't have the specified <paramref name="tag"/>, it is ignored, instead of throwing an error.</para>
-        /// <para>To unmark an article as starred or read, see <see cref="UnmarkArticles(ArticleState,IEnumerable{string},CancellationToken)"/>.</para>
+        /// <para>To unmark an article as starred or read, see <see cref="Unmark(InoreaderCs.Entities.ArticleState,System.Collections.Generic.IEnumerable{string},System.Threading.CancellationToken)"/>.</para>
         /// </summary>
         /// <param name="tag">The name of a custom user tag, such as <c>Important</c>, to remove from each article.</param>
         /// <param name="articleIds">One or more <see cref="Article"/> IDs (<see cref="Article.ShortId"/> or <see cref="Article.LongId"/>) to modify.</param>
         /// <param name="cancellationToken">To optionally abort the request before it finishes.</param>
         /// <seealso href="https://www.inoreader.com/developers/edit-tag" />
         /// <exception cref="InoreaderException">If an error occurred communicating with the Inoreader API, with subclasses (like <see cref="InoreaderException.Unauthorized"/>) for specific errors, and an inner <see cref="HttpException"/> for details.</exception>
-        Task UntagArticles(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken = default);
+        Task Untag(string tag, IEnumerable<string> articleIds, CancellationToken cancellationToken = default);
 
     }
 

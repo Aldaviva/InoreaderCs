@@ -23,10 +23,10 @@ internal sealed partial class ClientRequests {
         ListArticlesBrief(StreamId.ReadingList, maxArticles, minTime, StreamId.ForState(subtract), StreamId.ForState(intersect), pagination, sortAscending, showFolders, cancellationToken);
 
     /// <inheritdoc />
-    Task<BriefArticles> IInoreaderClient.INewsfeedMethods.ListAllArticlesBrief(int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect, bool sortAscending,
-                                                                               bool showFolders, CancellationToken cancellationToken) =>
-        ListAllArticles<BriefArticles, BriefArticle>((remainingArticles, page, ct) => ((IInoreaderClient.INewsfeedMethods) this)
-            .ListArticlesBrief(remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, ct), maxArticles, cancellationToken);
+    async Task<IReadOnlyList<BriefArticle>> IInoreaderClient.INewsfeedMethods.ListAllArticlesBrief(int? maxArticles, DateTimeOffset? minTime, ArticleState? subtract, ArticleState? intersect,
+                                                                                                   bool sortAscending, bool showFolders, CancellationToken cancellationToken) =>
+        (await ListAllArticles<BriefArticles, BriefArticle>((remainingArticles, page, ct) => ((IInoreaderClient.INewsfeedMethods) this)
+            .ListArticlesBrief(remainingArticles, minTime, subtract, intersect, page, sortAscending, showFolders, ct), maxArticles, cancellationToken).ConfigureAwait(false)).Articles;
 
     /// <inheritdoc />
     async Task<NewsfeedUnreadCounts> IInoreaderClient.INewsfeedMethods.GetUnreadCounts(CancellationToken cancellationToken) {
