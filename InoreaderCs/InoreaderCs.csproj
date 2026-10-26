@@ -47,7 +47,7 @@
     <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
         <!-- System.Text.Json 9 introduced JsonSerializerOptions.AllowOutOfOrderMetadataProperties, which we need because Inoreader's tag/list API response returns the type property not as the first property in the JSON object. -->
         <!-- System.Text.Json 10 introduced JsonIgnoreCondition.WhenWriting, which we use to hide proxy properties in entity classes when deserializing and then serializing. -->
-        <PackageReference Include="System.Text.Json" Version="10.0.13" />
+        <PackageReference Include="System.Text.Json" Version="10.0.14" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(CI)' == 'true' or '$(Configuration)' != 'Debug'">
